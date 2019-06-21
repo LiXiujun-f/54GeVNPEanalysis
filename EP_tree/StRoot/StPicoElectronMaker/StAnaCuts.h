@@ -15,10 +15,8 @@
 
 namespace anaCuts
 {
-   std::array<unsigned int, 6> const triggers = {
-   
-   610001,610011,610021,610031,610041,610051
-   
+   std::array<unsigned int, 2> const triggers = {
+    580001,580021 
    };    
    //cut before QA
    float const qavz = 30.0;// < cm.
@@ -37,13 +35,13 @@ namespace anaCuts
 
    //cut 
    // float const vz = 35.0;// < cm.
-   float const vz = 60.0;// < cm.
+   float const vz = 40.0;// < cm.
    float const Verror = 1.0e-5; //
    float const Vr = 2.0; //cm
-   float const vzVpdVz = 1000; //cm
+   float const vzVpdVz = 4; //cm
 
    // tracks cuts
-   float const GPt = 0.15;
+   float const GPt = 0.2;
    int const NHitsFit = 20;
    int const NHitsDedx = 15;
    int const NHitsFit2Poss = 0.52;
@@ -66,12 +64,12 @@ namespace anaCuts
    int const nparVz_mult = 7;
    float parVz_mult[nparVz_mult]={435.9,-0.02413,-0.003707,0.0002204,1.487e-5,-2.95e-07,-1.866e-8};
    int const nCent = 9 ;
-   // float Refmult_cent[nCent] = {7,16,31,54,89,138,205,299,361}; //refmult > par[i],  70-80%, 60-70%, ... ,0-5%
-   float Refmult_cent[nCent] = {6,12,24,43,70,110,165,242,292}; //refmult > par[i],  70-80%, 60-70%, ... ,0-5%
+   float Refmult_cent[nCent] = {7,16,31,54,89,138,205,299,361}; //refmult > par[i],  70-80%, 60-70%, ... ,0-5%
+   // float Refmult_cent[nCent] = {6,12,24,43,70,110,165,242,292}; //refmult > par[i],  70-80%, 60-70%, ... ,0-5%
 
    //cuts for  event plane recentering
-   float ptMin_Re=0.15;
-   // float ptMin_Re=0.2;
+   // float ptMin_Re=0.15;
+   float ptMin_Re=0.2;
    float ptMax_Re=2;
 }
 #endif

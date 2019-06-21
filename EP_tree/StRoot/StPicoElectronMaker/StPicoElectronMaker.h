@@ -140,7 +140,8 @@ class StPicoElectronMaker : public StMaker
     float mEP_M_sh;
     float mEP_P_raw;
     float mEP_P_re;
-    float mEP_p_sh;
+    float mEP_P_sh;
+    float mRes;
  
     // int const NincE=80; 
     int m_nIncE;
@@ -166,6 +167,7 @@ class StPicoElectronMaker : public StMaker
     // int const Nphe=60;
     int m_nPhoE;
     int m_idx_phe[Nphe];
+    UInt_t m_topomap0_phe[Nphe]; 
     float m_nSigE_phe[Nphe];
     float m_beta_phe[Nphe];
     float m_pt_phe[Nphe];
@@ -177,6 +179,7 @@ class StPicoElectronMaker : public StMaker
     float m_ndEdx_phe[Nphe];
     float m_deltaphi_phe[Nphe];
     float m_cos2phi_phe[Nphe];
+    UInt_t m_topomap0_parte[Nphe]; 
     int m_idx_parte[Nphe];
     float m_nSigE_parte[Nphe];
     float m_beta_parte[Nphe];

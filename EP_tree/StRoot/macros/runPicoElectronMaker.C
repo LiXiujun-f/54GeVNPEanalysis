@@ -6,7 +6,8 @@ void runPicoElectronMaker(TString picolist="try.list",  TString outFileName="tes
   TStopwatch*   stopWatch = new TStopwatch();
   stopWatch->Start();
   //Check STAR Library. Please set SL_version to the original star library used in the production from http://www.star.bnl.gov/devcgi/dbProdOptionRetrv.pl
-  string SL_version = "SL19b";
+  // string SL_version = "SL19b";
+  string SL_version = "SL18c";
   string env_SL = getenv("STAR");
   if (env_SL.find(SL_version) == string::npos)
   {
@@ -24,7 +25,7 @@ void runPicoElectronMaker(TString picolist="try.list",  TString outFileName="tes
   chain = new StChain();
   StPicoDstMaker* picoDstMaker = new StPicoDstMaker(2, picolist, "picoDstMaker");
   StPicoElectronMaker*  picoElectronMaker = new StPicoElectronMaker("picoElectronMaker",picolist , outFileName.Data(), picoDstMaker);
-  picoElectronMaker->setRunNumList("StRoot/macros/runnumber_nfs.list");
+  picoElectronMaker->setRunNumList("StRoot/macros/runnumber.list");
   picoElectronMaker->getBadruns("StRoot/macros/badrunlist.txt");
   picoElectronMaker->setRecenterFile("StRoot/StPicoElectronMaker/eventplane/recenter.root");
   picoElectronMaker->setShiftFile("StRoot/StPicoElectronMaker/eventplane/shift.root");
@@ -89,5 +90,6 @@ void load(){
   gSystem->Load("StMtdCalibMaker");
   gSystem->Load("StBTofUtil");
   gSystem->Load("StVpdCalibMaker");
-
+  gSystem->Load("StStrangeMuDst");
+  gSystem->Load("StStrangeAssoc");
 }

@@ -189,10 +189,11 @@ bool StPicoElectronMaker::initTree()
   mTree->Branch("EP_M_sh",&mEP_M_sh,"EP_M_sh");
   mTree->Branch("EP_P_raw",&mEP_P_raw,"EP_P_raw/F");
   mTree->Branch("EP_P_re",&mEP_P_re,"EP_P_re");
-  mTree->Branch("EP_M_sh",&mEP_M_sh,"EP_M_sh");
+  mTree->Branch("EP_P_sh",&mEP_P_sh,"EP_M_sh");
+  mTree->Branch("resolution",&mRes,"resolution");
   
   mTree->Branch("nIncE",&m_nIncE,"nIncE/I");
-  mTree->Branck("idx_inc",&m_idx_inc,"idx_inc[nIncE]/I")
+  mTree->Branch("idx_inc",&m_idx_inc,"idx_inc[nIncE]/I");
   mTree->Branch("nSigE_inc",m_nSigmaE,"nSigE_inc[nIncE]/F");
   mTree->Branch("beta_inc",m_beta_inc,"beta_inc[nIncE]/F");
   mTree->Branch("pt_inc",m_pt_inc,"pt_inc[nIncE]/F");
@@ -210,7 +211,7 @@ bool StPicoElectronMaker::initTree()
   mTree->Branch("has3hit_inc",m_has3hit_inc,"has3hit_inc[nIncE]/O"); 
 
   mTree->Branch("nPhoE",&m_nPhoE,"nPhoE/I");
-  mTree->Branck("idx_phe",&m_idx_phe,"idx_phe[nPhoE]/I")
+  mTree->Branch("idx_phe",&m_idx_phe,"idx_phe[nPhoE]/I");
   mTree->Branch("nSigE_phe",m_nSigE_phe,"nSigE_phe[nPhoE]/F");
   mTree->Branch("beta_phe",m_beta_phe,"beta_phe[nPhoE]/F");
   mTree->Branch("pt_phe",m_pt_phe,"pt_phe[nPhoE]/F");
@@ -223,7 +224,8 @@ bool StPicoElectronMaker::initTree()
   mTree->Branch("deltaphi_phe",m_deltaphi_phe,"deltaphi_phe[nPhoE]/F");
   mTree->Branch("cos2phi_phe",m_cos2phi_phe,"cos2phi_phe[nPhoE]/F");
 
-  mTree->Branck("idx_parte",&m_idx_parte,"idx_parte[nPhoE]/I")
+  mTree->Branch("topomap0_phe",m_topomap0_phe,"topomap0_phe[nPhoE]/i"); 
+  mTree->Branch("idx_parte",&m_idx_parte,"idx_parte[nPhoE]/I");
   mTree->Branch("nSigE_parte",m_nSigE_parte,"nSigE_parte[nPhoE]/F");
   mTree->Branch("beta_parte",m_beta_parte,"beta_parte[nPhoE]/F");
   mTree->Branch("gpt_parte",m_pt_parte,"gpt_parte[nPhoE]/F");
@@ -233,6 +235,7 @@ bool StPicoElectronMaker::initTree()
   mTree->Branch("charge_parte",m_charge_parte,"charge_parte[nPhoE]/F");
   mTree->Branch("nFit_parte",m_nFit_parte,"nFit_parte[nPhoE]/F");
   mTree->Branch("ndEdx_parte",m_ndEdx_parte,"ndEdx_parte[nPhoE]/F");
+  mTree->Branch("topomap0_parte",m_topomap0_parte,"topomap0_parte[nPhoE]/i"); 
   mTree->Branch("DCA_pair",m_DCA_pair,"DCA_pair[nPhoE]/F");
   mTree->Branch("decayL_pair",m_decayL_pair,"decayL_pair[nPhoE]/F");
   mTree->Branch("V0x_pair",m_V0x_pair,"V0x_pair[nPhoE]/F");
@@ -245,7 +248,7 @@ bool StPicoElectronMaker::initTree()
   mTree->Branch("px_pair",m_px_pair,"px_pair[nPhoE]/F");
   mTree->Branch("py_pair",m_py_pair,"py_pair[nPhoE]/F");
   mTree->Branch("pz_pair",m_pz_pair,"pz_pair[nPhoE]/F");
-return kStOK;
+  return kStOK;
 }
 
 //-----------------------------------------------------------------------------
@@ -354,7 +357,7 @@ bool StPicoElectronMaker::ProcessPicoEvent()
   
   if (isGoodEvent(picoEvent)){
    bool strangetof = picoEvent->btofTrayMultiplicity()>250&&picoEvent->refMult()<20;
-   hnTofMulvsRef->Fill(picoEvent->btofTrayMultiplicity(),picoEvent->refMult());
+   // hnTofMulvsRef->Fill(picoEvent->btofTrayMultiplicity(),picoEvent->refMult());
    // hnTofMatvsRef->Fill(picoEvent->nBTOFMatch(),picoEvent->refMult());  
    if (strangetof) return kStOK;
    StThreeVectorF pVtx = picoEvent->primaryVertex();
@@ -491,13 +494,14 @@ bool StPicoElectronMaker::recenterEventPlane()
    m_Qx_M=QxEtaM;
    m_Qy_M=QyEtaM;
    m_Qx_P=QxEtaP;
-   m_Qy_P=QxEtaP;
+   m_Qy_P=QyEtaP;
    mEP_M_raw=Q_M_ori.Phi()*0.5;
    mEP_M_re=EP_M;
    mEP_M_sh=EP_M_Sh;
    mEP_P_raw=Q_P_ori.Phi()*0.5;
    mEP_P_re=EP_P;
    mEP_M_sh=EP_P_Sh;
+   mRes = resolution;
 
   if (DEBUG) cout <<"finish reconstruct EP" <<endl;
   // return kStOK;
@@ -540,7 +544,7 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
       double phi = pe_1->pMom().phi();
       if (phi<0.) phi+=2*TMath::Pi();
       double cos2deltaPhi=std::cos(2*phi-2*EP);
-      double deltaPhi = pe_1->pMom().Phi()-EP;
+      double deltaPhi = pe_1->pMom().phi()-EP;
       if (deltaPhi<0) deltaPhi+=2*TMath::Pi();
       if (deltaPhi>TMath::Pi()) deltaPhi-=TMath::Pi();
       bool hasFirst1hit = pe_1->topologyMap(0) >> 8 & 0x1;
@@ -555,7 +559,7 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
         //   pIncEv2_hitcut->Fill(pe_1->pMom().Perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight); 
       
         //fill tree
-       m_idx_inc[m_id_inc]=itrack1;
+       m_idx_inc[m_nIncE]=itrack1;
        m_nSigmaE[m_nIncE]=pe_1->nSigmaElectron();
        m_beta_inc[m_nIncE]=beta;
        m_pt_inc[m_nIncE]=mom.perp();
@@ -633,9 +637,10 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
           if (passPEtopocut) {
             //reconstruct the photon
             // bool unlike=pe_2->charge()*pe_1->charge()<0;
-            if (mother.M()<0.3){
+            if (mother.m()<0.3){
               m_idx_phe[m_nPhoE]=itrack1;
               m_nSigE_phe[m_nPhoE]=pe_1->nSigmaElectron();
+              m_topomap0_phe[m_nPhoE]=pe_1->topologyMap(0); 
               m_beta_phe[m_nPhoE]=beta;
               m_pt_phe[m_nPhoE]=pe_1->pMom().perp();
               m_eta_phe[m_nPhoE]=pe_1->pMom().pseudoRapidity();
@@ -648,6 +653,7 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
               m_cos2phi_phe[m_nPhoE]=cos2deltaPhi;
 
               m_idx_parte[m_nPhoE]=itrack2;
+              m_topomap0_parte[m_nPhoE]=pe_2->topologyMap(0); 
               m_nSigE_parte[m_nPhoE]=pe_2->nSigmaElectron();
               m_beta_parte[m_nPhoE]=beta2;
               m_pt_parte[m_nPhoE]=pe_2->pMom().perp();
@@ -779,7 +785,8 @@ bool StPicoElectronMaker::isPEsecondElectron(StPicoTrack const * const trk, bool
   // require MUST tof match at pt<1.5, and hybrid PID at >1.5
   // TVector3 mom = trk->pMom(); 
   bool isTPCElectron = fabs(trk->nSigmaElectron())<anaCuts::nESigma_partner;  //attention this cut is different from purity fit sample
-  bool isTOFElectron = tofmatch?fabs(1./beta-1.)<anaCuts::tofe:false; 
+  // bool isTOFElectron = tofmatch?fabs(1./beta-1.)<anaCuts::tofe:false; 
+  bool isTOFElectron = true; 
   return  isTPCElectron&&isTOFElectron; //donot require electron
 }
 bool StPicoElectronMaker::isElectron(StPicoTrack const * const trk, bool tofmatch, float beta) const
