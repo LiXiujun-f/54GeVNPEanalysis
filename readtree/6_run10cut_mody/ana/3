@@ -1,0 +1,14 @@
+void plotfinal()
+{
+  TFile* file = new TFile("out.root");
+  TH1F* HFv2stat = (TH1F*)file->Get("hHFv2stat");
+  TH1F* HFv2sys = (TH1F*)file->Get("hHFv2sys");
+  int const nbins = HFv2stat->GetNbinsX();
+  double x[nbins] , y[nbins], syserr[nbins];
+  for (int ib=0;ib<nbins;ib++)
+  {
+    y[ib] = HFv2stat->GetBinContent(ib+1);
+    x[ib] = HFv2stat->GetBinCenter(ib+1);
+    syserr[ib] = HFv2sys->GetBinError(ib+1);
+  }
+}
