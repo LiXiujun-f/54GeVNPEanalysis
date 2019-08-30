@@ -1,15 +1,6 @@
 #ifndef StPicoElectronMaker_h
 #define StPicoElectronMaker_h
 
-/* **************************************************
- *  A Maker to read a StPicoEvent and StPicoDstarEvent
- *  simultaneously and do analysis.
- *
- *  Authors: Guannan Xie <guannanxie@lbl.gov>
- *           Mustafa Mustafa <mmustafa@lbl.gov>
- *
- * **************************************************
- */
 
 #include "TChain.h"
 #include "StMaker.h"
@@ -78,6 +69,8 @@ class StPicoElectronMaker : public StMaker
     void getBadruns(string inputFileName);
     void setRecenterFile(string recenterfilename);
     void setShiftFile(string shiftfilename);
+    void setRecoPhE(bool b);
+
   private: 
     TFile* mFile;
     std::map<int,int> runnum;
@@ -110,6 +103,7 @@ class StPicoElectronMaker : public StMaker
     TH2F* hincEptCent;
     string mRecenterFile;
     string mShiftFile;
+    bool mRecoPhE; 
     //recenter
     TProfile* pQxRecenterM[9];
     TProfile* pQyRecenterM[9];
@@ -136,6 +130,11 @@ class StPicoElectronMaker : public StMaker
     TProfile2D* pIncHadronv2;
     TProfile2D* pPionMinusv2;
     TProfile2D* pPionPlusv2;
+    TProfile2D* pKaonMinusv2;
+    TProfile2D* pKaonPlusv2;
+    TProfile2D* pProtonMinusv2;
+    TProfile2D* pProtonPlusv2;
+
     TProfile2D* pTagEv2;
     TProfile2D* pTagEv2_LS;
     TProfile2D* pIncEv2;
@@ -197,4 +196,8 @@ inline void StPicoElectronMaker::setRecenterFile(string recenterfilename){
 inline void StPicoElectronMaker::setShiftFile(string shiftfilename){
   mShiftFile = shiftfilename;
 }
+inline void StPicoElectronMaker::setRecoPhE(bool b){
+  mRecoPhE = b;
+}
+
 #endif

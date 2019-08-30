@@ -37,7 +37,7 @@ void calMee(){
   hphoto->Add(hphotols,-1);
   int const bin =12;
   double ptedge[bin+1]={0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.6,2.0,2.8,4.0};
-  int centL = 3,centH=9;
+  int centL = 1,centH=9;
   TH1F* centcorr = (TH1F*)f->Get("hcentwg");
   double nEvents = centcorr->Integral(centL,centH);
   cout<<nEvents<<endl;

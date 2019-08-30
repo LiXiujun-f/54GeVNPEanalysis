@@ -1,0 +1,9 @@
+Universe       = vanilla
+Notification   = never
+Requirements   = (CPU_Type != "crs") && (CPU_Experiment == "star")
++Experiment     = "star"
+Priority        = +10
++Job_Type       = "cas"
+GetEnv          = true
+Initialdir      = /star/u/jiyj/pwg/ana_new/
+Executable      = analysis

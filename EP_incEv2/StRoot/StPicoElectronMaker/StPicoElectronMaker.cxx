@@ -40,7 +40,9 @@ ClassImp(StPicoElectronMaker)
   StPicoElectronMaker::StPicoElectronMaker(char const * name, TString const inputFilesList, TString const outFileBaseName, StPicoDstMaker* picoDstMaker):
     StMaker(name), mPicoDstMaker(picoDstMaker),
     mInputFilesList(inputFilesList), mOutFileBaseName(outFileBaseName)
-{}
+{
+  mRecoPhE=true;
+}
 
 Int_t StPicoElectronMaker::Init()
 {
@@ -128,17 +130,21 @@ bool StPicoElectronMaker::initHists(){
   pIncHadronv2 = new TProfile2D("pIncHadronv2","pIncHadronv2;p_{T};Centrality",80,0,4,9,-0.5,8.5);
   pPionMinusv2 = new TProfile2D("pPionMinusv2","pPionMinusv2;p_{T};Centrality",80,0,4,9,-0.5,8.5);
   pPionPlusv2 = new TProfile2D("pPionPlusv2","pPionPlusv2;p_{T};Centrality",80,0,4,9,-0.5,8.5);
-  // hPionv2vsPtvsCent = new TH3F("hPionv2vsPtvsCent","hPionv2vsPtvsCent;#phi-#Psi_{2};p_{T} [GeV/c];Centrality",360,0,PI,200,0,4,9,-0.5,8.5);
-  // hKaonv2vsPtvsCent = new TH3F("hKaonv2vsPtvsCent","hKaonv2vsPtvsCent;#phi-#Psi_{2};p_{T} [GeV/c];Centrality",360,0,PI,200,0,4,9,-0.5,8.5);
-  hPhEv2vsPtvsCent = new TH3F("hPhEv2vsPtvsCent","hPhEv2vsPtvsCent;#phi-#Psi_{2};p_{T} [GeV/c];Centrality",360,0,PI,80,0,4,9,-0.5,8.5);
-  hPhEv2vsPtvsCentLS = new TH3F("hPhEv2vsPtvsCentLS","hPhEv2vsPtvsCentLS;#phi-#Psi_{2};p_{T} [GeV/c];Centrality",360,0,PI,80,0,4,9,-0.5,8.5);
-  pTagEv2 = new TProfile2D("pTagEv2","pTagEv2;p_{T};Centrality",80,0,4,9,-0.5,8.5);
-  pTagEv2_LS = new TProfile2D("pTagEv2_LS","pTagEv2_LS;p_{T};Centrality",80,0,4,9,-0.5,8.5);
-  hphoto = new TH3F("hphoto","Mee;Mee;partner e p_{T};cent",300,0,0.3,100,0,5,9,-0.5,8.5);
-  hphoto_LS = new TH3F("hphoto_LS","Mee like sign vs e pt vs cent;Mee;Tag e p_{T};cent",300,0,0.3,100,0,5,9,-0.5,8.5);
-  hphotoVsPt_LS = new TH3F("hphotoVsPt_LS","Mee like sign vs photon pt vs cent;Mee;photon p_{T};cent",120,0,0.3,80,0,8,9,-0.5,8.5);
-  hphotoVsPt = new TH3F("hphotoVsPt","Mee like sign vs photon pt vs cent;Mee;photon p_{T};cent",120,0,0.3,80,0,8,9,-0.5,8.5);
+  pKaonMinusv2 = new TProfile2D("pKaonMinusv2","pKaonMinusv2;p_{T};Centrality",80,0,4,9,-0.5,8.5);
+  pKaonPlusv2 = new TProfile2D("pKaonPlusv2","pKaonPlusv2;p_{T};Centrality",80,0,4,9,-0.5,8.5);
+  pProtonMinusv2 = new TProfile2D("pProtonMinusv2","pProtonMinusv2;p_{T};Centrality",80,0,4,9,-0.5,8.5);
+  pProtonPlusv2 = new TProfile2D("pProtonPlusv2","pProtonPlusv2;p_{T};Centrality",80,0,4,9,-0.5,8.5);
 
+  if (mRecoPhE){
+    hPhEv2vsPtvsCent = new TH3F("hPhEv2vsPtvsCent","hPhEv2vsPtvsCent;#phi-#Psi_{2};p_{T} [GeV/c];Centrality",360,0,PI,80,0,4,9,-0.5,8.5);
+    hPhEv2vsPtvsCentLS = new TH3F("hPhEv2vsPtvsCentLS","hPhEv2vsPtvsCentLS;#phi-#Psi_{2};p_{T} [GeV/c];Centrality",360,0,PI,80,0,4,9,-0.5,8.5);
+    pTagEv2 = new TProfile2D("pTagEv2","pTagEv2;p_{T};Centrality",80,0,4,9,-0.5,8.5);
+    pTagEv2_LS = new TProfile2D("pTagEv2_LS","pTagEv2_LS;p_{T};Centrality",80,0,4,9,-0.5,8.5);
+    hphoto = new TH3F("hphoto","Mee;Mee;partner e p_{T};cent",300,0,0.3,100,0,5,9,-0.5,8.5);
+    hphoto_LS = new TH3F("hphoto_LS","Mee like sign vs e pt vs cent;Mee;Tag e p_{T};cent",300,0,0.3,100,0,5,9,-0.5,8.5);
+    hphotoVsPt_LS = new TH3F("hphotoVsPt_LS","Mee like sign vs photon pt vs cent;Mee;photon p_{T};cent",120,0,0.3,80,0,8,9,-0.5,8.5);
+    hphotoVsPt = new TH3F("hphotoVsPt","Mee like sign vs photon pt vs cent;Mee;photon p_{T};cent",120,0,0.3,80,0,8,9,-0.5,8.5);
+  }
   // prfQxCent = new TProfile("prfQxCent","prfQxCent", 9, -0.5, 8.5);
   // prfQyCent = new TProfile("prfQyCent","prfQyCent", 9, -0.5, 8.5);
   // hQyQxCent = new TH3F("hQyQxCent", "hQyQxCent;Cent;Qx;Qy", 9,-0.5,8.5,1000,-50,50,1000,-50,50);
@@ -151,6 +157,10 @@ Int_t StPicoElectronMaker::Finish()
   //write the hists
   hevt->Write();
   hevtcut->Write();
+  hcent->Write();
+  hcentwg->Write();
+  hrefmult->Write();
+  hrefmultcor->Write();
 
   hEventPlaneCent_M->Write();
   hEventPlaneCent_M_Re->Write();
@@ -166,23 +176,26 @@ Int_t StPicoElectronMaker::Finish()
   hIncHadronv2vsPtvsCent->Write();
   // hPionv2vsPtvsCent->Write();
   // hKaonv2vsPtvsCent->Write();
-  hPhEv2vsPtvsCent->Write();
-  hPhEv2vsPtvsCentLS->Write();
+  pIncEv2->Write();
+  pIncEv2_hitcut->Write();
   pIncHadronv2->Write();
   pPionMinusv2->Write();
   pPionPlusv2->Write();
-  pIncEv2->Write();
-  pIncEv2_hitcut->Write();
-  pTagEv2_LS->Write();
-  pTagEv2->Write();
-  hcent->Write();
-  hcentwg->Write();
-  hrefmult->Write();
-  hrefmultcor->Write();
-  hphotoVsPt->Write();
-  hphotoVsPt_LS->Write();
-  hphoto->Write();
-  hphoto_LS->Write();
+  pKaonMinusv2->Write();
+  pKaonPlusv2->Write();
+  pProtonMinusv2->Write();
+  pProtonPlusv2->Write();
+
+  if (mRecoPhE){
+    hPhEv2vsPtvsCent->Write();
+    hPhEv2vsPtvsCentLS->Write();
+    pTagEv2_LS->Write();
+    pTagEv2->Write();
+    hphotoVsPt->Write();
+    hphotoVsPt_LS->Write();
+    hphoto->Write();
+    hphoto_LS->Write();
+  }
   mFile->Close();
   for (int ic=0;ic<9;ic++)
   {
@@ -237,31 +250,31 @@ bool StPicoElectronMaker::ProcessPicoEvent()
   if (isBadrun(mRunId)) return kStOK;
   
   if (isGoodEvent(picoEvent)){
-   bool strangetof = picoEvent->btofTrayMultiplicity()>250&&picoEvent->refMult()<20;
-   // hnTofMulvsRef->Fill(picoEvent->btofTrayMultiplicity(),picoEvent->refMult());
-   // hnTofMatvsRef->Fill(picoEvent->nBTOFMatch(),picoEvent->refMult());  
-   if (strangetof) return kStOK;
-   StThreeVectorF pVtx = picoEvent->primaryVertex();
-   mVx = pVtx.x();
-   mVy = pVtx.y();
-   mVz = pVtx.z();
-   hevtcut->Fill(1);
-   float bField=picoEvent->bField(); 
-   // centrality definition
-   mWeight=1;
+    bool strangetof = picoEvent->btofTrayMultiplicity()>250&&picoEvent->refMult()<20;
+    // hnTofMulvsRef->Fill(picoEvent->btofTrayMultiplicity(),picoEvent->refMult());
+    // hnTofMatvsRef->Fill(picoEvent->nBTOFMatch(),picoEvent->refMult());  
+    if (strangetof) return kStOK;
+    StThreeVectorF pVtx = picoEvent->primaryVertex();
+    mVx = pVtx.x();
+    mVy = pVtx.y();
+    mVz = pVtx.z();
+    hevtcut->Fill(1);
+    float bField=picoEvent->bField(); 
+    // centrality definition
+    mWeight=1;
 
-   if (DEBUG)cout<<"ok3"<<endl;
-   double refmultcor;
-   mCent = getCentralityBin(mVz,mRunId,picoEvent->refMult(),mWeight,refmultcor);
-   if (mCent<0) return  kStOK;
-   hcent->Fill(mCent);
-   hcentwg->Fill(mCent,mWeight);
-   hrefmultcor->Fill(refmultcor,mWeight);
-   hrefmult->Fill(picoEvent->refMult(),mWeight);
+    if (DEBUG)cout<<"ok3"<<endl;
+    double refmultcor;
+    mCent = getCentralityBin(mVz,mRunId,picoEvent->refMult(),mWeight,refmultcor);
+    if (mCent<0) return  kStOK;
+    hcent->Fill(mCent);
+    hcentwg->Fill(mCent,mWeight);
+    hrefmultcor->Fill(refmultcor,mWeight);
+    hrefmult->Fill(picoEvent->refMult(),mWeight);
 
-   // loopTracks();
-   if (!recenterEventPlane()) return kStOK;
-   getIncElectronv2(bField, pVtx);
+    // loopTracks();
+    if (!recenterEventPlane()) return kStOK;
+    getIncElectronv2(bField, pVtx);
   } //Good Event
   return kStOK;
 }
@@ -348,7 +361,8 @@ bool StPicoElectronMaker::recenterEventPlane()
   mEP_P_Sh=EP_P_Sh;
   mEP_P_Re=EP_P;
   if (DEBUG) cout <<"finish reconstruct EP" <<endl;
-  return kStOK;
+  // cout<< kStOK<<endl;
+  return 1;
 }
 bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
 {
@@ -390,7 +404,7 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
       bool hasFirst4hit = pe_1->topologyMap(0) >> 8 & 0xF;
       bool passTPChit = hasFirst1hit;
       if (iselectron) {
-        hIncEv2vsPtvsCent->Fill(deltaPhi/anaCuts::resolution[mCent],pe_1->pMom().perp(),mCent,mWeight); 
+        hIncEv2vsPtvsCent->Fill(deltaPhi,pe_1->pMom().perp(),mCent,mWeight); 
         pIncEv2->Fill(pe_1->pMom().perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight); 
         if (passTPChit) 
           pIncEv2_hitcut->Fill(pe_1->pMom().perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight); 
@@ -399,11 +413,26 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
       if (DEBUG) cout << "start loop second pe" <<endl;
       //inclusive charged particle, just for check
       pIncHadronv2->Fill(pe_1->pMom().perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight);
-      hIncHadronv2vsPtvsCent->Fill(deltaPhi/anaCuts::resolution[mCent],pe_1->pMom().perp(),mCent,mWeight); 
+      hIncHadronv2vsPtvsCent->Fill(deltaPhi,pe_1->pMom().perp(),mCent,mWeight); 
 
       // pion, just for check
       if (isPion(pe_1,beta) && pe_1->charge()>0) pPionPlusv2->Fill(pe_1->pMom().perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight);
       if (isPion(pe_1,beta) && pe_1->charge()<0) pPionMinusv2->Fill(pe_1->pMom().perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight);
+      
+      // kaon, just for check
+      if (isKaon(pe_1,beta) && pe_1->charge()>0)
+        pKaonPlusv2->Fill(pe_1->pMom().perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight);
+      if (isKaon(pe_1,beta) && pe_1->charge()<0)
+        pKaonMinusv2->Fill(pe_1->pMom().perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight);
+
+      // proton, just for check
+      if (isProton(pe_1,beta) && pe_1->charge()>0) 
+        pProtonPlusv2->Fill(pe_1->pMom().perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight);
+      if (isProton(pe_1,beta) && pe_1->charge()<0)
+        pProtonMinusv2->Fill(pe_1->pMom().perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight);
+
+      //if not reconstruct the photonic electron then skip the following code
+      if (!mRecoPhE) return kStOK;
 
       if (isPE1){
         for (int itrack2=0;itrack2<nTracks;itrack2++){
@@ -414,7 +443,7 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
           float beta2 = getTofBeta(pe_2);
           bool tofmatch2 = (beta2!=std::numeric_limits<float>::quiet_NaN()) && beta2>0;
           if (!isPEsecondElectron(pe_2,tofmatch2,beta2)) continue; 
-          if (fabs(pe_2->gMom().pseudoRapidity())>=0.8) continue;
+          // if (fabs(pe_2->gMom().pseudoRapidity())>=0.8) continue;
           // use straight lines approximation to get point of DCA of e+e- pair
           StPhysicalHelixD p1Helix = pe_1->helix(bField);
           StPhysicalHelixD p2Helix = pe_2->helix(bField);
@@ -445,18 +474,19 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
 
           bool passPEtopocut = fabs(DcaDaughters) < anaCuts::EEdcaDaughter;
 
-          if (passPEtopocut && fabs(mother.rapidity())<1) {
+          // if (passPEtopocut && fabs(mother.rapidity())<1) {
+          if (passPEtopocut) {
             //reconstruct the photon
             bool unlike=pe_2->charge()*pe_1->charge()<0;
             if (mother.m()<0.3){
               if (mother.m()<0.15 && unlike) {
                 pTagEv2->Fill(pe_1->pMom().perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight);
-                hPhEv2vsPtvsCent->Fill(deltaPhi/anaCuts::resolution[mCent],pe_1->pMom().perp(),mCent,mWeight);
+                hPhEv2vsPtvsCent->Fill(deltaPhi,pe_1->pMom().perp(),mCent,mWeight);
                 // hV0->Fill(V0.x(),V0.y(),V0.z());
               }
               if ( mother.m()<0.15 && (!unlike)){
                 pTagEv2_LS->Fill(pe_1->pMom().perp(),mCent,cos2deltaPhi/anaCuts::resolution[mCent],mWeight);
-                hPhEv2vsPtvsCentLS->Fill(deltaPhi/anaCuts::resolution[mCent],pe_1->pMom().perp(),mCent,mWeight);
+                hPhEv2vsPtvsCentLS->Fill(deltaPhi,pe_1->pMom().perp(),mCent,mWeight);
                 // hV0_LS->Fill(V0.x(),V0.y(),V0.z());
               }
               if (unlike) {
@@ -506,7 +536,7 @@ bool StPicoElectronMaker::isGoodTrack(StPicoTrack const* trk, float dca) const
 {
   // StThreeVectorF const vtx = mPicoDstMaker->picoDst()->event()->primaryVertex();
   return trk->pMom().perp() > anaCuts::GPt && fabs(trk->nHitsFit()) >= anaCuts::NHitsFit && 
-    fabs(trk->gMom().pseudoRapidity())<anaCuts::Eta &&
+    fabs(trk->pMom().pseudoRapidity())<anaCuts::Eta &&
     fabs(trk->nHitsDedx())>=anaCuts::NHitsDedx && fabs(dca)<=anaCuts::Dca &&
     fabs(trk->nHitsFit()*1.0/trk->nHitsMax()) >=anaCuts::NHitsFit2Poss;
   // fabs(trk->nHitsDedx())>=anaCuts::NHitsDedx &&
@@ -515,10 +545,12 @@ bool StPicoElectronMaker::isGoodTrack(StPicoTrack const* trk, float dca) const
 bool StPicoElectronMaker::isGoodTrackGlobal(StPicoTrack const* trk, float dca) const
 {
   // StThreeVectorF const vtx = mPicoDstMaker->picoDst()->event()->primaryVertex();
-  return trk->pMom().perp() > anaCuts::GPt && fabs(trk->nHitsFit()) >= anaCuts::NHitsFit && 
-    fabs(trk->gMom().pseudoRapidity())<anaCuts::Eta &&
-    fabs(trk->nHitsDedx())>=anaCuts::NHitsDedx && fabs(dca)<=anaCuts::Dca &&
-    fabs(trk->nHitsFit()*1.0/trk->nHitsMax()) >=anaCuts::NHitsFit2Poss;
+  return trk->gMom().perp() > anaCuts::GPt && 
+       fabs(trk->nHitsFit()) >= anaCuts::NHitsFit && 
+       fabs(trk->gMom().pseudoRapidity())<anaCuts::Eta &&
+       fabs(trk->nHitsDedx())>=anaCuts::NHitsDedx &&
+       // fabs(dca)<=anaCuts::Dca &&
+       fabs(trk->nHitsFit()*1.0/trk->nHitsMax()) >=anaCuts::NHitsFit2Poss;
   // fabs(trk->nHitsDedx())>=anaCuts::NHitsDedx &&
   // fabs( trk->gDCA(vtx.x() , vtx.y(), vtx.z() )) <= anaCuts::Dca;
 }
@@ -568,6 +600,7 @@ float StPicoElectronMaker::getTofBeta(StPicoTrack const* const trk) const
   } 
   return beta;
 }
+
 bool StPicoElectronMaker::isPEfirstElectron(StPicoTrack const * const trk, bool tofmatch, float beta) const
 { 
   // first photonic electron
@@ -585,7 +618,8 @@ bool StPicoElectronMaker::isPEsecondElectron(StPicoTrack const * const trk, bool
   // require MUST tof match at pt<1.5, and hybrid PID at >1.5
   StThreeVectorF mom = trk->pMom(); 
   bool isTPCElectron= fabs(trk->nSigmaElectron())<anaCuts::nESigma_partner;  //attention this cut is different from purity fit sample
-  bool isTOFElectron = tofmatch?fabs(1./beta-1.)<0.025:false; 
+  // bool isTOFElectron = tofmatch?fabs(1./beta-1.)<0.025:false; 
+  bool isTOFElectron = true; 
   return  isTPCElectron&&isTOFElectron; //donot require electron
 }
 bool StPicoElectronMaker::isElectron(StPicoTrack const * const trk, bool tofmatch, float beta) const

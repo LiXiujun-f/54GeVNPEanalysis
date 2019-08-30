@@ -90,6 +90,5 @@ void load(){
   gSystem->Load("StMtdCalibMaker");
   gSystem->Load("StBTofUtil");
   gSystem->Load("StVpdCalibMaker");
-  gSystem->Load("StStrangeMuDst");
-  gSystem->Load("StStrangeAssoc");
+
 }

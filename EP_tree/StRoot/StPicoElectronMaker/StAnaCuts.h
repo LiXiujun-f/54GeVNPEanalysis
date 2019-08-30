@@ -43,22 +43,23 @@ namespace anaCuts
    // tracks cuts
    float const GPt = 0.2;
    int const NHitsFit = 20;
+   int const NHitsFit_loose = 15;
    int const NHitsDedx = 15;
-   int const NHitsFit2Poss = 0.52;
+   float const NHitsFit2Poss = 0.52;
    // float const Dca = 1.5;// < cm
    float const Dca = 1.5;// < cm
    float const Eta = 1; 
    float const pTof=0.04;
    float const piTof=0.01;
    float const kTof=0.04;
-   float const tofe=0.03;
+   float const tofe=0.04;
    float const kTpc=2;
    float const pTpc=2;
    float const piTpc=2;
-   float const nESigma_partner=4;
+   float const nESigma_partner=3.5;
    float const nESigma_Tag=2.5;
    float const tofYlocal=1.8;
-   float EEdcaDaughter=1;  //cm
+   float EEdcaDaughter=1.5;  //cm
 
    double resolution[9]={0.156125,0.228833,0.326535,0.430296, 0.514733,0.558188,0.537687,0.451522, 0.344037};
    int const nparVz_mult = 7;

@@ -1,0 +1,4 @@
+k/p samples are always require tof, |nsigma|<5
+electron samples are only require tof at pt<1.5
+Mee<0.01
+no decaylength cut

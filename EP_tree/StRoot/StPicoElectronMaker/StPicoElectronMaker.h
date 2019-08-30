@@ -22,7 +22,7 @@
 #include "TProfile2D.h"
 // #include "StPicoDst.h"
 
-#define Nphe 300
+#define Nphe 1500
 #define NincE 200
 
 class TString;
@@ -124,6 +124,7 @@ class StPicoElectronMaker : public StMaker
     float m_pVtx_x;
     float m_pVtx_y;
     float m_pVtx_z;
+    float m_vzVpdVz;
     float m_BBCx;
     float m_ZDCx;
     float m_nTofMult; 

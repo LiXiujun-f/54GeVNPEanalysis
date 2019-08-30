@@ -28,6 +28,7 @@ void runPicoElectronMaker(TString picolist="try.list",  TString outFileName="tes
   picoElectronMaker->getBadruns("StRoot/macros/badrunlist.txt");
   picoElectronMaker->setRecenterFile("StRoot/StPicoElectronMaker/eventplane/recenter.root");
   picoElectronMaker->setShiftFile("StRoot/StPicoElectronMaker/eventplane/shift.root");
+  picoElectronMaker->setRecoPhE(true);
   // -------------- USER variables -------------------------
   chain->Init();
   int nEntries = picoDstMaker->chain()->GetEntries();

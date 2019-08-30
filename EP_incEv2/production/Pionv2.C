@@ -13,7 +13,8 @@ void Pionv2()
   SetsPhenixStyle(); 
   // TFile* file = new TFile("eta0.8/incEv2.root");
   // TFile* file = new TFile("incEv2.root");
-  TFile* file = new TFile("incEv2_0.root");
+  TFile* file = new TFile("0610/incEv2.root");
+  // TFile* file = new TFile("0711/incEv2.root");
   TCanvas* c = new TCanvas("c","c");
   TPDF* pdf = new TPDF("plots.pdf"); 
   pdf->Off();
@@ -61,9 +62,10 @@ void Pionv2()
   // TProfile2D* pHad2D = (TProfile2D*)file->Get("pIncEv2");
   // for ()
   // {
-  int centL=5,centH=7;  //start at 1
+  int centL=8,centH=9;  //start at 1
   // int centL=1,centH=4;  //start at 1
   TProfile* pHadv2 = (TProfile*)pHad2D->ProfileX("pHadv2",centL,centH);
+  TProfile*  pHadv2cent = (TProfile*)pHad2D->ProfileY();
   // TProfile* pHadv2cent[9];
   // for (int ic =centL;ic<=centH;ic++){
   //   pHadv2cent[ic-1] = (TProfile*)pHad2D->ProfileX(Form("pHadv2_%d",ic),ic,ic);
@@ -72,18 +74,18 @@ void Pionv2()
 
   // TH1F* pHadv2 = (TH1F*)pHadv2cent[centH]->ProjectionX("hHadv2"); 
   // TProfile* pHadv2;
-    // for (int ic=centL;ic<=centH;ic++)
-    // {
-    //   if (ic==centL) 
-    //   {
-    //    // cout<<"?"<<endl;
-    //    pHadv2=(TProfile*)pHadv2cent[centL-1]->Clone("pHadv2");
-    //   }
-    //   else 
-    //   {
-    //    pHadv2->Add(pHadv2cent[ic-1],1);
-    //   }
-    //  }
+  //   for (int ic=centL;ic<=centH;ic++)
+  //   {
+  //     if (ic==centL) 
+  //     {
+  //      // cout<<"?"<<endl;
+  //      pHadv2=(TProfile*)pHadv2cent[centL-1]->Clone("pHadv2");
+  //     }
+  //     else 
+  //     {
+  //      pHadv2->Add(pHadv2cent[ic-1],1);
+  //     }
+  //    }
      pHadv2->GetXaxis()->SetTitle("p_{T}");
      pHadv2->GetYaxis()->SetTitle("#pi v_{2}");
      
@@ -100,19 +102,19 @@ void Pionv2()
     // if (totnum!=0) pHadv2->SetBinContent(ib,totv2/(double)totnum);
     // else pHadv2->SetBinContent(ib,0);
   // }
-  // double resMB=0, totmult=0;
+  double resMB=0, totmult=0;
   // double refmult[9]={11,22.8,41.7,70.2,112,170,249,329,402};
-  // for (int icent=centL;icent<=centH;icent++) {
-  //   // resMB+= resolution->GetBinContent(icent)*refmult[icent-1];
-  //   resMB+= prfres->GetBinContent(icent)*refmult[icent-1];
-  //   totmult+=refmult[icent-1];
-  // }
-  // resMB/=(1.0*totmult);
+  for (int icent=centL;icent<=centH;icent++) {
+    // resMB+= resolution->GetBinContent(icent)*refmult[icent-1];
+    resMB+= prfres->GetBinContent(icent)*pHadv2cent->GetBinEntries(icent);
+    totmult+=pHadv2cent->GetBinEntries(icent);
+  }
+  resMB/=(1.0*totmult);
   // prfres->Rebin(9);
   // double resMB = prfres->GetBinContent(1);
   // resMB = sqrt(resMB);
   // cout<<sqrt(resMB)<<endl;
-  // pHadv2->Scale(0.97/sqrt(resMB));
+  pHadv2->Scale(1./sqrt(resMB));
   pHadv2->SetMarkerStyle(20);
   pHadv2->SetMarkerColor(kBlue);
   pHadv2->Draw("psame");
@@ -122,12 +124,12 @@ void Pionv2()
   // hadv2ShW->Draw("samep");
   TFile* fpre = new TFile("prev2.root");
   // TGraphErrors* g1 = (TGraphErrors*)fpre->Get("pionplus_0_10_39"); 
-  // TGraphErrors* g1 = (TGraphErrors*)fpre->Get("pionplus_40_80_39"); 
+  TGraphErrors* g1 = (TGraphErrors*)fpre->Get("pionplus_40_80_39"); 
   // TGraphErrors* g1 = (TGraphErrors*)fpre->Get("pionplus_0_80_39"); 
-  TGraphErrors* g1 = (TGraphErrors*)fpre->Get("pionplus_10_40_39"); 
+  // TGraphErrors* g1 = (TGraphErrors*)fpre->Get("pionplus_10_40_39"); 
   g1->SetMarkerSize(1);
-  // TGraphErrors* g2 = (TGraphErrors*)fpre->Get("pionplus_0_10_62"); 
-  TGraphErrors* g2 = (TGraphErrors*)fpre->Get("pionplus_10_40_62"); 
+  TGraphErrors* g2 = (TGraphErrors*)fpre->Get("pionplus_0_10_62"); 
+  // TGraphErrors* g2 = (TGraphErrors*)fpre->Get("pionplus_10_40_62"); 
   // TGraphErrors* g2 = (TGraphErrors*)fpre->Get("pionplus_0_80_62"); 
   // TGraphErrors* g2 = (TGraphErrors*)fpre->Get("pionplus_40_80_62"); 
   g2->SetMarkerColor(kRed);
@@ -135,9 +137,9 @@ void Pionv2()
   g1->SetMarkerStyle(20);
   g2->SetMarkerSize(1);
   // TGraphErrors* g3 = (TGraph*)fpre->Get("pionplus_0_10_27"); 
-  TGraphErrors* g3 = (TGraph*)fpre->Get("pionplus_10_40_27"); 
+  // TGraphErrors* g3 = (TGraph*)fpre->Get("pionplus_10_40_27"); 
   // TGraphErrors* g3 = (TGraph*)fpre->Get("pionplus_0_80_27"); 
-  // TGraphErrors* g3 = (TGraph*)fpre->Get("pionplus_40_80_27"); 
+  TGraphErrors* g3 = (TGraph*)fpre->Get("pionplus_40_80_27"); 
   g3->SetMarkerColor(kGreen);
   g3->SetMarkerSize(1);
   g3->SetMarkerStyle(20);

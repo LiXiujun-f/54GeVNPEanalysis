@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!-- <job fileListSyntax="xrootd" maxFilesPerProcess="90" simulateSubmission="false"> -->
+<job fileListSyntax="xrootd" maxFilesPerProcess="50" simulateSubmission="false">
+<!-- <job fileListSyntax="xrootd" maxFilesPerProcess="6" simulateSubmission="false"> -->
+
+<stdout URL="file:./out/$JOBID.out" />
+ <stderr URL="file:./err/$JOBID.err" />
+         
+ <Generator>
+   <Location>./report/</Location>
+   <ScriptLocation>./csh/</ScriptLocation>
+   <ListLocation>./list/</ListLocation>
+ </Generator>
+                                                
+<command>
+starver SL18c
+root4star -b -l -q runPicoElectronMaker.C\(\"$FILELIST\",\"$JOBID.root\"\) &gt;&amp; ${JOBID}.log
+<!-- tar &#45;zcvf ${JOBID}.log.tgz ${JOBID}.log -->
+</command>
+
+<input URL="filelist:&dir;/&listOfFiles;" />
+<output fromScratch="*.root" toURL="&dir;/production/" />
+<output fromScratch="*.log" toURL="&dir;/log/" />
+
+<SandBox installer="ZIP">
+	<Package name="LocalLibraries">
+    <File>file:./StRoot/</File>
+    <File>file:./runPicoElectronMaker.C</File>
+    <File>file:./.sl73_gcc485/</File>
+	</Package>
+</SandBox>
+
+</job>

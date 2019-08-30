@@ -173,24 +173,25 @@ bool StPicoElectronMaker::initTree()
   mTree->Branch("pVtx_x",&m_pVtx_x,"pVtx_x/F");
   mTree->Branch("pVtx_y",&m_pVtx_y,"pVtx_y/F");
   mTree->Branch("pVtx_z",&m_pVtx_z,"pVtx_z/F");
+  mTree->Branch("vzVpdVz",&m_vzVpdVz,"vzVpdVz/F");
   mTree->Branch("BBCx",&m_BBCx,"BBCx/F");
   mTree->Branch("ZDCx",&m_ZDCx,"ZDCx/F");
   mTree->Branch("nTofMult",&m_nTofMult,"nTofMult/F"); //refuse pile up, incase offical centrality
   mTree->Branch("nTofmatch",&m_nTofMat,"nTofmatch/F");
 // event plane
-  mTree->Branch("nQvecP",&m_nQvec_M,"nQvecP/F");
-  mTree->Branch("nQvecM",&m_nQvec_P,"nQvecM/F");
+  mTree->Branch("nQvecP",&m_nQvec_P,"nQvecP/F");
+  mTree->Branch("nQvecM",&m_nQvec_M,"nQvecM/F");
   mTree->Branch("Qx_M",&m_Qx_M,"Qx_M/D");
   mTree->Branch("Qy_M",&m_Qy_M,"Qy_M/D");
   mTree->Branch("Qx_P",&m_Qx_P,"Qx_P/D");
   mTree->Branch("Qy_P",&m_Qy_P,"Qy_P/D");
   mTree->Branch("EP_M_raw",&mEP_M_raw,"EP_M_raw/F");
-  mTree->Branch("EP_M_re",&mEP_M_re,"EP_M_re");
-  mTree->Branch("EP_M_sh",&mEP_M_sh,"EP_M_sh");
+  mTree->Branch("EP_M_re",&mEP_M_re,"EP_M_re/F");
+  mTree->Branch("EP_M_sh",&mEP_M_sh,"EP_M_sh/F");
   mTree->Branch("EP_P_raw",&mEP_P_raw,"EP_P_raw/F");
-  mTree->Branch("EP_P_re",&mEP_P_re,"EP_P_re");
-  mTree->Branch("EP_P_sh",&mEP_P_sh,"EP_M_sh");
-  mTree->Branch("resolution",&mRes,"resolution");
+  mTree->Branch("EP_P_re",&mEP_P_re,"EP_P_re/F");
+  mTree->Branch("EP_P_sh",&mEP_P_sh,"EP_P_sh/F");
+  mTree->Branch("resolution",&mRes,"resolution/F");
   
   mTree->Branch("nIncE",&m_nIncE,"nIncE/I");
   mTree->Branch("idx_inc",&m_idx_inc,"idx_inc[nIncE]/I");
@@ -389,6 +390,7 @@ bool StPicoElectronMaker::ProcessPicoEvent()
    m_pVtx_x=mVx;
    m_pVtx_y=mVy;
    m_pVtx_z=mVz;
+   m_vzVpdVz=mVz - picoEvent->vzVpd();
    m_BBCx=picoEvent->BBCx();
    m_ZDCx=picoEvent->ZDCx();
    m_nTofMult=picoEvent->btofTrayMultiplicity(); 
@@ -491,16 +493,16 @@ bool StPicoElectronMaker::recenterEventPlane()
   //fill tree
    m_nQvec_M=numOfTrksM;
    m_nQvec_P=numOfTrksP;
-   m_Qx_M=QxEtaM;
-   m_Qy_M=QyEtaM;
-   m_Qx_P=QxEtaP;
-   m_Qy_P=QyEtaP;
+   m_Qx_M=QxEtaM_ori;
+   m_Qy_M=QyEtaM_ori;
+   m_Qx_P=QxEtaP_ori;
+   m_Qy_P=QyEtaP_ori;
    mEP_M_raw=Q_M_ori.Phi()*0.5;
    mEP_M_re=EP_M;
    mEP_M_sh=EP_M_Sh;
    mEP_P_raw=Q_P_ori.Phi()*0.5;
    mEP_P_re=EP_P;
-   mEP_M_sh=EP_P_Sh;
+   mEP_P_sh=EP_P_Sh;
    mRes = resolution;
 
   if (DEBUG) cout <<"finish reconstruct EP" <<endl;
@@ -579,7 +581,6 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
        m_has4hit_inc[m_nIncE]=hasFirst4hit; 
           
        m_nIncE++;
-      
       }
       
       if (DEBUG) cout << "start loop second pe" <<endl;
@@ -594,7 +595,6 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
 
       if (isPE1){
         for (int itrack2=0;itrack2<nTracks;itrack2++){
-          
           if (itrack1==itrack2) continue;
           StPicoTrack* pe_2 = mPicoDst->track(itrack2);
           if (!isGoodTrackGlobal(pe_2,pe_2->gDCA(mVx,mVy,mVz))) continue;
@@ -631,13 +631,12 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
           // float PointingAngle = vtxToV0.angle(mother.vect());  //theta
           // float DecayLength = vtxToV0.mag(); 
           
-          
           bool passPEtopocut = fabs(DcaDaughters) < anaCuts::EEdcaDaughter;
 
           if (passPEtopocut) {
             //reconstruct the photon
             // bool unlike=pe_2->charge()*pe_1->charge()<0;
-            if (mother.m()<0.3){
+            if (mother.m()<0.28){
               m_idx_phe[m_nPhoE]=itrack1;
               m_nSigE_phe[m_nPhoE]=pe_1->nSigmaElectron();
               m_topomap0_phe[m_nPhoE]=pe_1->topologyMap(0); 
@@ -656,9 +655,9 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
               m_topomap0_parte[m_nPhoE]=pe_2->topologyMap(0); 
               m_nSigE_parte[m_nPhoE]=pe_2->nSigmaElectron();
               m_beta_parte[m_nPhoE]=beta2;
-              m_pt_parte[m_nPhoE]=pe_2->pMom().perp();
-              m_eta_parte[m_nPhoE]=pe_2->pMom().pseudoRapidity();
-              m_phi_parte[m_nPhoE]=pe_2->pMom().phi();
+              m_pt_parte[m_nPhoE]=pe_2->gMom().perp();
+              m_eta_parte[m_nPhoE]=pe_2->gMom().pseudoRapidity();
+              m_phi_parte[m_nPhoE]=pe_2->gMom().phi();
               m_gDca_parte[m_nPhoE]=pe_2->gDCA(mVx,mVy,mVz);
               m_charge_parte[m_nPhoE]=pe_2->charge();
               m_nFit_parte[m_nPhoE]=pe_2->nHitsFit();
@@ -676,7 +675,6 @@ bool StPicoElectronMaker::getIncElectronv2(float bField,StThreeVectorF pVtx)
               m_py_pair[m_nPhoE]=mother.py();
               m_pz_pair[m_nPhoE]=mother.pz();
               m_nPhoE++;
-
             } //mass <0.3
           } // pass topo cut
         } //second pe loop
@@ -714,13 +712,15 @@ bool StPicoElectronMaker::isGoodTrigger(StPicoEvent const* const picoEvent) cons
 }
 bool StPicoElectronMaker::isGoodTrackGlobal(StPicoTrack const* trk, float dca) const
 {
-  // StThreeVectorF const vtx = mPicoDstMaker->picoDst()->event()->primaryVertex();
-  return trk->gMom().perp() > anaCuts::GPt && fabs(trk->nHitsFit()) >= anaCuts::NHitsFit && 
-    fabs(trk->gMom().pseudoRapidity())<anaCuts::Eta &&
-    fabs(trk->nHitsDedx())>=anaCuts::NHitsDedx && fabs(dca)<=anaCuts::Dca &&
-    fabs(trk->nHitsFit()*1.0/trk->nHitsMax()) >=anaCuts::NHitsFit2Poss;
-  // fabs(trk->nHitsDedx())>=anaCuts::NHitsDedx &&
-  // fabs( trk->gDCA(vtx.x() , vtx.y(), vtx.z() )) <= anaCuts::Dca;
+  //use a very loose cut for partnere electron to enhance the reco eff.
+  return 
+         trk->gMom().perp() > anaCuts::GPt &&
+         fabs(trk->nHitsFit()) >= anaCuts::NHitsFit_loose; 
+         // fabs(trk->nHitsFit()) >= anaCuts::NHitsFit && 
+         // fabs(trk->gMom().pseudoRapidity())<anaCuts::Eta &&
+         // fabs(trk->nHitsDedx())>=anaCuts::NHitsDedx &&
+         // fabs(dca)<=anaCuts::Dca &&
+         // fabs(trk->nHitsFit()*1.0/trk->nHitsMax()) >=anaCuts::NHitsFit2Poss;
 }
 //-----------------------------------------------------
 bool StPicoElectronMaker::isGoodTrack(StPicoTrack const* trk, float dca) const
@@ -785,7 +785,9 @@ bool StPicoElectronMaker::isPEsecondElectron(StPicoTrack const * const trk, bool
   // require MUST tof match at pt<1.5, and hybrid PID at >1.5
   // TVector3 mom = trk->pMom(); 
   bool isTPCElectron = fabs(trk->nSigmaElectron())<anaCuts::nESigma_partner;  //attention this cut is different from purity fit sample
+  if (trk->gMom().mag()<0.3)  isTPCElectron = fabs(trk->nSigmaElectron())<anaCuts::nESigma_partner+0.3;  
   // bool isTOFElectron = tofmatch?fabs(1./beta-1.)<anaCuts::tofe:false; 
+  // bool isTOFElectron = tofmatch?fabs(1./beta-1.)<anaCuts::tofe:true;  //very loose cut 
   bool isTOFElectron = true; 
   return  isTPCElectron&&isTOFElectron; //donot require electron
 }
@@ -844,16 +846,16 @@ bool StPicoElectronMaker::isProton(StPicoTrack const * const trk,  float beta) c
 }
 int StPicoElectronMaker::getCentralityBin(float vz,int runId,float mult,float &weight,double &refmultcor) const
 {
-  // float mult_corr = mult;
+  float mult_corr = mult;
   //if trigger 580001, correct the refmult
-  // mult+=gRandom->Rndm();
-  // if (runId<18156031) {
-  //   float fvz = 0; 
-  //   for (int i=0;i<anaCuts::nparVz_mult;i++){ 
-  //     fvz +=anaCuts::parVz_mult[i]*std::pow(vz,i);
-  //   }
-  //   mult=mult*1.0*anaCuts::parVz_mult[0]/fvz;
-  // }
+  mult+=gRandom->Rndm();
+  if (runId<18156031) {
+    float fvz = 0;
+    for (int i=0;i<anaCuts::nparVz_mult;i++){
+      fvz +=anaCuts::parVz_mult[i]*std::pow(vz,i);
+    }
+    mult=mult*1.0*anaCuts::parVz_mult[0]/fvz;
+  }
   refmultcor=mult;
   weight = reweight(mult);
   for (int cent=0;cent<anaCuts::nCent;cent++)

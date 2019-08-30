@@ -11,9 +11,9 @@ void addpdf(TPDF* pdf)
 void electronv2()
 {
   SetsPhenixStyle(); 
-  // TFile* file = new TFile("incEv2.root");
+  TFile* file = new TFile("incEv2.root");
   // TFile* file = new TFile("eta0.8/incEv2.root");
-  TFile* file = new TFile("incEv2_0.root");
+  // TFile* file = new TFile("incEv2_0.root");
   // TFile* file = new TFile("test_out_.recenter.root");
   TCanvas* c = new TCanvas("c","c");
   TPDF* pdf = new TPDF("plots.pdf"); 
@@ -28,6 +28,7 @@ void electronv2()
   for (int ic=0;ic<9;ic++)
   {
      double res2sub = prfres->GetBinContent(prfres->FindBin(ic));
+     
      res2sub = sqrt(res2sub);
      double res2suberr = prfres->GetBinError(prfres->FindBin(ic));
      res2suberr = 0.5/res2sub*res2suberr;
@@ -36,7 +37,7 @@ void electronv2()
      rescheck->SetBinError(9-ic,res2suberr);
      resolution->SetBinError(ic+1,res2suberr);
      res_xbincenter[ic]=rescheck->GetBinCenter(ic+1);
-     cout << res2sub  << endl;
+     cout << res2sub <<" "<<prfres->GetBinEntries(prfres->FindBin(ic)) << endl;
   }
   // resolution->Draw();
 
@@ -111,28 +112,28 @@ void electronv2()
      hphoE->SetBinContent(i,v2PhE);
   }
   // cout<<"????"<<endl;
-  // double resMB=0, totmult=0;
-  // double refmult[9]={11,22.8,41.7,70.2,112,170,249,329,402};
-  // for (int icent=centL;icent<=centH;icent++) {
-  //   resMB+= resolution->GetBinContent(icent)*refmult[icent-1];
-  //   totmult+=refmult[icent-1];
-  // }
-  // resMB/=(1.0*totmult);
-  // cout<<resMB<<endl;
+  double resMB=0, totmult=0;
+  double refmult[9]={11,22.8,41.7,70.2,112,170,249,329,402};
+  for (int icent=centL;icent<=centH;icent++) {
+    resMB+= resolution->GetBinContent(icent)*refmult[icent-1];
+    totmult+=refmult[icent-1];
+  }
+  resMB/=(1.0*totmult);
+  cout<<resMB<<endl;
   // resMB = sqrt(resMB); 
-  // pHadv2->Scale(1./(resMB));
+  pHadv2->Scale(1./(resMB));
  pHadv2->SetMarkerStyle(20);
  pHadv2->SetMarkerColor(kBlue);
  pHadv2->Draw("psame");
  pHadv2->GetXaxis()->SetTitle("p_{T}");
  pHadv2->GetYaxis()->SetTitle("v_{2}");
- // pEv2->Scale(1./(resMB));
+ pEv2->Scale(1./(resMB));
  pEv2->SetMarkerStyle(21);
  pEv2->SetMarkerColor(kRed);
  pEv2 = (TProfile*)pEv2->Rebin(12,"pEv2",ptedge);
 //  pEv2->Rebin();
  pEv2->Draw("psame");
- // hphoE->Scale(1./(resMB));
+ hphoE->Scale(1./(resMB));
  hphoE->SetMarkerStyle(21);
  hphoE->SetMarkerColor(kGreen);
  hphoE->Draw("psame");

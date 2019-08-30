@@ -1,0 +1,60 @@
+#include "sPhenixStyle.h"
+void drawBox(double x1,double y1,double x2,double y2)
+{
+  TBox* box = new TBox(x1,y1,x2,y2); 
+  box->SetFillColor(kBlue);
+  box->SetFillStyle(3002);
+  box->Draw("same");
+}
+
+void puritysys()
+{
+  SetsPhenixStyle();
+  char name[100]="Nsigma_2_5";  
+  // char name[100]="Nsigma_6_8";  
+  
+  TCanvas* c = new TCanvas("c","c",1200,600);
+  c->Divide(2,1);
+  TFile* fmean = new TFile(Form("%s.root",name));
+  TFile* fsys = new TFile(Form("%s_sys.root",name));
+  TH1F* hmean = (TH1F*)fmean->Get("hpurity");
+  hmean->SetDirectory(0);
+  TH1F* hsys = (TH1F*)fsys->Get("hpurity");
+  hsys->SetDirectory(0);
+  hmean->SetLineColor(kRed);
+  c->cd(1);
+  hmean->Draw();
+  hsys->Draw("same");
+  hmean->Draw("same");
+  TLegend * leg = new TLegend(0.5,0.2,0.8,0.5);
+  leg->AddEntry( hsys,"sys. err band","l");
+  leg->AddEntry( hmean,"mean value","l");
+  leg->Draw();
+
+  c->cd(2);
+  hratio = (TH1F*)hsys->Clone("hpurity_syserr");
+  hratio->Add(hmean,-1);
+  hratio->Divide(hmean);
+  hratio->GetYaxis()->SetRangeUser(-0.1,0.1);
+  hratio->GetYaxis()->SetTitle("sys/mean");
+  hratio->Draw();
+  TLine* l = new TLine(0.2,0.05,3,0.05 );
+  l->SetLineStyle(4);
+  l->Draw("same");
+  TLine* l2 = new TLine(0.2,-0.05,3,-0.05);
+  l2->SetLineStyle(4);
+  l2->Draw("same");
+  TLine* l1 = new TLine(0.2,0,3,0);
+  l1->SetLineStyle(3);
+  l1->Draw("same");
+
+  drawBox(1,-0.1,1.35,0.1);
+  // drawBox(0.8,-0.1,1.4,0.1);
+  drawBox(0.525,-0.1,0.575,0.1 );
+  // drawBox(0.5,-0.1,0.6,0.1 );
+  hratio->Draw("same");
+
+  // TLegend* leg2 = new TLegend(0.5,0.2,0.85,0.5);
+  // leg2->AddEntry( , "remove this region","lep");
+  gPad->SaveAs(Form("%s_purity.png",name));
+}
