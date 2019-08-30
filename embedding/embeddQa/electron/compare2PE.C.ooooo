@@ -1,0 +1,104 @@
+#include "sPhenixStyle.h"
+void addpdf(TPDF* pdf,TCanvas* c)
+{
+  c->cd();
+  pdf->On();
+  c->Update();
+  pdf->NewPage();
+  pdf->Off();
+}
+
+void compare2PE()
+{
+  SetsPhenixStyle();
+  TCanvas* c = new TCanvas("c","c");
+  c->Divide(3,2);
+  TPDF* pdf = new TPDF("qa.pdf");
+  pdf->Off();
+  drawQa("NFit",pdf,c);
+  drawQa("DCA",pdf,c);
+  pdf->On();
+  //  pdf->NewPage();
+  pdf->Close(); 
+
+}
+
+void drawQa(TString head, TPDF* pdf, TCanvas* c)
+{
+  TFile* file = TFile::Open("embeddingQa.mc.root");
+  // TFile* file = TFile::Open("embeddingQa.mc.root.old");
+  if (head.Contains("NFit")) 
+  {  
+    TString name[3]={"hNHit_1_3","hNFitsvsPt","hNFitsvsPt_LS"};
+  }
+  else if (head.Contains("DCA"))
+  { 
+    TString name[3]={"hDca_1_3","hDcavsPt","hDcavsPt_LS"};
+  }
+  else cout<<"???"<<endl;
+  TH3F* hDCArc = (TH3F*)file->Get(name[0]);
+  hDCArc->SetDirectory(0);
+  file->Close();
+  // file = TFile::Open("forqa.root");
+  // file = TFile::Open("qa.root");
+  file = TFile::Open("qa2.root");
+  // file = TFile::Open("forQA.root");
+  hDCAdata = (TH3F*)file->Get(name[1]);
+  hDCAdataLS = (TH3F*)file->Get(name[2]);
+  // cout <<"  ...  " <<endl;
+  hDCAdataLS->SetDirectory(0);
+  hDCAdata->SetDirectory(0);
+  file->Close();
+  // cout <<"  ...  " <<endl;
+  hDCAdata->Add(hDCAdataLS,-1);
+  
+  // cout <<"  ...  " <<endl;
+  c->Clear();
+  c->Draw();
+  c->Divide(3,2);  
+  int ipad=1;
+  // hDCAdata->Draw();
+  // return;
+  
+  for (int ip=1;ip<=10;ip++)
+  {
+    TH1* hrc = (TH1*)hDCArc->ProjectionZ("hrc",ip,ip);
+    // hrc->SetDirectory(0);
+//  cout <<  hDCArc->GetXaxis()->GetBinLowEdge(ip)<<" " <<  hDCArc->GetXaxis()->GetBinUpEdge(ip)<< endl;
+    // TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata",hDCAdata->GetXaxis()->FindBin(hrc->GetXaxis()->GetBinLowEdge(ip)) , hDCAdata->GetXaxis()->FindBin(hrc->GetXaxis()->GetBinUpEdge(ip)), hDCAdata->GetZaxis()->FindBin(-1),hDCAdata->GetZaxis()->FindBin(1));
+    TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata",hDCAdata->GetXaxis()->FindBin(hDCArc->GetXaxis()->GetBinLowEdge(ip)) , hDCAdata->GetXaxis()->FindBin(hDCArc->GetXaxis()->GetBinUpEdge(ip)));
+  cout <<"  ...  " <<endl;
+    // hdata->SetDirectory(0);
+    
+    hrc->Scale(1./hrc->Integral());
+    hdata->Scale(1./hdata->Integral());
+    hrc->SetMarkerColor(kBlue);
+    hrc->SetLineColor(kBlue);
+    hdata->SetLineColor(kRed);
+    hdata->SetMarkerColor(kRed);
+
+    cout <<"  ...  " <<endl;
+    c->cd(ipad);
+    hrc->DrawCopy();
+    hdata->DrawCopy("same");
+    drawLatex(0.2,0.6,Form("%0.1f<p_{T}<%0.1f",hDCArc->GetXaxis()->GetBinLowEdge(ip),hDCArc->GetXaxis()->GetBinUpEdge(ip)),0.035);
+    
+    ipad++;
+    
+    if (ip==5 || ip == 10)
+    {
+      c->cd(6);
+      TLegend* leg = new TLegend(0.2,0.2,0.7,0.7);  
+      leg->AddEntry(hrc,"MC e^{-}","lep");
+      leg->AddEntry(hdata,"data e^{-}","lep");
+      leg->SetHeader(head);
+      leg->Draw();
+      addpdf(pdf,c);
+      ipad=1;
+      c->Clear();
+      c->Draw();
+      c->Divide(3,2);
+    }
+  }
+  
+}

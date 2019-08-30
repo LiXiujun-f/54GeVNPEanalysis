@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job fileListSyntax="paths" maxFilesPerProcess="50" simulateSubmission="false">
+
+<stdout URL="file:./out/$JOBID.out" />
+ <stderr URL="file:./err/$JOBID.err" />
+         
+ <Generator>
+   <Location>./report/</Location>
+   <ScriptLocation>./csh/</ScriptLocation>
+   <ListLocation>./list/</ListLocation>
+ </Generator>
+                                                
+<command>
+starver DEV
+
+root4star -l -b -q doEmbeddingQAMaker.C\(2017,\"P18ic\",\"$FILELIST\",\"$JOBID.Qa.mc.root\",1,35,0,1000,8\)
+</command>
+
+<input URL="filelist:&dir;/&listOfFiles;" />
+<output fromScratch="*.root" toURL="&dir;/production_MC/" />
+<output fromScratch="*.log" toURL="&dir;/log/" />
+
+<SandBox installer="ZIP">
+	<Package name="LocalLibraries">
+    <File>file:./StRoot/</File>
+    <File>file:./doEmbeddingQAMaker.C</File>
+    <File>file:./.sl73_gcc485/</File>
+	</Package>
+</SandBox>
+
+</job>

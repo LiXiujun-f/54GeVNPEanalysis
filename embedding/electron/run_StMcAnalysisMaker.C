@@ -1,0 +1,1 @@
+StRoot/macros/run_StMcAnalysisMaker.C

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!-- <job fileListSyntax="paths" maxFilesPerProcess="50" simulateSubmission="false"> -->
+<job fileListSyntax="paths" maxFilesPerProcess="4" simulateSubmission="false">
+
+<stdout URL="file:./out/$JOBID.out" />
+<stderr URL="file:./err/$JOBID.err" />
+<ResourceUsage>
+    <!-- <Memory> -->
+    <!--   <MinMemory>4096</MinMemory> -->
+    <!-- </Memory> -->
+    <!-- <StorageSpace> -->
+      <!-- <MinStorage>100</MinStorage> -->
+    <!-- </StorageSpace> -->
+</ResourceUsage> 
+
+ <Generator>
+   <Location>./report/</Location>
+   <ScriptLocation>./csh/</ScriptLocation>
+   <ListLocation>./list/</ListLocation>
+ </Generator>
+                                                
+<command>
+starver SL18c
+<!-- [ ! &#45;d INPUTFILES ] | mkdir INPUTFILES  -->
+<!-- chmod u+x copy.sh -->
+sh copy.sh &dir;/list/sched$JOBID.list $PWD 
+<!-- find  $PWD/INPUTFILES &#45;name "*.event.root"  &#38;gt; tmp.event.list -->
+cp &dir;/list/sched$JOBID.list tmp.event.list
+root4star -l -b -q run_StMcAnalysisMaker.C\(\"tmp.event.list\",\"$JOBID.Qa.root\"\)  &gt;&amp; ${JOBID}.log
+</command>
+
+<input URL="filelist:&dir;/&listOfFiles;" />
+<output fromScratch="*.root" toURL="&dir;/production/" />
+<output fromScratch="*.log" toURL="&dir;/log/" />
+
+<SandBox installer="ZIP">
+	<Package name="LocalLibraries">
+    <File>file:./StRoot/</File>
+    <File>file:./run_StMcAnalysisMaker.C</File>
+    <File>file:./.sl73_gcc485/</File>
+    <File>file:./copy.sh</File>
+    <File>file:./hMc.root</File>
+	</Package>
+</SandBox>
+
+</job>
