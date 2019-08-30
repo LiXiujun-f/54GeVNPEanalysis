@@ -1,3 +1,12 @@
+/*
+!.gitignore
+!*.C
+!*.sh
+!*.xml
+!*.h
+!*.cxx
+!*.cpp
+!*.csh
 *.root*
 *.pdf
 *.png
