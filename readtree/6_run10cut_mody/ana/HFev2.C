@@ -81,7 +81,7 @@ void HFev2()
   double nEvents = centcorr->Integral(centL,centH);
   cout<<nEvents<<endl;
   TH1F* hPhe = new TH1F("hPheectra", "hPheectra;electron p_{T}(GeV);Counts",nbin,ptedge);
-  
+   
   for(int j=0;j<nbin;j++){
     int lbin = hphoto->GetYaxis()->FindBin(ptedge[j]);
     int hbin = hphoto->GetYaxis()->FindBin(ptedge[j+1]);
@@ -128,6 +128,7 @@ void HFev2()
     // hincE->Scale(1./nEvents);
     // hPhe->Scale(1./nEvents);
     hincE->Draw();
+    TH1F* hHFe_cor = (TH1F*)hincE->Clone("hHFe_cor");
     hPhe->Draw("same");
     // hincE->SetLineColor(kRed);
     SetTH1(hincE,kRed);
@@ -183,7 +184,7 @@ void HFev2()
        v2PhE = (Nul*v2ul-Nls*v2ls)*1./(double)(Nul-Nls);
      // cout<<Nls << "  "<< Nul << " " <<v2ls <<" "<<v2ul <<endl;
      hphoE->SetBinContent(i,v2PhE);
-     
+      
      double err = v2ulerr*v2ulerr*Nul*Nul+v2lserr*v2lserr*Nls*Nls;
      err = sqrt(err);
      err/=(1.*(Nul-Nls)); 

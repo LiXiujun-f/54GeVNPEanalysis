@@ -56,5 +56,7 @@ namespace anaCuts
    // float ptMin_Re=0.15;
    float ptMin_Re=0.2;
    float ptMax_Re=2;
+   float refusepileup[4]={2.88,-155,1.,0};
+   float refusebadtof[4]={0,0.0,0.,0};
 }
 #endif

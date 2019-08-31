@@ -75,6 +75,7 @@ bool StMcAnalysisMaker::InitHists()
   hnPi0 = new TH1F("hnPi0","hnPi0",100,0,100); 
   hRefmult = new TH1F("hRefmult","hRefmult",500,0,500);
   hEvent = new TH1F("hEvent","hEvent;Cent",9,-0.5,8.5);
+  hEP = new TH1F("hEP","hEP;#Phi",360,0,TMath::Pi()); 
   //check the pi pt distribution
   hPi2tot = new TH1F("hPi2tot","hPi2tot",30,0,0.3);
   hPi0Pt = new TH2F("hPi0Pt","hPi0Pt;p_{T}[GeV];Cent",120,0,15,9,-0.5,8.5);
@@ -115,7 +116,6 @@ bool StMcAnalysisMaker::InitHists()
     hPairDecayL = new TH2F("hPairDecayL","hPairDecayL;DecayL;p_{T}",150,0,30,60,0,4);
 
     //pho v2
-    hEP = new TH1F("hEP","hEP;#Phi",360,0,TMath::Pi()); 
     pPi0Ev2 = new TProfile2D("pPi0Ev2","pPi0Ev2;pt;cent",100,0,4,9,-0.5,8.5);
     pPhoEv2 = new TProfile2D("pPhoEv2","pPhoEv2;pt;cent",100,0,4,9,-0.5,8.5);
     hPhoEPtPhiCent = new TH3F("hPhoEPtPhiCent","hPhoEPtPhiCent",100,0,4, 180, 0, TMath::Pi() ,9,-0.5,8.5);
@@ -235,7 +235,7 @@ int StMcAnalysisMaker::Make()
   mCentWeight = 1.;
   double refmultcor=0;
   // mCentrality = getCentralityBin(mpVtx.z(),mEvent->runId(),mMuDst->event()->refMult(),mCentWeight,refmultcor); 
-  mCentrality = getCentralityBin(mpVtx.z(),mEvent->runId(),mMuDst->event()->refMult()/(1.+0.201),mCentWeight,refmultcor); 
+  mCentrality = getCentralityBin(mpVtx.z(),mEvent->runId(),mMuDst->event()->refMult()/(1.+0.05),mCentWeight,refmultcor); 
   if (mCentrality<0) return kStSkip;
 
   bookSpectra(mCentrality); 
@@ -380,7 +380,7 @@ int StMcAnalysisMaker::fillTracks(int& nRTracks, int& nMcTracks)
 void StMcAnalysisMaker::fillMcTrack(StMcTrack const* const mcTrk)
 {
   // cout << " parent  "<< mcTrk->parent()->geantId() << endl;
-  if (mcTrk->geantId()==McAnaCuts::parentId) 
+  if (McAnaCuts::parentId>0&&mcTrk->geantId()==McAnaCuts::parentId) 
   {
     // cout << " test if the key is the same "<< mMcEvent->tracks()[mcTrk->key()-1]->key() << " " << mcTrk->key()<<endl; 
     nPi0++;    
@@ -395,8 +395,7 @@ void StMcAnalysisMaker::fillMcTrack(StMcTrack const* const mcTrk)
       // cout <<" test the mother key "<<mcTrk->key() <<" " << mcTrk->parent()->key()<<endl;; 
       // only check the dalitz decay particles
       // if (mcTrk->parent()->geantId() == 10007 && mcTrk->pt()>McAnaCuts::minPt && fabs(mcTrk->pseudoRapidity())<McAnaCuts::partnerEta)
-      // if ( mcTrk->pt()>McAnaCuts::minPt && fabs(mcTrk->pseudoRapidity())<McAnaCuts::eta)
-      if ( mcTrk->pt()>McAnaCuts::minPt && fabs(mcTrk->pseudoRapidity())<McAnaCuts::TagEta)
+      if ( mcTrk->pt()>McAnaCuts::minPt && fabs(mcTrk->pseudoRapidity())<McAnaCuts::eta)
       {
         hMcElectronPtvsCent->Fill(mcTrk->pt(),mCentrality,mCentWeight);
         // hMcElectronPtvsCent_test->Fill(mcTrk->momentum().perp(),mCentrality,mCentWeight);
@@ -421,12 +420,12 @@ void StMcAnalysisMaker::fillRcTrack( StMuTrack const* const rcTrack,StMcTrack co
     pt = rcTrack->primaryTrack()->pt();
     eta = rcTrack->primaryTrack()->eta();
   }
-  hDCAvsPt->Fill(dca,pt);  
+  hDCAvsPt->Fill(dca,pt,mCentWeight);  
   bool goodRcTrack = pt>McAnaCuts::minPt && fabs(eta)<McAnaCuts::eta;
   if (!goodRcTrack) return; 
-  hnHitsvsPt->Fill(nHitsFit,pt); 
+  hnHitsvsPt->Fill(nHitsFit,pt,mCentWeight); 
   hRcElectronPtvsCent->Fill(pt,mCentrality,mCentWeight);
-  hMomResolution->Fill(mcTrack->pt(),(pt-mcTrack->pt())/mcTrack->pt());
+  hMomResolution->Fill(mcTrack->pt(),(pt-mcTrack->pt())/mcTrack->pt(),mCentWeight);
 }
 
 void StMcAnalysisMaker::pairPartnerElectron(StMuTrack const* const TagE,StMcTrack const * const McTagE, std::map<int,int>& mc_rcpair)
@@ -639,7 +638,7 @@ bool StMcAnalysisMaker::isGoodTagE(StMuTrack const* const rcTrack) const
   float phi =rcTrack->momentum().phi();
   bool passPhiCut = !( fabs(phi)<McAnaCuts::phicut.first && fabs(phi)>McAnaCuts::phicut.second);
   // bool goodRcTrack = passPhiCut && passnHits && hasFirst3Hit && fabs(dca)<1.5 && rcTrack->pt()>McAnaCuts::tagPt && fabs(rcTrack->momentum().pseudoRapidity())<McAnaCuts::TagEta && fabs(rcTrack->momentum().pseudoRapidity())>0.05;
-  bool goodRcTrack = passPhiCut && passnHits && hasFirst3Hit && fabs(dca)<1.5 && rcTrack->pt()>McAnaCuts::tagPt && fabs(rcTrack->momentum().pseudoRapidity())<McAnaCuts::TagEta;
+  bool goodRcTrack = passPhiCut && passnHits && hasFirst3Hit && fabs(dca)<1.5 && rcTrack->pt()>McAnaCuts::tagPt && fabs(eta)<McAnaCuts::TagEta;
   return goodRcTrack; 
 }
 

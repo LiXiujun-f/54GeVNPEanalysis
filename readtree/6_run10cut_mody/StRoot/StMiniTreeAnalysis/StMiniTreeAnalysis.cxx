@@ -72,8 +72,10 @@ int StMiniTreeAnalysis::Make()
     //add bad runs rejection
     Int_t runId = mTree->runId;
     if (isBadrun(runId)) continue;
-    bool refusepileup = mTree->refMult*2.88-155 < mTree->nTofMult;
+    // bool refusepileup = mTree->refMult*2.88-155 < mTree->nTofMult;
+    bool refusepileup = mTree->refMult*anaCuts::refusepileup[0]+ anaCuts::refusepileup[1]< mTree->nTofMult* anaCuts::refusepileup[2]+ anaCuts::refusepileup[3];
     bool refusebadtof = !(mTree->refMult<20 &&mTree->nTofMult>250);
+    // bool refusebadtof = mTree->refMult *anaCuts::refusebadtof[0]+ anaCuts::refusebadtof[1]> mTree->nTofMult*anaCuts::refusebadtof[2]-anaCuts::refusebadtof[3];
     bool goodevent = fabs(mTree->pVtx_z) < anaCuts::vz &&  
                      fabs(mTree->vzVpdVz) < anaCuts::vzVpdVz &&
                      sqrt(mTree->pVtx_x*mTree->pVtx_x+mTree->pVtx_y*mTree->pVtx_y)<anaCuts::Vr;
@@ -92,8 +94,8 @@ int StMiniTreeAnalysis::Make()
     // if either side has 0 tracks , 0.1% in 0-60%, 1% in 70-80%
     if (mTree->nQvecP<0.5 || mTree->nQvecM<0.5) continue;
     if (!EventPlane(cent,runId,EP_P_sh,EP_M_sh)) continue;
-    EP_M_sh=mTree->EP_M_sh;
-    EP_P_sh=mTree->EP_P_sh;
+    // EP_M_sh=mTree->EP_M_sh;
+    // EP_P_sh=mTree->EP_P_sh;
     getIncEv2(EP_M_sh,EP_P_sh,cent,weight);
   } //event loop
   return 1;

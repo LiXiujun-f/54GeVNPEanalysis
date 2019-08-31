@@ -103,7 +103,7 @@ void run_StMcAnalysisMaker(string file, std::string outFile = "test")
    for (int i=0;i<muDstMaker->chain()->GetEntries();i++)
    {
       chain->Clear();
-      int iret = chain->Make(i);
+      int iret = chain->Make();
       if (iret)
       {
         cout << "Bad return code!" << iret << endl;
