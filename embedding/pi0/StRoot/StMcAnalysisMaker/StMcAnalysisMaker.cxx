@@ -75,6 +75,8 @@ bool StMcAnalysisMaker::InitHists()
   hnPi0 = new TH1F("hnPi0","hnPi0",100,0,100); 
   hRefmult = new TH1F("hRefmult","hRefmult",500,0,500);
   hEvent = new TH1F("hEvent","hEvent;Cent",9,-0.5,8.5);
+  hVzvsmcVz = new TH2F("hVzvsmcVz","hVzvsmcVz;Vz;mcVz",70,-35,35,70,-35,35 );
+  hEP = new TH1F("hEP","hEP;#Phi",360,0,TMath::Pi()); 
   //check the pi pt distribution
   hPi2tot = new TH1F("hPi2tot","hPi2tot",30,0,0.3);
   hPi0Pt = new TH2F("hPi0Pt","hPi0Pt;p_{T}[GeV];Cent",120,0,15,9,-0.5,8.5);
@@ -83,11 +85,14 @@ bool StMcAnalysisMaker::InitHists()
   hnHitsvsPt = new TH2F("hnHits","hnHits;nHits;p_{T}",55,0,55,10,0,5); 
   hDCAvsPt = new TH2F("hDCA","hDCA;DCA;p_{T}",100,0,3,10,0,5);
 
-  hMcElectronPtvsCent = new TH2F("hMcElectronPtvsCent","hMcElectron;p_{T};Cent",80,0,4,9,-0.5,8.5);
+  hMcElectronPtvsCent = new TH2F("hMcElectronPtvsCent","hMcElectron;mc p_{T};Cent",80,0,4,9,-0.5,8.5);
   hMcElectronPtvsCent->Sumw2();
   // hMcElectronPtvsCent_test = new TH2F("hMcElectronPtvsCent_test","hMcElectron;p_{T};Cent",80,0,4,9,-0.5,8.5);
-  hRcElectronPtvsCent = new TH2F("hRcElectronPtvsCent","hRcElectron;p_{T};Cent",80,0,4,9,-0.5,8.5);
+  hRcElectronPtvsCent = new TH2F("hRcElectronPtvsCent","hRcElectron;rc p_{T};Cent",80,0,4,9,-0.5,8.5);
   hRcElectronPtvsCent->Sumw2();
+  hRcElectronMcPtvsCent = new TH2F("hRcElectronMcPtvsCent","hRcElectron;mc p_{T};Cent",80,0,4,9,-0.5,8.5);
+  hRcElectronMcPtvsCent->Sumw2();
+
   hMomResolution = new TH2F("hMomResolution","hMomResolution;mc p_{T};#frac{rc p_{T}-mc p_{T}}{mc p_{T}}",80,0,4,100,-0.1,0.1);
 
   //check the duplicated tracks
@@ -115,7 +120,6 @@ bool StMcAnalysisMaker::InitHists()
     hPairDecayL = new TH2F("hPairDecayL","hPairDecayL;DecayL;p_{T}",150,0,30,60,0,4);
 
     //pho v2
-    hEP = new TH1F("hEP","hEP;#Phi",360,0,TMath::Pi()); 
     pPi0Ev2 = new TProfile2D("pPi0Ev2","pPi0Ev2;pt;cent",100,0,4,9,-0.5,8.5);
     pPhoEv2 = new TProfile2D("pPhoEv2","pPhoEv2;pt;cent",100,0,4,9,-0.5,8.5);
     hPhoEPtPhiCent = new TH3F("hPhoEPtPhiCent","hPhoEPtPhiCent",100,0,4, 180, 0, TMath::Pi() ,9,-0.5,8.5);
@@ -210,6 +214,7 @@ int StMcAnalysisMaker::Make()
     // cout << mpVtx.z()<<" "<< mpVtx.perp()<<" "<< mpVtx.z()-mMuDst->event()->vpdVz()<<endl;
     return kStSkip;    
   }
+
   // if(mGRefMultCorrUtil && mMuDst)
   // {
   //   mGRefMultCorrUtil->init(mEvent->runId());
@@ -217,7 +222,6 @@ int StMcAnalysisMaker::Make()
   //                                mEvent->primaryVertex()->position().z()); 
   //                                // mEvent->primaryVertex()->position().z(), 
   //                                // mEvent->runInfo()->zdcCoincidenceRate() );
-  //
   //   if (mGRefMultCorrUtil->isBadRun(mEvent->runId()))
   //   {
   //     LOG_INFO << "This is a bad run from mGRefMultCorrUtil! Skip! " << endm;
@@ -234,10 +238,10 @@ int StMcAnalysisMaker::Make()
   //get centrality
   mCentWeight = 1.;
   double refmultcor=0;
-  // mCentrality = getCentralityBin(mpVtx.z(),mEvent->runId(),mMuDst->event()->refMult(),mCentWeight,refmultcor); 
-  mCentrality = getCentralityBin(mpVtx.z(),mEvent->runId(),mMuDst->event()->refMult()/(1.+0.201),mCentWeight,refmultcor); 
+  mCentrality = getCentralityBin(mpVtx.z(),mEvent->runId(),mMuDst->event()->refMult(),mCentWeight,refmultcor); 
+  // mCentrality = getCentralityBin(mpVtx.z(),mEvent->runId(),mMuDst->event()->refMult()/(1.+0.201),mCentWeight,refmultcor); 
   if (mCentrality<0) return kStSkip;
-
+  hVzvsmcVz->Fill(mpVtx.z(),mMcEvent->primaryVertex()->position().z());
   bookSpectra(mCentrality); 
   mEP = gRandom->Rndm()*TMath::Pi();
   // mEP = 0;
@@ -426,6 +430,7 @@ void StMcAnalysisMaker::fillRcTrack( StMuTrack const* const rcTrack,StMcTrack co
   if (!goodRcTrack) return; 
   hnHitsvsPt->Fill(nHitsFit,pt); 
   hRcElectronPtvsCent->Fill(pt,mCentrality,mCentWeight);
+  hRcElectronMcPtvsCent->Fill(mcTrack->momentum().perp(),mCentrality,mCentWeight);
   hMomResolution->Fill(mcTrack->pt(),(pt-mcTrack->pt())/mcTrack->pt());
 }
 

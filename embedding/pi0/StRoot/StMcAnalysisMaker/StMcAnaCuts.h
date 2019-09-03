@@ -36,7 +36,8 @@ namespace McAnaCuts
   int const nHitsdEdx= 15;
   float const nFit2nMax = 0.52;
   float const  EEdcaDaughter = 1;
-  std::pair<float,float> phicut={1.75,1.25};
+  // std::pair<float,float> phicut={1.75,1.25};
+  std::pair<float,float> phicut={1.95,1.25};
 
   int const SpectraParPi0_centbin[9]={0,0,1,1,2,2,3,4,4};
   // double SpectraParPi0[4][5]={ {1052,0.408,0.091,1.021,10.98},

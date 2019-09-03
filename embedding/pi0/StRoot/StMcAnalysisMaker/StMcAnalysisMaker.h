@@ -46,6 +46,7 @@ private:
 
    int nPi0;
    TH2F* hnHitsvsPt;
+   TH2F* hVzvsmcVz;
    TH2F* hDCAvsPt;
    TH1F* hnPi0;
    TH1F* hRefmult;
@@ -56,6 +57,7 @@ private:
    TH2F* hMcElectronPtvsCent;
    // TH2F* hMcElectronPtvsCent_test;
    TH2F* hRcElectronPtvsCent;
+   TH2F* hRcElectronMcPtvsCent;
    TH2F* hMomResolution;
    TH3F* hDuplicated;
    TH2F* hDupTracksDpt;
@@ -144,3 +146,4 @@ inline  bool StMcAnalysisMaker::isBadrun(Int_t runId){
 inline void StMcAnalysisMaker::setOutFileName(std::string s){ mOutfileName = s.c_str();}
 inline void StMcAnalysisMaker::setRefMultCorr(StRefMultCorr* grefmultCorrUtil){ mGRefMultCorrUtil = grefmultCorrUtil;}
 #endif
+
