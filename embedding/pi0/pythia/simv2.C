@@ -83,22 +83,20 @@ void fill(TLorentzVector* mother,TLorentzVector* gamma, double weight,float EP, 
 void bookHists()
 {
   //gamma v2
-  pGammav2 = new TProfile2D();
+  pGammav2 = new TProfile3D("pGammav2","pGammav2;p_{T}[GeV/c];#eta;Cent",150,0,15,150,-1.5,1.5,9,-0.5,8.5);
   pGammav2->SetDirectory(0);
 
-  //pi0spectra
-  for (int i=0;i<9;i++)
+  //pi0spectra and v2
+  for (int i=0;i<nCent;i++)
   {
-    
+    fpispectra[i] = new TF1(); 
   }
-
-  //pi0v2
-  for (int i=0;i<9;i++)
+  for (int i=0;i<nCent;i++)
   {
-    
+    fpiv2[i] = new TF1(); 
   }
 }
-void getCentAndEP(int & cent, float & EP)
+void setCentAndEP(int & cent, float & EP)
 {
   EP = gRandom->Rndm()*TMath::Pi();
   cent = floor(gRandom->Rndm()*9);
