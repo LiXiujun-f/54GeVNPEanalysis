@@ -45,7 +45,8 @@ namespace McAnaCuts
   //                              {381.4,0.3689,0.03409,1.141,11.42},
   //                              {147.2,0.3094,0.1883,0.927,10.19}
   //                            };
-   double const SpectraParPi0[5][5]={ {10.8807, -8.38707, 0.436178, -684.524, 0.519633},
+   double const SpectraParPi0[5][5]={ 
+                               {1.67607, -1.77146, 0.0759459, -0.369874, 2.01742},
                                {264.787, 0.349324, 0.0475088, 1.01322, 10.903},
                                {406.429, 0.361361, 0.0558035, 1.10099, 11.2414},
                                {682.788, 0.396488, 0.0690007, 1.06078, 11.0674},
@@ -56,12 +57,15 @@ namespace McAnaCuts
    float const parVz_mult[nparVz_mult]={435.9,-0.02413,-0.003707,0.0002204,1.487e-5,-2.95e-07,-1.866e-8};
    int const nCent = 9 ;
    float const Refmult_cent[nCent] = {7,16,31,54,89,138,205,299,361}; //refmult > par[i],  70-80%, 60-70%, ... ,0-5% 
-  
  
   int const parentId = 10007; 
   int const gammaId = 1; 
   int const dauId1 = 2;
   int const dauId2 = 3; 
+ 
+  TString pi0spectraform="2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])";
+  TString etaspectraform="2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0.134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3], -[4])";
+
   StDedxMethod dedxMethod = kLikelihoodFitId;
 
   float const minPt=0.1; 

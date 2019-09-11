@@ -42,7 +42,7 @@ namespace anaCuts
    float const nESigma_partner=3.5;
    float const nESigma_Tag=2; 
    
-   std::pair<float,float> PhiCut = {1.75,1.25};
+   std::pair<float,float> PhiCut = {1.95,1.25};
    float const tofYlocal=1.8;
    float EEdcaDaughter=1;  //cm
 

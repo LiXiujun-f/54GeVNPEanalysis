@@ -1,3 +1,5 @@
+//----2019.0828----
+//use the full eta region instead of rm (-0.05,0.05) so as to have a flat eta. I hope the eta gap is enough
 #include "StAnaCuts.h"
 #include "StMiniTreeAnalysis.h"   //could also include other headers
 #include "myTree.h"  // tree
@@ -70,28 +72,30 @@ int StMiniTreeAnalysis::Make()
     //add bad runs rejection
     Int_t runId = mTree->runId;
     if (isBadrun(runId)) continue;
-    bool refusepileup = mTree->refMult*2.88-155 < mTree->nTofMult;
+    // bool refusepileup = mTree->refMult*2.88-155 < mTree->nTofMult;
+    bool refusepileup = mTree->refMult*anaCuts::refusepileup[0]+ anaCuts::refusepileup[1]< mTree->nTofMult* anaCuts::refusepileup[2]+ anaCuts::refusepileup[3];
     bool refusebadtof = !(mTree->refMult<20 &&mTree->nTofMult>250);
-    bool goodevent = mTree->pVtx_z < anaCuts::vz &&  
+    // bool refusebadtof = mTree->refMult *anaCuts::refusebadtof[0]+ anaCuts::refusebadtof[1]> mTree->nTofMult*anaCuts::refusebadtof[2]-anaCuts::refusebadtof[3];
+    bool goodevent = fabs(mTree->pVtx_z) < anaCuts::vz &&  
                      fabs(mTree->vzVpdVz) < anaCuts::vzVpdVz &&
                      sqrt(mTree->pVtx_x*mTree->pVtx_x+mTree->pVtx_y*mTree->pVtx_y)<anaCuts::Vr;
     if (!refusepileup) continue; 
     if (!refusebadtof) continue; 
     if (!goodevent) continue;
-    Int_t cent = mTree->centrality;
+    // Int_t cent = mTree->centrality;
     // Float_t pVtx_z = mTree->pVtx_z;
     // float ZDCx = mTree->ZDCx;
-    // float weight=1.;
-    float weight=mTree->weight;
-    // int cent = getCentralityBin(mTree->pVtx_z,runId,mTree->refMult,&weight);
+    float weight=1.;
+    // float weight=mTree->weight;
+    int cent = getCentralityBin(mTree->pVtx_z,runId,mTree->refMult,weight);
     hcent->Fill(cent);
     hcentwg->Fill(cent,weight);
     float  EP_P_sh=0,EP_M_sh=0;
     // if either side has 0 tracks , 0.1% in 0-60%, 1% in 70-80%
     if (mTree->nQvecP<0.5 || mTree->nQvecM<0.5) continue;
     if (!EventPlane(cent,runId,EP_P_sh,EP_M_sh)) continue;
-    EP_M_sh=mTree->EP_M_sh;
-    EP_P_sh=mTree->EP_P_sh;
+    // EP_M_sh=mTree->EP_M_sh;
+    // EP_P_sh=mTree->EP_P_sh;
     getIncEv2(EP_M_sh,EP_P_sh,cent,weight);
   } //event loop
   return 1;
@@ -102,7 +106,7 @@ int StMiniTreeAnalysis::EventPlane(int cent, int runId, float &EP_P_sh,float &EP
    //I write the wrong name in tree, will change it after group meeting
    //I store the Qx after recenter, if needed can re run the tree
   // the new version after 0630 have been corrected 
-  double nQvecP = mTree->nQvecP;
+   double nQvecP = mTree->nQvecP;
    double nQvecM = mTree->nQvecM;
    
    TVector2 QvecM(mTree->Qx_M,mTree->Qy_M);
@@ -156,20 +160,39 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
     incE.SetPtEtaPhi(mTree->pt_inc[itrk1],mTree->eta_inc[itrk1],mTree->phi_inc[itrk1]);
 
     bool iselectron = isElectron(mTree->nSigE_inc[itrk1],mTree->beta_inc[itrk1],incE.Mag()); 
+    // bool passTPChit = mTree->has2hit_inc[itrk1];
     bool passTPChit = mTree->has3hit_inc[itrk1];
-    float cos2deltaPhi = mTree->cos2phi_inc[itrk1];
-    float deltaPhi = mTree->deltaphi_inc[itrk1];
+    bool passPhiCut = !( fabs(mTree->phi_inc[itrk1])<anaCuts::PhiCut.first && fabs(mTree->phi_inc[itrk1])>anaCuts::PhiCut.second  );
+    // float cos2deltaPhi = mTree->cos2phi_inc[itrk1];
+    // float deltaPhi = mTree->deltaphi_inc[itrk1];
+    float EP=0;
+    if (mTree->eta_inc[itrk1]<-0.0) EP = EP_P_sh;
+    else if (mTree->eta_inc[itrk1]>0.0) EP = EP_M_sh;
+    else continue;
+    float phi_1 = mTree->phi_inc[itrk1];
+    if (phi_1<0.) phi_1+=2*TMath::Pi();
+    double cos2deltaPhi=std::cos(2*phi_1-2*EP);
+    float  deltaPhi = phi_1-EP;
+    if (deltaPhi<0) deltaPhi+=2*TMath::Pi();
+    if (deltaPhi>TMath::Pi()) deltaPhi-=TMath::Pi(); 
+
     if (iselectron)
     {
       hIncEv2vsPtvsCent->Fill(deltaPhi,mTree->pt_inc[itrk1],cent,weight);
       hIncEPtvsCent->Fill(mTree->pt_inc[itrk1],cent,weight);
       pIncEv2->Fill(mTree->pt_inc[itrk1],cent,cos2deltaPhi/anaCuts::resolution[cent],weight);
-      hPhi->Fill(mTree->phi_inc[itrk1]);
-      if (passTPChit){
+      hPhi->Fill(mTree->phi_inc[itrk1],weight);
+      if (passTPChit) 
+      {
+        hPhi_hitcut->Fill(mTree->phi_inc[itrk1],weight);
+        hEta->Fill(mTree->eta_inc[itrk1],weight);
+      }
+      hePtvsP->Fill(mTree->pt_inc[itrk1], incE.Mag());     
+      if (passTPChit && passPhiCut){
         pIncEv2_hitcut->Fill(mTree->pt_inc[itrk1],cent,cos2deltaPhi/anaCuts::resolution[cent],weight);
         hIncEv2vsPtvsCent_hitcut->Fill(deltaPhi,mTree->pt_inc[itrk1],cent,weight);
         hIncEPtvsCent_hitcut->Fill(mTree->pt_inc[itrk1],cent,weight);
-        hPhi_pshit->Fill(mTree->phi_inc[itrk1]);
+        hPhi_allcut->Fill(mTree->phi_inc[itrk1],weight);
       }
     }  
   }
@@ -179,59 +202,157 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
     TVector3 tagE;
     tagE.SetPtEtaPhi(mTree->pt_phe[itrk2],mTree->eta_phe[itrk2],mTree->phi_phe[itrk2]);
     // bool iselectron = isElectron(mTree->nSigE_phe[itrk2],mTree->beta_phe[itrk2],mTree->pt_phe[itrk2]); 
-    bool iselectron = isElectron(mTree->nSigE_phe[itrk2],mTree->beta_phe[itrk2],tagE.Mag()); 
+    bool iselectron = isElectron( mTree->nSigE_phe[itrk2],mTree->beta_phe[itrk2],tagE.Mag()); 
     // bool passTPChit = (mTree->topomap0_phe[itrk2]>>8 & 0x7) && (mTree->topomap0_parte[itrk2]>>8 & 0x7);
-    bool passTPChit = (mTree->topomap0_phe[itrk2]>>8 & 0x7);
+    bool passTPChit = (mTree->topomap0_phe[itrk2]>>8 & 0x7) ;
+    bool passPhiCut = !( fabs(mTree->phi_phe[itrk2])<anaCuts::PhiCut.first && fabs(mTree->phi_phe[itrk2])>anaCuts::PhiCut.second);
     bool isPartnerElectron = isSecondPE(mTree->nSigE_parte[itrk2],mTree->beta_parte[itrk2],mTree->gpt_parte[itrk2]); 
     bool passPEtopocut = mTree->DCA_pair[itrk2] < anaCuts::EEdcaDaughter;
     //
-    bool isgoodtrack_PhoE = fabs(mTree->eta_phe[itrk2])<anaCuts::eEta &&
+    bool isgoodtrack_PhoE = 
+                       fabs(mTree->eta_phe[itrk2])<anaCuts::eEta &&
                        fabs(mTree->gDca_phe[itrk2])<anaCuts::Dca &&
                        fabs(mTree->pt_phe[itrk2])>anaCuts::GPt  &&
+                       // passPhiCut &&
                        fabs(mTree->ndEdx_phe[itrk2])>=anaCuts::NHitsDedx &&
                        fabs(mTree->nFit_phe[itrk2])>=anaCuts::NHitsFit;
+
     bool isgoodtrack_PartE = 
-                       fabs(mTree->geta_parte[itrk2])<anaCuts::eEta &&   //only for check
+                       fabs(mTree->geta_parte[itrk2])<anaCuts::Eta &&   
                        // fabs(mTree->gDca_parte[itrk2])<anaCuts::Dca &&     //only for check
+                       // fabs(mTree->gpt_parte[itrk2])>anaCuts::GPt;
+                       fabs(mTree->gpt_parte[itrk2])>anaCuts::GPt  &&
+                       // fabs(mTree->ndEdx_parte[itrk2])>=anaCuts::NHitsDedx &&
+                       fabs(mTree->nFit_parte[itrk2]) >= anaCuts::nFit_parte;
+    
+    //keep the track quality is the same as Tag e
+    bool isgoodtofmatch_PartE = 
+                       fabs(mTree->geta_parte[itrk2])<anaCuts::eEta &&   
+                       fabs(mTree->gDca_parte[itrk2])<anaCuts::Dca &&
                        fabs(mTree->gpt_parte[itrk2])>anaCuts::GPt  &&
                        fabs(mTree->ndEdx_parte[itrk2])>=anaCuts::NHitsDedx &&
-                       fabs(mTree->nFit_parte[itrk2])>=anaCuts::NHitsFit;
+                       fabs(mTree->nFit_parte[itrk2]) >= anaCuts::NHitsFit;
+    
     if (!isgoodtrack_PartE || !isgoodtrack_PhoE) continue;
     TLorentzVector mother;
     mother.SetXYZM(mTree->px_pair[itrk2],mTree->py_pair[itrk2],mTree->pz_pair[itrk2],mTree->M_pair[itrk2]);
-    float cos2deltaPhi = mTree->cos2phi_phe[itrk2];
-    float deltaPhi = mTree->deltaphi_phe[itrk2];
+    // float cos2deltaPhi = mTree->cos2phi_phe[itrk2];
+    // float deltaPhi = mTree->deltaphi_phe[itrk2];
+    float EP=0;
+    if (mTree->eta_phe[itrk2]<-0.0) EP = EP_P_sh;
+    else if (mTree->eta_phe[itrk2]>0.0) EP = EP_M_sh;
+    else continue;
+    float phi = mTree->phi_phe[itrk2];
+    double cos2deltaPhi=std::cos(2*phi-2*EP);
+    float  deltaPhi = phi-EP;
+    if (deltaPhi<0) deltaPhi+=2*TMath::Pi();
+    if (deltaPhi>TMath::Pi()) deltaPhi-=TMath::Pi();
+    
+    TVector3 V0(mTree->V0x_pair[itrk2],mTree->V0y_pair[itrk2],mTree->V0z_pair[itrk2]);
 
+    //check the pair DCA
+    if (iselectron && isPartnerElectron && mTree->DCA_pair[itrk2]<3)
+    {
+      bool unlike = mTree->charge_phe[itrk2] * mTree->charge_parte[itrk2] <0;
+      if (mTree->M_pair[itrk2]<0.3) 
+      {
+         if (mTree->M_pair[itrk2]<0.15 && unlike) {
+            hPairDCA->Fill( mTree->DCA_pair[itrk2],cent,weight);     
+            hDecayL->Fill( V0.Perp(),mTree->gpt_parte[itrk2] ,weight);
+         }
+         if ( mTree->M_pair[itrk2]<0.15 && (!unlike)){
+            hPairDCALS->Fill( mTree->DCA_pair[itrk2],cent,weight);     
+            hDecayL_LS->Fill( V0.Perp(),mTree->gpt_parte[itrk2] ,weight);
+         }
+      } // mass cut  
+    }
     if (iselectron && isPartnerElectron && passPEtopocut)
     {
       bool unlike = mTree->charge_phe[itrk2] * mTree->charge_parte[itrk2] <0;
       if (mTree->M_pair[itrk2]<0.3) 
       {
-           if (mTree->M_pair[itrk2]<0.15 && unlike) {
-             pTagEv2->Fill(mTree->pt_phe[itrk2],cent,cos2deltaPhi/anaCuts::resolution[cent],weight);
-             hPhEv2vsPtvsCent->Fill(deltaPhi,mTree->pt_phe[itrk2],cent,weight);
-             hV0->Fill(mTree->V0x_pair[itrk2],mTree->V0y_pair[itrk2],mTree->V0z_pair[itrk2]);
-             hNFitsvsPt->Fill(mTree->gpt_parte[itrk2],mTree->nFit_parte[itrk2]);
-             if (mTree->decayL_pair[itrk2]< 2.5 && mTree->M_pair[itrk2]< 0.01) hDcavsPt->Fill(mTree->gpt_parte[itrk2],mTree->gDca_parte[itrk2]);
-           }
-           if ( mTree->M_pair[itrk2]<0.15 && (!unlike)){
-             pTagEv2_LS->Fill(mTree->pt_phe[itrk2],cent,cos2deltaPhi/anaCuts::resolution[cent],weight);
-             hPhEv2vsPtvsCentLS->Fill(deltaPhi,mTree->pt_phe[itrk2],cent,weight);
-             hV0_LS->Fill(mTree->V0x_pair[itrk2],mTree->V0y_pair[itrk2],mTree->V0z_pair[itrk2]);
-             hNFitsvsPt_LS->Fill(mTree->gpt_parte[itrk2],mTree->nFit_parte[itrk2]);
-             if (mTree->decayL_pair[itrk2]<2.5 && mTree->M_pair[itrk2]< 0.01) hDcavsPt_LS->Fill(mTree->gpt_parte[itrk2],mTree->gDca_parte[itrk2]);
-           }
+         if (mTree->M_pair[itrk2]<0.15 && unlike && passTPChit) 
+         {
+            pTagEv2->Fill(mTree->pt_phe[itrk2],cent,cos2deltaPhi/anaCuts::resolution[cent],weight);
+            hPhEv2vsPtvsCent->Fill(deltaPhi,mTree->pt_phe[itrk2],cent,weight);
+            hV0->Fill(mTree->V0x_pair[itrk2],mTree->V0y_pair[itrk2],mTree->V0z_pair[itrk2]);
+            hNFitsvsPt->Fill(mTree->gpt_parte[itrk2],mTree->nFit_parte[itrk2]);
+            //for tof match calculation
+            if (isgoodtofmatch_PartE)
+            {
+              hPartETpc->Fill(mTree->gpt_parte[itrk2],cent,weight);
+              if (mTree->beta_parte[itrk2]>0) 
+                hPartETof->Fill(mTree->gpt_parte[itrk2],cent,weight);
+            }
+
+            hPartEptetaphi->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight);
+            //partner electron pt eta phi distribution
+            if (mTree->decayL_pair[itrk2]<2) 
+            {
+              hPartEptetaphi_Dz->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight); 
+              hDcavsPt_Dz->Fill(mTree->gpt_parte[itrk2],mTree->gDca_parte[itrk2]);
+            }
+            //Tag e pt eta phi?
+
+            //for gamma conversion QA
+             if (mTree->decayL_pair[itrk2]>3.5) 
+             {  
+               hPartEptetaphi_Gm->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight); 
+               hDcavsPt_Gm->Fill(mTree->gpt_parte[itrk2],mTree->gDca_parte[itrk2]);
+             }
+
+         }
+         //sideband unlike sign
+         // if (mTree->M_pair[itrk2]>0.15 && mTree->M_pair[itrk2]<0.25 && unlike && passTPChit)
+         // {
+         //    hPartEptetaphi_SB->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight);
+         //    //check sideband v2
+         // }
+         //like sign
+         if ( mTree->M_pair[itrk2]<0.15 && (!unlike) && passTPChit)
+         {
+           pTagEv2_LS->Fill(mTree->pt_phe[itrk2],cent,cos2deltaPhi/anaCuts::resolution[cent],weight);
+           hPhEv2vsPtvsCentLS->Fill(deltaPhi,mTree->pt_phe[itrk2],cent,weight);
+           hV0_LS->Fill(mTree->V0x_pair[itrk2],mTree->V0y_pair[itrk2],mTree->V0z_pair[itrk2]);
            
-           if (unlike) {
-             hphoto->Fill(mTree->M_pair[itrk2],mTree->pt_phe[itrk2], cent,weight); 
-             if (passTPChit) hphoto_hitcut->Fill(mTree->M_pair[itrk2],mTree->pt_phe[itrk2], cent,weight); 
-              hphotoVsPt->Fill(mTree->M_pair[itrk2],mother.Perp(),cent,weight);
+           //for tof match calculation
+           if (isgoodtofmatch_PartE)
+           {
+              hPartETpcLS->Fill(mTree->gpt_parte[itrk2],cent,weight);
+              if (mTree->beta_parte[itrk2]>0) 
+                hPartETofLS->Fill(mTree->gpt_parte[itrk2],cent,weight);
            }
-           else {
-             hphoto_LS->Fill(mTree->M_pair[itrk2],mTree->pt_phe[itrk2],cent,weight); 
-             if (passTPChit) hphoto_LS_hitcut->Fill(mTree->M_pair[itrk2],mTree->pt_phe[itrk2], cent,weight); 
-              hphotoVsPt_LS->Fill(mTree->M_pair[itrk2],mother.Perp(),cent,weight);
-           }  
+
+           hPartEptetaphi_LS->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight);
+           hNFitsvsPt_LS->Fill(mTree->gpt_parte[itrk2],mTree->nFit_parte[itrk2]);
+           if (mTree->decayL_pair[itrk2]<2)
+           {  
+             hPartEptetaphi_Dz_LS->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight);
+             hDcavsPt_Dz_LS->Fill(mTree->gpt_parte[itrk2],mTree->gDca_parte[itrk2]);
+           }
+         //for gamma conversion QA
+           if (mTree->decayL_pair[itrk2]>3.5) 
+           {  
+             hPartEptetaphi_Gm_LS->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight); 
+             hDcavsPt_Gm_LS->Fill(mTree->gpt_parte[itrk2],mTree->gDca_parte[itrk2]);
+           }
+         
+         }
+         // if (mTree->M_pair[itrk2]>0.15 && mTree->M_pair[itrk2]<0.25 && !unlike && passTPChit)
+         // {
+         //    hPartEptetaphi_SB_LS->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight);
+         //    //check sideband v2
+         // }
+         if (unlike) {
+           hphoto->Fill(mTree->M_pair[itrk2],mTree->pt_phe[itrk2], cent,weight); 
+           if (passTPChit) hphoto_hitcut->Fill(mTree->M_pair[itrk2],mTree->pt_phe[itrk2], cent,weight); 
+           hphotoVsPt->Fill(mTree->M_pair[itrk2],mother.Perp(),cent,weight);
+         }
+         else {
+           hphoto_LS->Fill(mTree->M_pair[itrk2],mTree->pt_phe[itrk2],cent,weight); 
+           if (passTPChit) hphoto_LS_hitcut->Fill(mTree->M_pair[itrk2],mTree->pt_phe[itrk2], cent,weight); 
+           hphotoVsPt_LS->Fill(mTree->M_pair[itrk2],mother.Perp(),cent,weight);
+         }  
       } // mass cut  
     }   // is electron and pass dca_pair cut
   }
@@ -240,10 +361,6 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
 //------------------------------------------------------------
 int StMiniTreeAnalysis::Finish()
 {
-  WriteHists(mOutfile);
-  mOutfile->Close();
-  delete mChain;
-  mChain=NULL;
   for (int ic=0;ic<9;ic++)
   {
     delete pQxRecenterM[ic];
@@ -258,6 +375,13 @@ int StMiniTreeAnalysis::Finish()
     delete pSinEtaP[ic];
     delete pCosEtaP[ic];
   }
+
+  //make write easier...
+  WriteHists(mOutfile);
+  // mOutfile->Write();
+  mOutfile->Close();
+  delete mChain;
+  mChain=NULL;
   return 1;
 }
 //------------------------------------------------------------
@@ -328,21 +452,53 @@ void StMiniTreeAnalysis::initHists(int nRunNum)
 
   hphotoVsPt_LS = new TH3F("hphotoVsPt_LS","Mee like sign vs photon pt vs cent;Mee;photon p_{T};cent",120,0,0.3,80,0,8,9,-0.5,8.5);
   hphotoVsPt = new TH3F("hphotoVsPt","Mee like sign vs photon pt vs cent;Mee;photon p_{T};cent",120,0,0.3,80,0,8,9,-0.5,8.5);
-  hPhi = new TH1F("hPhi","hPhi",180,0,360);
-  hPhi_pshit = new TH1F("hPhi_pshit","hPhi_pshit",180,0,360);
+  hPhi = new TH1F("hPhi","hPhi",360,-1*TMath::Pi(),TMath::Pi());
+  hPhi_hitcut = new TH1F("hPhi_hitcut","hPhi_hitcut",360,-1*TMath::Pi(),TMath::Pi());
+  hPhi_allcut= new TH1F("hPhi_allcut","hPhi_allcut",360,-1*TMath::Pi(),TMath::Pi());
+  hEta = new TH1F("hEta","hEta",50,-1,1);
   hV0 = new TH3F("hV0","hV0;x(cm);y(cm);z(cm)",300,-60,60,300,-60,60,500,-100,100);
   hV0_LS = new TH3F("hV0_LS","hV0_LS;x(cm);y(cm);z(cm)",300,-60,60,300,-60,60,500,-100,100);
+  hePtvsP = new TH2F("hePtvsP","hePtvsP",200,0,10,200,0,10);
 
-  hDcavsPt_LS = new TH2F("hDcavsPt_LS","hDcavsPt_LS;p_{T};gDca;",10,0,5,100,0,3);
-  hDcavsPt = new TH2F("hDcavsPt","hDcavsPt;p_{T};gDca;",10,0,5,100,0,3);
+  //tof matching efficiency
+  //use partner electron which pass the track quality cut
+  hPartETpc = new TH2F("hPartETpc","hPartETpc;p_{T}[GeV];Cent",80,0,4,9,-0.5,8.5 );
+  hPartETpcLS = new TH2F("hPartETpcLS","hPartETpcLS;p_{T}[GeV];Cent",80,0,4,9,-0.5,8.5);
+  hPartETof = new TH2F("hPartETof","hPartETof;p_{T}[GeV];Cent",80,0,4,9,-0.5,8.5);
+  hPartETofLS = new TH2F("hPartETofLS","hPartETofLS;p_{T}[GeV];Cent",80,0,4,9,-0.5,8.5);
+
+  //check if the LS can describe the bkgd
+  //use the sideband
+  // hPartEptetaphi_SB = new TH3F("hPartEptetaphi_SB", "hPartEptetaphi;p_{T};#eta;#phi",80,0,4,100,-1,1,180,-1*TMath::Pi(),TMath::Pi() );
+  // hPartEptetaphi_SB_LS = new TH3F("hPartEptetaphi_SB_LS","hPartEptetaphi_LS;p_{T};#eta;#phi",80,0,4,100,-1,1,180,-1*TMath::Pi(),TMath::Pi() );
+  //
+  //for embedding QA comparison
+  hDcavsPt_Gm_LS = new TH2F("hDcavsPt_Gm_LS","hDcavsPt_LS;p_{T};gDca;",10,0,5,100,0,3);
+  hDcavsPt_Gm = new TH2F("hDcavsPt_Gm","hDcavsPt;p_{T};gDca;",10,0,5,100,0,3);
+  hDcavsPt_Dz_LS = new TH2F("hDcavsPt_Dz_LS","hDcavsPt_LS;p_{T};gDca;",10,0,5,100,0,3);
+  hDcavsPt_Dz = new TH2F("hDcavsPt_Dz","hDcavsPt;p_{T};gDca;",10,0,5,100,0,3);
   hNFitsvsPt_LS = new TH2F("hNFitsvsPt_LS","hNFitsvsPt_LS;p_{T};NFits",10,0,5,50,0,50);
   hNFitsvsPt = new TH2F("hNFitsvsPt","hNFitsvsPt;p_{T};NFits",10,0,5,50,0,50);
+  hPartEptetaphi = new TH3F("hPartEptetaphi", "hPartEptetaphi;p_{T};#eta;#phi",80,0,4,100,-1,1,180,-1*TMath::Pi(),TMath::Pi() );
+  hPartEptetaphi_LS = new TH3F("hPartEptetaphi_LS","hPartEptetaphi_LS;p_{T};#eta;#phi",80,0,4,100,-1,1,180,-1*TMath::Pi(),TMath::Pi() );
+  hPartEptetaphi_Dz = new TH3F("hPartEptetaphi_Dz","hPartEptetaphi_Dz;p_{T};#eta;#phi",80,0,4,100,-1,1,180,-1*TMath::Pi(),TMath::Pi() );
+  hPartEptetaphi_Dz_LS = new TH3F("hPartEptetaphi_Dz_LS","hPartEptetaphi_Dz_LS;p_{T};#eta;#phi",80,0,4,100,-1,1,180,-1*TMath::Pi(),TMath::Pi() );
+  hPartEptetaphi_Gm = new TH3F("hPartEptetaphi_Gm","hPartEptetaphi_Gm;p_{T};#eta;#phi",80,0,4,100,-1,1,180,-1*TMath::Pi(),TMath::Pi() );
+  hPartEptetaphi_Gm_LS = new TH3F("hPartEptetaphi_Gm_LS","hPartEptetaphi_Gm_LS;p_{T};#eta;#phi",80,0,4,100,-1,1,180,-1*TMath::Pi(),TMath::Pi() );
+
+  hPairDCA = new TH2F("hPairDCA","hPairDCA;DCA;Cent", 100,0,3,9,-0.5,8.5);
+  hDecayL= new TH2F("hDecayL","hDecayL;DecayL;p_{T}", 150,0,30,60,0,4);
+  hPairDCALS = new TH2F("hPairDCALS","hPairDCALS;DCA;Cent", 100,0,3,9,-0.5,8.5);
+  hDecayL_LS= new TH2F("hDecayL_LS","hDecayL_LS;DecayL;p_{T}", 150,0,30,60 ,0,4);
 }
 //------------------------------------------------------------
 void StMiniTreeAnalysis::WriteHists(TFile* out)
 {
   out->cd();
   //write the hists
+  hcent->Write();
+  hcentwg->Write();
+
   hEventPlaneCent_M->Write();
   hEventPlaneCent_P->Write();
   hEventPlaneCent_M_re->Write();
@@ -361,9 +517,11 @@ void StMiniTreeAnalysis::WriteHists(TFile* out)
   pIncEv2_hitcut->Write();
   pTagEv2_LS->Write();
   pTagEv2->Write();
- 
-  hcent->Write();
-  hcentwg->Write();
+  hPhi_hitcut->Write();
+  hPhi_allcut->Write();
+  hPhi->Write();  
+  hEta->Write();
+
   hphotoVsPt->Write();
   hphotoVsPt_LS->Write();
   hphoto->Write();
@@ -371,13 +529,27 @@ void StMiniTreeAnalysis::WriteHists(TFile* out)
   hphoto_hitcut->Write();
   hphoto_LS_hitcut->Write();
 
-  //for embedding QA
-
+  hDcavsPt_Dz->Write();
+  hDcavsPt_Dz_LS->Write();
+  hDcavsPt_Gm_LS->Write();
+  hDcavsPt_Gm->Write();
   hNFitsvsPt->Write();
   hNFitsvsPt_LS->Write();
-  hDcavsPt->Write();
-  hDcavsPt_LS->Write();
+  hPartEptetaphi->Write();
+  hPartEptetaphi_LS->Write();
+  hPartEptetaphi_Gm_LS->Write();
+  hPartEptetaphi_Gm->Write();
+  hPairDCA->Write();
+  hPairDCALS->Write();
+  hDecayL_LS->Write();
+  hDecayL->Write();
 
+  hPartETpc->Write();
+  hPartETpcLS->Write();
+  hPartETof->Write();
+  hPartETofLS->Write(); 
+
+  hePtvsP->Write();
 }
 //------------------------------------------------------------
 bool StMiniTreeAnalysis::isSecondPE(float nSigE,float beta,float pt)
@@ -397,17 +569,35 @@ bool StMiniTreeAnalysis::isElectron(float nSigE,float beta,float pt)
    // isTPCElectron = nSigE>0;
    return isTPCElectron && isTOFElectron;
 }
-int StMiniTreeAnalysis::getCentralityBin(float z,int runId,double mult,double &weight)
+int StMiniTreeAnalysis::getCentralityBin(float vz,int runId,double mult,float &weight)
 {
-  // mult+=gRandom->Rndm();
-  // weight = reweight(mult);
-  weight = 1;
-  // if  (mult<6)  return  -1;
+  float mult_corr = mult;
+  // if trigger 580001, correct the refmult
+  mult+=gRandom->Rndm();
+  if (runId<18156031) {
+    float fvz = 0;
+    for (int i=0;i<anaCuts::nparVz_mult;i++){
+      fvz +=anaCuts::parVz_mult[i]*std::pow(vz,i);
+    }
+    mult=mult*1.0*anaCuts::parVz_mult[0]/fvz;
+  }
+  // refmultcor=mult;
+  weight = reweight(mult);
   for (int cent=0;cent<anaCuts::nCent;cent++)
   {
     if (mult<anaCuts::Refmult_cent[cent]) return cent-1;
   }
   return anaCuts::nCent-1;
+}
+float StMiniTreeAnalysis::reweight(float x) const
+{
+  x+=gRandom->Rndm();
+  // float p[7] = {3.9,-204.4,1.85,24.3,-0.01746,6405,3.7e-5};
+  float p[5] = {0.811,238.9,24.31,-25,6.325e-5};
+  // return 1;
+  if (x>70) return 1;
+  // else return p[0] + p[1]/(p[2]*x + p[3]) + p[4]*(p[2]*x + p[3]) + p[5]/(p[2]*x + p[3])/(p[2]*x + p[3]) + p[6]*(p[2]*x + p[3])*(p[2]*x + p[3]);
+  else return p[0] + p[1]/(p[2]*x + p[3]) + p[4]*(p[2]*x + p[3]);
 }
 double StMiniTreeAnalysis::getEventPlaneShift(double EP_Re,int side,int cent) const
 {

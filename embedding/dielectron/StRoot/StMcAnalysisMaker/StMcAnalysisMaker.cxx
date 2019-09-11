@@ -67,17 +67,18 @@ int StMcAnalysisMaker::Init()
    hnPi0 = new TH1F("hnPi0","hnPi0",100,0,100); 
    hRefmult = new TH1F("hRefmult","hRefmult",500,0,500);
    hCentrality = new TH1F("hCentrality","hCentrality",9,-0.5,8.5);
+   hVz = new TH1F("hVz","hVz",120,-60,60);
    hPi2tot = new TH1F("hPi2tot","hPi2tot",30,0,0.3);
    hPi0Pt = new TH1F("hPi0Pt","hPi0Pt;pt;#eta;#phi",120,0,15);
-   hMcElectronPtvsCent = new TH2F("hMcElectronPtvsCent","hMcElectron;p_{T};Cent",80,0,4,9,-0.5,8.5);
-   hRcElectronPtvsCent = new TH2F("hRcElectronPtvsCent","hRcElectron;p_{T};Cent",80,0,4,9,-0.5,8.5);
+
+   hMcElectronPtvsCent = new TH3F("hMcElectronPtvsCent","hMcElectron;p_{T};eta;Cent",80,0,4,4,-1,1,9,-0.5,8.5);
+   hRcElectronPtvsCent = new TH3F("hRcElectronPtvsCent","hRcElectron;p_{T};eta;Cent",80,0,4,4,-1,1,9,-0.5,8.5);
    LOG_INFO << "Init() - DONE" << endm;
    TFile * fweight = new TFile("hMc.root");
    hweight = (TH1F*)fweight->Get("hMcElectronPtvsCent_px"); 
    hweight->SetDirectory(0);
    return kStOk;
 }
-
 //__________________________________
 int StMcAnalysisMaker::Make()
 {
@@ -135,7 +136,7 @@ int StMcAnalysisMaker::Make()
    if(mGRefMultCorrUtil && mMuDst)
    {
      mGRefMultCorrUtil->init(mEvent->runId());
-     mGRefMultCorrUtil->initEvent(mMuDst->event()->refMult(),
+     mGRefMultCorrUtil->initEvent(mMuDst->event()->refMult()/1.05,
                                   mMuDst->event()->primaryVertexPosition().z()); 
                                   // mMuDst->event()->primaryVertexPosition().z(), 
                                   // mMuDst->event()->runInfo().zdcCoincidenceRate() );
@@ -156,7 +157,8 @@ int StMcAnalysisMaker::Make()
    cout<<"refmult finish..." <<endl;
    hRefmult->Fill(mMuDst->event()->refMult()); 
    hCentrality->Fill(mCentrality, mGRefMultCorrUtil->getWeight());
-   // cout << "check consistent: event: "<<mEvent->id() << " "<< mMuDst->event()->eventId()<< " run: "<< mMuDst->event()->runId()<<" "<<mEvent->runId()<<endl;
+   if (mCentrality>0) hVz->Fill(mMuDst->event()->primaryVertexPosition().z() ); 
+   cout << "check consistent: event: "<<mEvent->id() << " "<< mMuDst->event()->eventId()<< " run: "<< mMuDst->event()->runId()<<" "<<mEvent->runId()<<endl;
    // Fill
    int nRTracks = -1;
    int nMcTracks = -1;
@@ -190,6 +192,7 @@ int StMcAnalysisMaker::fillTracks(int& nRTracks, int& nMcTracks)
     // key -1 is the index and idTruth is equal to key if this rctrack is a MC track 
    cout <<"fillMcTrack" <<endl;
    std::map<int,int> mc_rcpair;
+   // std::map<int,int> pair;
    // std::vector<long> rckey;
    for (unsigned int iTrk = 0;  iTrk < mMcEvent->tracks().size(); ++iTrk)
    {
@@ -212,6 +215,8 @@ int StMcAnalysisMaker::fillTracks(int& nRTracks, int& nMcTracks)
       else {
         // ++nRTracks;
         mc_rcpair.insert(std::pair<int,int>(mcTrack->key(),rcTrack->key()));
+        if (rcTrack->node()->track(primary))  fillRcTrack(rcTrack,mcTrack);
+        // pair.insert(std::pair<int,int>(rcTrack->key(),mcTrack->key()));
         // rckey.push_back(rcTrack->key());
         // cout <<"mcTrack key: "<< mcTrack->key() << " "<< mcTrack->geantId()<<" ";
         // cout<< "paired rc: "<<rcTrack->key()<< " idtruth "<< rcTrack->idTruth()<<" qatruth: "<< rcTrack->qaTruth()<< "nCom "<< nCom<<endl;
@@ -222,30 +227,35 @@ int StMcAnalysisMaker::fillTracks(int& nRTracks, int& nMcTracks)
    hPi2tot->Fill(1.*nPi0/mMuDst->event()->refMult()); 
 
    cout <<"fillRcTrack..." <<endl;
-   for (unsigned int ircTrk = 0;ircTrk<mMuDst->globalTracks()->GetEntries();ircTrk++)
-   {
-      StMuTrack* rcTrack = mMuDst->globalTracks(ircTrk);
-      if (!rcTrack) {
-        LOG_WARN<<" no rcTrack input! "<< endm;
-        continue;
-      }
-      int idTruth = rcTrack->idTruth();
-      // bool isfromMcTrack =  (idTruth>nPi0 && idTruth<=mMcEvent->tracks().size()); 
-      bool isfromMcTrack =  (idTruth>0 && idTruth<=(mMcEvent->tracks().size())); 
-      if (!isfromMcTrack) continue;
-      ++nRTracks;
-      // cout<< "idTruth " << idTruth<< endl;
-      if (mc_rcpair[idTruth]!=rcTrack->id()) {
-        cout<<"duplicated rctrack !" << endl;
-        continue;
-      }
-      StMcTrack* const mcTrack = mMcEvent->tracks()[idTruth-1];
-      if (!mcTrack) cout<<"idTruth is not correct!" << endl;
-      if (mcTrack->geantId()!=2 &&  mcTrack->geantId()!=3) continue;
-      if (!rcTrack->primaryTrack()) continue;
-      fillRcTrack(rcTrack,mcTrack);
-   }
+   // for (unsigned int ircTrk = 0;ircTrk<mMuDst->globalTracks()->GetEntries();ircTrk++)
+   // for (unsigned int ircTrk = 0;ircTrk<mMuDst->primaryTracks()->GetEntries();ircTrk++)
+   // {
+   //    StMuTrack* rcTrack = mMuDst->primaryTracks(ircTrk);
+   //    if (!rcTrack) {
+   //      LOG_WARN<<" no rcTrack input! "<< endm;
+   //      continue;
+   //    }
+   //    int idTruth = rcTrack->idTruth();
+   //    // bool isfromMcTrack =  (idTruth>nPi0 && idTruth<=mMcEvent->tracks().size()); 
+   //    bool isfromMcTrack =  (idTruth>0 && idTruth<=(mMcEvent->tracks().size())); 
+   //    if (!isfromMcTrack) continue;
+   //    // if (pair.find(rcTrack->id())==pair.end()) continue;
+   //    // int idTruth = pair[rcTrack->id()];
+   //    ++nRTracks;
+   //    // if (rcTrack->qaTruth()<90) continue;
+   //    // cout<< "idTruth " << idTruth<< endl;
+   //    if (mc_rcpair[idTruth]!=rcTrack->id()) {
+   //      cout<<"duplicated rctrack !" << endl;
+   //      continue;
+   //    }
+   //    StMcTrack* const mcTrack = mMcEvent->tracks()[idTruth-1];
+   //    if (!mcTrack) cout<<"idTruth is not correct!" << endl;
+   //    if (mcTrack->geantId()!=2 &&  mcTrack->geantId()!=3) continue;
+   //    // if (!rcTrack->primaryTrack()) continue;
+   //    fillRcTrack(rcTrack,mcTrack);
+   // }
    mc_rcpair.clear();
+   // pair.clear();
   //  StSPtrVecTrackNode& trackNode = mEvent->trackNodes();
   // int nTracks = trackNode.size();
   // for (int i=0; i < nTracks; i++) {
@@ -280,34 +290,60 @@ void StMcAnalysisMaker::fillMcTrack(StMcTrack const* const mcTrk)
       if ( mcTrk->geantId() == 2 ||  mcTrk->geantId() == 3)
       {
         // cout <<" test the mother key "<<mcTrk->key() <<" " << mcTrk->parent()->key()<<endl;; 
-        if (fabs(mcTrk->momentum().pseudoRapidity())<1)
+        if (fabs(mcTrk->momentum().pseudoRapidity())<=1&& mcTrk->pt()>McAnaCuts::minPt)
           // hMcElectronPtvsCent->Fill(mcTrk->momentum().perp(),mCentrality,hweight->GetBinContent(hweight->FindBin(mcTrk->pt())));
           // hMcElectronPtvsCent->Fill(mcTrk->momentum().perp(),mCentrality,mGRefMultCorrUtil->getWeight());
-          hMcElectronPtvsCent->Fill(mcTrk->momentum().perp(),mCentrality);
+          hMcElectronPtvsCent->Fill(mcTrk->momentum().perp(),mcTrk->momentum().pseudoRapidity() ,mCentrality);
         // cout << "check if pt is correct "<< mcTrk->momentum().perp() - mcTrk->pt()<<endl;
       }
    }
 }
-
+void StMcAnalysisMaker::fillRcTrack( StTrack const* const rcTrack,StMcTrack const * const mcTrack)
+{
+   StTrack* rcp=(StTrack*)rcTrack->node()->track(primary);
+   float dca = rcTrack->geometry()->helix().distance(mMuDst->event()->primaryVertexPosition());
+   int nHitsFit = rcTrack->fitTraits().numberOfFitPoints();
+   int nHitsMax = rcTrack->numberOfPossiblePoints();
+   static StTpcDedxPidAlgorithm pidAlgorithm(McAnaCuts::dedxMethod);
+   StParticleDefinition const* prtcl = rcTrack->pidTraits(pidAlgorithm);
+   int nHitsDedx=0;
+   if (prtcl)  nHitsDedx = pidAlgorithm.traits()->numberOfPoints();
+   double pt =rcp->geometry()->momentum().perp();
+   double eta = rcp->geometry()->momentum().pseudoRapidity();
+   // bool passnHits = fabs(nHitsFit) >20 && fabs(1.*nHitsFit/(1.*nHitsMax))>0.52;
+   bool passnHits = fabs(nHitsFit) >=20 && fabs(nHitsDedx)>=15 && nHitsFit/(1.*nHitsMax)>0.52;
+   // cout<<"check nHitsfit: " <<nHitsFit<<" "<<nHitsMax<< " "<< fabs(1.*nHitsFit/(1.*nHitsMax))<<endl;
+   // cout << (nHitsFit >20)<<" "<< (nHitsFit/(1.*nHitsMax) > 0.52)  <<endl;
+   // cout <<" nSigmaE "<<  rcTrack->nSigmaElectron()  <<endl;
+   if (passnHits) hDCAvsPt->Fill(dca,pt);  
+   // bool goodRcTrack = passnHits && fabs(dca)<McAnaCuts::gDCA &&  fabs(rcTrack->eta())<1 && rcTrack->pt()>McAnaCuts::minPt;
+   bool goodRcTrack = passnHits && fabs(dca)<=1 &&  fabs(eta)<=1 && pt>McAnaCuts::minPt;
+   if (!goodRcTrack) return; 
+   hnHitsvsPt->Fill(nHitsFit,pt); 
+   // hRcElectronPtvsCent->Fill(rcTrack->pt(),mCentrality,hweight->GetBinContent(hweight->FindBin(mcTrack->pt())));
+   // hRcElectronPtvsCent->Fill(rcTrack->pt(),mCentrality,mGRefMultCorrUtil->getWeight());
+   hRcElectronPtvsCent->Fill(pt,eta ,mCentrality);
+   // cout << "check if pt is correct "<< rcTrack->momentum().perp() - rcTrack->pt()<<endl;
+}
 void StMcAnalysisMaker::fillRcTrack( StMuTrack const* const rcTrack,StMcTrack const * const mcTrack)
 {
    float dca = rcTrack->dcaGlobal().mag();
-   int nHitsFit = rcTrack->nHitsFit();
+   int nHitsFit = rcTrack->globalTrack()->nHitsFit();
    int nHitsMax = rcTrack->nHitsPoss();
-   int nHitsDedx = rcTrack->nHitsDedx();
+   int nHitsDedx = rcTrack->globalTrack()->nHitsDedx();
    // bool passnHits = fabs(nHitsFit) >20 && fabs(1.*nHitsFit/(1.*nHitsMax))>0.52;
-   bool passnHits = fabs(nHitsFit) >=20 && fabs(nHitsDedx)>=15;
+   bool passnHits = fabs(nHitsFit) >=20 && fabs(nHitsDedx)>=15 && nHitsFit/(1.*nHitsMax)>0.52;
    // cout<<"check nHitsfit: " <<nHitsFit<<" "<<nHitsMax<< " "<< fabs(1.*nHitsFit/(1.*nHitsMax))<<endl;
    // cout << (nHitsFit >20)<<" "<< (nHitsFit/(1.*nHitsMax) > 0.52)  <<endl;
    // cout <<" nSigmaE "<<  rcTrack->nSigmaElectron()  <<endl;
    if (passnHits) hDCAvsPt->Fill(dca,rcTrack->pt());  
    // bool goodRcTrack = passnHits && fabs(dca)<McAnaCuts::gDCA &&  fabs(rcTrack->eta())<1 && rcTrack->pt()>McAnaCuts::minPt;
-   bool goodRcTrack = passnHits && fabs(dca)<=1 &&  fabs(rcTrack->eta())<1 && rcTrack->pt()>McAnaCuts::minPt;
+   bool goodRcTrack = passnHits && fabs(dca)<=1 &&  fabs(rcTrack->eta())<=1 && rcTrack->pt()>McAnaCuts::minPt;
    if (!goodRcTrack) return; 
    hnHitsvsPt->Fill(nHitsFit,rcTrack->pt()); 
    // hRcElectronPtvsCent->Fill(rcTrack->pt(),mCentrality,hweight->GetBinContent(hweight->FindBin(mcTrack->pt())));
    // hRcElectronPtvsCent->Fill(rcTrack->pt(),mCentrality,mGRefMultCorrUtil->getWeight());
-   hRcElectronPtvsCent->Fill(rcTrack->pt(),mCentrality );
+   hRcElectronPtvsCent->Fill(rcTrack->pt(),rcTrack->eta() ,mCentrality);
    // cout << "check if pt is correct "<< rcTrack->momentum().perp() - rcTrack->pt()<<endl;
 }
 
@@ -317,10 +353,11 @@ bool StMcAnalysisMaker::isGoodMcTrack(StMcTrack const* const mcTrack) const
      // mcTrack->geantId() == McAnaCuts::geantId &&
      // mcTrack->startVertex()->position().perp() < McAnaCuts::mcTrackStartVtxR;
      // return true;
-     return (mcTrack->geantId() == 2 || mcTrack->geantId() == 3) &&
+     return (mcTrack->geantId() == 2 || mcTrack->geantId() == 3);
+     // return (mcTrack->geantId() == 2 || mcTrack->geantId() == 3) &&
              // mcTrack->pt()>McAnaCuts::minPt; 
              // mcTrack->pt()>McAnaCuts::minPt && 
-            mcTrack->startVertex()->position().perp() < McAnaCuts::mcTrackStartVtxR;
+            // mcTrack->startVertex()->position().perp() < McAnaCuts::mcTrackStartVtxR;
 }
 
 bool StMcAnalysisMaker::passTrigger()

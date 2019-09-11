@@ -143,14 +143,29 @@ bool StMcAnalysisMaker::InitHists()
 
 void StMcAnalysisMaker::bookSpectra(int centrality)
 {
-  mPi0Spectra = new TF1("pi0spectra","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])",0,15);
-  mPi0Spectra->SetParameters(McAnaCuts::SpectraParPi0[McAnaCuts::SpectraParPi0_centbin[mCentrality]]);
-  TFile* file = TFile::Open("StRoot/macros/fitpionv2.root");
-  TString namev2[9]={"50_60","50_60","50_60","40_50","30_40","20_30","10_20","0_10","0_10"};
+  // mPi0Spectra = new TF1("pi0spectra","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])",0,15);
+  if (McAnaCuts::parentId==10007) 
+  {
+    mPi0Spectra = new TF1("pi0spectra",McAnaCuts::pi0spectraform.Data(),0,15);
+    TFile* file = TFile::Open("StRoot/macros/fitpionv2.root");
+    TString namev2[9]={"50_60","50_60","50_60","40_50","30_40","20_30","10_20","0_10","0_10"};
+    fPi0v2 = (TF1*)file->Get(Form("fit_%s", namev2[centrality].Data())); 
+  // fPi0v2 = (TF1*)file->Get("fit_20_30"); 
+  file->Close();
+
+  }
+  if (McAnaCuts::parentId==10003) 
+  {
+    mPi0Spectra = new TF1("pi0spectra",McAnaCuts::etaspectraform.Data(),0,15);
+    TFile* file = TFile::Open("StRoot/macros/etav2.root");
+    TString namev2[9]={"50_60","50_60","50_60","40_50","30_40","20_30","10_20","0_10","0_10"};
   fPi0v2 = (TF1*)file->Get(Form("fit_%s", namev2[centrality].Data())); 
   // fPi0v2 = (TF1*)file->Get("fit_20_30"); 
   file->Close();
-}
+
+  }
+  mPi0Spectra->SetParameters(McAnaCuts::SpectraParPi0[McAnaCuts::SpectraParPi0_centbin[mCentrality]]);
+  }
 //__________________________________
 int StMcAnalysisMaker::Make()
 {
@@ -207,7 +222,7 @@ int StMcAnalysisMaker::Make()
   mpVtx=mMuDst->event()->primaryVertexPosition();
   // cout<<"start refmult"<<endl;
   // bool goodevent = fabs(mpVtx.z())<35 && fabs(mpVtx.perp()) < McAnaCuts::vr && fabs(mpVtx.z()-mMuDst->event()->vpdVz())<McAnaCuts::VzVpdvz;
-  bool goodevent = fabs(mpVtx.z())<35;
+  bool goodevent = fabs(mpVtx.z())<35&&fabs(mpVtx.z()-mMuDst->event()->vpdVz())<McAnaCuts::VzVpdvz;
   if (!goodevent) 
   {
     cout <<"is not good event  "<<endl;

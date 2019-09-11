@@ -50,7 +50,8 @@ void HFev2()
   // hreco->SetDirectory(0);
 
   // TH1F* hreco = ProjectionAndFit("embeddingQa.phoE.root", centL-1,centH-1 ,"RecoEff",pdf );
-  TH1F* hreco = ProjectionAndFit("embeddQa0825.root", centL-1,centH-1 ,"RecoEff",pdf );
+  // TH1F* hreco = ProjectionAndFit("embeddQa0825.root", centL-1,centH-1 ,"RecoEff",pdf );
+  TH1F* hreco = ProjectionAndFit("embeddQa_0910.root", centL-1,centH-1 ,"RecoEff",pdf );
   // TH1F* hreco = ProjectionAndFit("pi0/embeddQa_tightcut.root", centL-1,centH-1 ,"RecoEff",pdf );
   TFile* fPIDv2 = TFile::Open("prev2.root");
   TGraphErrors* gKs = (TGraphErrors*)fPIDv2->Get("ks_0_80_62");
@@ -205,7 +206,7 @@ void HFev2()
   // gPhoE62->Draw("psame");
   fprevious->Close();
   //
-  TF1* phe62v2 = new TF1("phe62v2","0.88*pol5(0)",0,5);
+  TF1* phe62v2 = new TF1("phe62v2","0.9*pol5(0)",0,5);
   // TF1* phe62v2 = new TF1("phe62v2","pol5",0,5);
   // double par62[5] = {0.00338,0.18,-0.1,0.026,-0.0028};
   // double par62[5] = {-0.02064,0.3289,-0.2923,0.103,-0.01232};

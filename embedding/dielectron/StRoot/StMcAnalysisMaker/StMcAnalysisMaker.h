@@ -40,11 +40,12 @@ private:
    TH2F* hDCAvsPt;
    TH1F* hnPi0;
    TH1F* hRefmult;
+   TH1F* hVz;
    TH1F* hCentrality;
    TH1F* hPi2tot;
    TH1F* hPi0Pt;
-   TH2F* hMcElectronPtvsCent;
-   TH2F* hRcElectronPtvsCent;
+   TH3F* hMcElectronPtvsCent;
+   TH3F* hRcElectronPtvsCent;
    TH1F* hweight;
    StMcEvent* mMcEvent;
    StEvent* mEvent;
@@ -58,6 +59,7 @@ private:
    int  fillTracks(int& nRTracks, int& nMcTracks);
    void fillMcTrack(StMcTrack const*);
    void fillRcTrack(StMuTrack const* const rcTrack ,StMcTrack const * const mcTrack);
+   void fillRcTrack(StTrack const* const rcTrack ,StMcTrack const * const mcTrack);
    void getDca(StTrack const*,float& dca, float& dcaXY, float& dcaZ) const;
 
    bool isGoodMcTrack(StMcTrack const*) const;

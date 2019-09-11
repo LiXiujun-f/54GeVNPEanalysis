@@ -1,0 +1,14 @@
+
+Universe       = vanilla
+Notification   = never
+Requirements   = (CPU_Type != "crs") && (CPU_Experiment == "star")
++Experiment     = "star"
+Priority        = +10
++Job_Type       = "cas"
+GetEnv          = true
+Initialdir      = /Users/yuanjing/STAR/NPE/54GeV/54GeVNPEanalysis/embedding/pythia 
+
+Executable = csh/1/run.sh
+Arguments = /Users/yuanjing/STAR/NPE/54GeV/54GeVNPEanalysis/embedding/pythia 1 1e6 82181
+Queue 
+ 

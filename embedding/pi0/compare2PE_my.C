@@ -16,10 +16,15 @@ void compare2PE_my()
   c->Divide(3,2);
   TPDF* pdf = new TPDF("qa.pdf");
   pdf->Off();
-  TString realdata = "incEv2_addqa_loose0825.root";
+  // TString realdata = "incEv2_addqa_loose0825.root";
+  TString realdata = "incEv2_0905.root";
+  // TString realdata = "qa5.root";
   // TString mcdata = "embeddQa0825.root";
-  TString mcdata = "embeddQa_phicut0827.root";
-  drawQaNhits("NFit",pdf,c,"qa2.root",mcdata);
+  // TString mcdata = "embeddQa_phicut0827.root";
+  TString mcdata = "embeddQa_0910.root";
+  // drawQaNhits("NFit",pdf,c,"qa2.root",mcdata);
+  drawQaNhits("NFit",pdf,c,"qa5.root",mcdata);
+  // drawQaNhits("NFit",pdf,c,"incEv2_0905.root",mcdata);
   drawQaDca("DCA",pdf,c,"qa2.root",mcdata);
   drawPartPtEtaPhi("Partner e",pdf ,c ,realdata,mcdata); 
   drawPairDca("pair DCA",pdf,c,realdata,mcdata);
@@ -194,8 +199,8 @@ void drawQaNhits(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
 void drawPartPtEtaPhi(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
 {
   TFile* file = TFile::Open(mc.Data());
-  TString name[3]={"hPartEptetaphi","hPartEptetaphi","hPartEptetaphi_LS"};
-  // TString name[3]={"hPartEptetaphi","hPartEptetaphi_Dz","hPartEptetaphi_Dz_LS"};
+  // TString name[3]={"hPartEptetaphi","hPartEptetaphi","hPartEptetaphi_LS"};
+  TString name[3]={"hPartEptetaphi","hPartEptetaphi_Dz","hPartEptetaphi_Dz_LS"};
   TH3F* hDCArc = (TH3F*)file->Get(name[0]);
   hDCArc->SetDirectory(0);
   file->Close();
@@ -230,8 +235,8 @@ void drawPartPtEtaPhi(TString head, TPDF* pdf, TCanvas* c,TString real,TString m
   drawLatex(0.2,0.6,Form("%s Eta", head.Data()));
 
   c->cd(2);
-  TH1* hrc_z = (TH1*)hDCArc->ProjectionZ("hrc_z");
-  TH1* hdata_z = (TH1*)hDCAdata->ProjectionZ("hdata_z");
+  TH1* hrc_z = (TH1*)hDCArc->ProjectionZ("hrc_z",1,hDCArc->GetNbinsX(),hDCArc->GetYaxis()->FindBin(-0.5),hDCArc->GetYaxis()->FindBin(0.5));
+  TH1* hdata_z = (TH1*)hDCAdata->ProjectionZ("hdata_z",1,hDCAdata->GetNbinsX(),hDCAdata->GetYaxis()->FindBin(-0.5),hDCAdata->GetYaxis()->FindBin(0.5));
   hrc_z->Rebin(4);
   NormHist(hrc_z,kBlue);
   NormHist(hdata_z,kRed);
@@ -296,9 +301,9 @@ void drawDecayL(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc");;
   TH1* hdata = (TH1*)hDCAdata->ProjectionX("hdata");
  
-  hrc->Scale(1./hrc->Integral());
+  hrc->Scale(1./hrc->Integral(hrc->GetXaxis()->FindBin(0),hrc->GetXaxis()->FindBin(2)));
   hrc->Scale(1./hrc->GetBinWidth(1));
-  hdata->Scale(1./hdata->Integral());
+  hdata->Scale(1./hdata->Integral(hdata->GetXaxis()->FindBin(0),hdata->GetXaxis()->FindBin(2)));
   hdata->Scale(1./hdata->GetBinWidth(1));
   hrc->SetMarkerColor(kBlue);
   hrc->SetLineColor(kBlue);

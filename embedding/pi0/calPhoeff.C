@@ -17,7 +17,9 @@ void calPhoeff()
   // TFile* file = new TFile("embeddingQa.phoE.root.ep0");
   // TFile* file = new TFile("embeddingQa.phoE.root");
   // TFile* file = new TFile("test.root");
-  TFile* file = new TFile("embeddQa0825.root");
+  // TFile* file = new TFile("embeddQa0825.root");
+  TFile* file = new TFile("embeddQa_0910.root");
+  // TFile* file = new TFile("embeddQa_phicut0827.root");
   // TFile* file = new TFile("embeddingQa.phoE.root.0818");
 
   // TFile* file = new TFile("test.McAna.root");

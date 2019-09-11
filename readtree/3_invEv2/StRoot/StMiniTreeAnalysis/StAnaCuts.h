@@ -25,11 +25,13 @@ namespace anaCuts
    float const GPt = 0.20;
    // float const GPt = 0.15;
    int const NHitsFit = 20;
+   int const nFit_parte = 15;
    int const NHitsDedx = 15;
    float const NHitsFit2Poss = 0.52;
    float const Dca = 1.5;// < cm
    // float const Dca = 1;// < cm
    float const eEta = 0.8; 
+   // float const eEta = 0.7; 
    float const Eta = 1; 
    float const pTof=0.02;
    float const piTof=0.02;
@@ -40,11 +42,12 @@ namespace anaCuts
    float const nESigma_partner=3.5;
    float const nESigma_Tag=2; 
    
+   std::pair<float,float> PhiCut = {1.75,1.25};
    float const tofYlocal=1.8;
    float EEdcaDaughter=1;  //cm
 
-   // int const nparVz_mult = 7;
-   // float parVz_mult[nparVz_mult]={435.9,-0.02413,-0.003707,0.0002204,1.487e-5,-2.95e-07,-1.866e-8};
+   int const nparVz_mult = 7;
+   float parVz_mult[nparVz_mult]={435.9,-0.02413,-0.003707,0.0002204,1.487e-5,-2.95e-07,-1.866e-8};
    int const nCent = 9 ;
    // float Refmult_cent[nCent] = {6,12,24,43,70,110,165,242,292}; //refmult > par[i],  70-80%, 60-70%, ... ,0-5%
    double resolution[9]={0.155569,0.229148,0.327245,0.43032,0.514879,0.558227,0.538259,0.452528,0.343969};
@@ -53,5 +56,7 @@ namespace anaCuts
    // float ptMin_Re=0.15;
    float ptMin_Re=0.2;
    float ptMax_Re=2;
+   float refusepileup[4]={2.88,-155,1.,0};
+   float refusebadtof[4]={0,0.0,0.,0};
 }
 #endif

@@ -17,9 +17,11 @@ void compare2PE_my()
   TPDF* pdf = new TPDF("qa.pdf");
   pdf->Off();
   TString realdata = "incEv2_addqa_loose0825.root";
-  TString mcdata = "embeddingQa.0829.root";
+  // TString mcdata = "embeddingQa.0829.root";
+  // TString mcdata = "embeddingQa.root";
+  TString mcdata = "embeddingQa.test.root";
   // TString mcdata = "embeddQa_phicut0827.root";
-  // drawQaNhits("NFit",pdf,c,"qa2.root",mcdata);
+  drawQaNhits("NFit",pdf,c,"qa2.root",mcdata);
   drawQaDca("DCA",pdf,c,"qa2.root",mcdata);
   // drawPartPtEtaPhi("Partner e",pdf ,c ,realdata,mcdata); 
   // drawPairDca("pair DCA",pdf,c,realdata,mcdata);
@@ -194,8 +196,8 @@ void drawQaNhits(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   TFile* file = TFile::Open(mc.Data());
   if (head.Contains("NFit")) 
   {  
-    // TString name[3]={"hnHits","hNFitsvsPt","hNFitsvsPt_LS"};
-    TString name[3]={"hPartEnFits","hNFitsvsPt","hNFitsvsPt_LS"};
+    TString name[3]={"hnHits","hNFitsvsPt","hNFitsvsPt_LS"};
+    // TString name[3]={"hPartEnFits","hNFitsvsPt","hNFitsvsPt_LS"};
     // TString name[3]={"hNHit_3_0_10007_2","hNFitsvsPt","hNFitsvsPt_LS"};
   }
   else if (head.Contains("DCA"))
@@ -231,7 +233,8 @@ void drawQaNhits(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   {
     // if (ip<3) continue;
     // TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc",hDCArc->GetYaxis()->FindBin(hDCAdata->GetXaxis()->GetBinLowEdge(ip*4+1)),hDCArc->GetYaxis()->FindBin(hDCAdata->GetXaxis()->GetBinUpEdge(ip*4+4)), hDCArc->GetZaxis()->FindBin(-0.8),hDCArc->GetZaxis()->FindBin(0.8) );;
-    TH1* hrc = (TH1*)hDCArc->ProjectionY("hrc",hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinLowEdge(ip)),hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinUpEdge(ip)));;
+    // TH1* hrc = (TH1*)hDCArc->ProjectionY("hrc",hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinLowEdge(ip)),hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinUpEdge(ip)));;
+    TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc",hDCArc->GetYaxis()->FindBin(hDCAdata->GetXaxis()->GetBinLowEdge(ip)),hDCArc->GetYaxis()->FindBin(hDCAdata->GetXaxis()->GetBinUpEdge(ip)));;
     TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata",ip,ip);
     // cout << hDCAdata->GetXaxis()->GetBinLowEdge(ip)<<" "<< hDCAdata->GetXaxis()->GetBinUpEdge(ip) << endl;
 

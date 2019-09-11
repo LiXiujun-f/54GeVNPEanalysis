@@ -52,12 +52,13 @@ class StMiniTreeAnalysis
     void WriteHists(TFile* out);
     void bookHists();
     bool isBadrun(Int_t runId);
-    int getCentralityBin(float z,int runId,double mult,double &weight); 
+    int getCentralityBin(float z,int runId,double mult,float &weight); 
     double getEventPlaneShift(double EP_Re,int side,int cent) const;
     int EventPlane(int cent, int runId, float &EP_P_sh,float &EP_M_sh);
     int getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float weight);
     bool isSecondPE(float nSigE,float beta,float pt);
     bool isElectron(float nSigE,float beta,float pt);
+    float reweight(float x) const;
   private:
     //read tree
     TStopwatch* stopWatch;
@@ -103,15 +104,35 @@ class StMiniTreeAnalysis
     TH3F* hphotoVsPt_LS; 
     TH3F* hV0_LS;
     TH3F* hV0;
+   
+    TH1F* hEta;
+    TH1F* hPhi;
+    TH1F* hPhi_hitcut; 
+    TH1F* hPhi_allcut; 
     
-    //for embedding QA
-    TH2F* hDcavsPt;
-    TH2F* hDcavsPt_LS;
+    TH2F* hePtvsP; 
+
+    TH2F* hDcavsPt_Gm;
+    TH2F* hDcavsPt_Gm_LS;
+    TH2F* hDcavsPt_Dz;
+    TH2F* hDcavsPt_Dz_LS;
     TH2F* hNFitsvsPt_LS;
     TH2F* hNFitsvsPt;
+    TH3F* hPartEptetaphi;
+    TH3F* hPartEptetaphi_LS;
+    TH3F* hPartEptetaphi_Dz_LS;
+    TH3F* hPartEptetaphi_Dz;
+    TH3F* hPartEptetaphi_Gm_LS;
+    TH3F* hPartEptetaphi_Gm;
+    TH2F* hPairDCA;
+    TH2F* hPairDCALS;
+    TH2F* hDecayL_LS;
+    TH2F* hDecayL;
+    TH2F* hPartETpc; 
+    TH2F* hPartETpcLS;
+    TH2F* hPartETof;
+    TH2F* hPartETofLS;
 
-    TH1F* hPhi;
-    TH1F* hPhi_pshit; 
     TProfile* pQxRecenterM[9];
     TProfile* pQyRecenterM[9];
     TProfile* pQxRecenterP[9];

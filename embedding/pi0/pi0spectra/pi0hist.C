@@ -52,6 +52,7 @@ void pi0hist()
     f[i]->SetParameters(SpectraParPi0[i]);
     gmul[i]->Draw("p");
     gmul[i]->Fit(f[i]);
+    gmul[i]->Fit(f[i]);
     gPad->SetLogy();
     drawLatex(0.2,0.2,Form("%s",centname[i].Data()),0.05);
     f[i]->GetParameters(par);
