@@ -18,6 +18,7 @@
 namespace Cuts
 {
   double M_PION_0 = 0.134977;
+  double M_Eta = 0.548;
   int Pi0Id=111;
   int EtaId=221;
   int GammaId = 22;
@@ -30,7 +31,6 @@ namespace Cuts
                                  {682.788, 0.396488, 0.0690007, 1.06078, 11.0674},
                                  {992.598, 0.406828, 0.0831998, 1.04464, 11.0797}
                              };
-
 };
 
 TH1F* hEP;
@@ -46,11 +46,11 @@ TH3D* hGammav2[9];
 TH3D* hGammaSpec; 
 
 void decayAndFill(int const kf, TLorentzVector* mother, TClonesArray& daughters,float EP ,int cent);
-void fill(TLorentzVector* mother,TLorentzVector* gamma1,TLorentzVector* gamma2, double weight,float EP, int cent);
-void fillGamma(TLorentzVector* gamma,double weight,float EP,int cent);
+void fill(TLorentzVector* mother,TLorentzVector* gamma1,TLorentzVector* gamma2, double ptweight, double phiweight,float EP, int cent);
+void fillGamma(TLorentzVector* gamma,double ptweight, double phiweight,float EP,int cent);
 void setDecayChannels(int const defirst,int const desecond,int const mdme);
 void getKinematics(TLorentzVector& b, double const mass);
-double getPi0Weight(TLorentzVector* mother,int cent,float EP);
+void getPi0Weight(TLorentzVector* mother,int cent,float EP,double& ptweight,double& phiweight);
 float getDeltaPhi(float mphi,float EP);
 void bookHists(int mode);
 void getCentAndEP(int & cent,float & EP);

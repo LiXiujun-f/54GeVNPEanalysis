@@ -143,7 +143,7 @@ bool StMcAnalysisMaker::InitHists()
 
 void StMcAnalysisMaker::bookSpectra(int centrality)
 {
-  mPi0Spectra = new TF1("pi0spectra","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])",0,15);
+  mPi0Spectra = new TF1("pi0spectra","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -1*[4])",0,15);
   // mPi0Spectra->SetParameters(McAnaCuts::SpectraParPi0[McAnaCuts::SpectraParPi0_centbin[mCentrality]]);
   mPi0Spectra->SetParameters(McAnaCuts::gammaFromPi0);
   //current for test

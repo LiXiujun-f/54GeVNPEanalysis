@@ -10,7 +10,7 @@ Double_t func1(Double_t *x, Double_t *par){
     return val;
 }
 
-void calgamma()
+void compair()
 {
   SetsPhenixStyle();   
   TCanvas* c = new TCanvas("c","c");
@@ -25,7 +25,7 @@ void calgamma()
   TProfile* pGmv2[9];
   TProfile* pPi0v2[9];
   
-  TString filename="gammav2_0906.root";
+  TString filename="gammav2.root";
   // drawpi0(filename,pdf,c);
   cout << "start gamma"<<endl;
   TFile* fgamma = new TFile("gammav2.root");
@@ -35,31 +35,44 @@ void calgamma()
   // c->Divide(3,2);
   int colors[7]={kRed,kOrange+8,kMagenta,kViolet,kBlue,kCyan,kGreen+2};
   TF1* fgammaSpec[7];
-  for (int i=2;i<3;i++){
+  for (int i=7;i<8;i++){
     c->cd(i-1);
-    // hGmSp[i] = (TH1F*)hGammaSpec->ProjectionX(Form("%d",i),hGammaSpec->GetYaxis()->FindBin(-0.1),hGammaSpec->GetYaxis()->FindBin(0.1) ,i+1,i+1);
-    hGmSp[i] = (TH1F*)hGammaSpec->ProjectionX(Form("%d",i),hGammaSpec->GetYaxis()->FindBin(-0.1),hGammaSpec->GetYaxis()->FindBin(0.1) ,3,9);
-    float events = hCent->GetBinContent(i+1);
+    // hGmSp[i] = (TH1F*)hGammaSpec->ProjectionX(Form("%d",i),hGammaSpec->GetYaxis()->FindBin(-1),hGammaSpec->GetYaxis()->FindBin(0.5) ,i+1,i+1);
+    // hGmSp[i] = (TH1F*)hGammaSpec->ProjectionX(Form("%d",i),hGammaSpec->GetYaxis()->FindBin(-0.5),hGammaSpec->GetYaxis()->FindBin(0.5) ,3,9);
+    hGmSp[i] = (TH1F*)hGammaSpec->ProjectionX(Form("%d",i),hGammaSpec->GetYaxis()->FindBin(-0.5),hGammaSpec->GetYaxis()->FindBin(0.5) ,8,9);
+    // float events = hCent->GetBinContent(i+1);
+    // float events = hCent->GetEntries();
+    float events = hCent->Integral(8,9);
     hGmSp[i]->Scale(1./(events*hGmSp[i]->GetBinWidth(1)));
     hGmSp[i]->SetLineColor(colors[i-2]);
+    TH1F* h=(TH1F*)hGmSp[i]->Clone("aaa");
+    for (int ib=1;ib<=h->GetNbinsX();ib++)
+    {
+       h->SetBinContent(ib,h->GetBinContent(ib)/h->GetBinCenter(ib));
+    
+    }
     
     // fgammaSpec[i] = new TF1(Form("fgammaSpec_%d",i),"2*TMath::Pi()*[0]*sqrt(x*x-0.14*0.14)*pow(TMath::Exp(-1*[1]*sqrt(x*x-0.14*0.14)-[2]*(x*x-0.14*0.14))+sqrt(x*x-0.14*0.14)/[3], -[4])", 0, 10 );
-    fgammaSpec[i] = new TF1(Form("fgammaSpec_%d",i),"2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])", 1, 10 );
-    // fgammaSpec[i] = new TF1(Form("fgammaSpec_%d",i),"x*([0]/6.28/[1]/(1+[1])*exp(-(x-1)/[2]) + [3]*[4]*pow(1+x*x/[5], [6]))", 0, 10 );
-    // fgammaSpec[i] = new TF1(Form("fgammaSpec_%d",i),"x*( [2]*pow(1+x*x/[3], [4]))", 0, 10 );
+    fgammaSpec[i] = new TF1(Form("fgammaSpec_%d",i),"2*TMath::Pi()*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])", 0.2, 10 );
     // fgammaSpec[i] = new TF1(Form("fgammaSpec_%d",i),func1, 0, 10,3 );
     double par[5]={698.6,0.3983,0.064,1.058,11.06};
     fgammaSpec[i]->SetParameters(par);
     // hGmSp[i]->Fit(fgammaSpec[i]);
-    // hGmSp[i]->Fit(fgammaSpec[i]);
-    // hGmSp[i]->Draw(); //change to a higher pt
-   fgammaSpec[i]->Draw();
+    // h->Fit(fgammaSpec[i]);
+    hGmSp[i]->DrawCopy(); //change to a higher pt
+    // h->DrawCopy(); //change to a higher pt
     gPad->SetLogy();
 
     addpdf(pdf);
 
   }
-  
+ 
+  TFile* f = new TFile("pi0_eta_gamma_decay_cent0_10p.root");
+  TH1F* hhhh = (TH1F*)f->Get("h_pi0");
+  hhhh->Scale(6.28/hhhh->GetBinWidth(1)/1.0e6); 
+  hhhh->Draw("same");
+
+
   pdf->On();
   pdf->Close();
 }
