@@ -17,8 +17,10 @@ void calgamma()
   TPDF* pdf = new TPDF("gammav2plots.pdf");
   pdf->Off();
 
-  TString filenamePi="pi02gamma_0912.root";
-  TString filenameEta="eta2gamma_0911.root";
+  // TString filenamePi="pi02gamma_0912.root";
+  TString filenamePi="gammav2.root";
+  // TString filenameEta="eta2gamma_0911.root";
+  TString filenameEta="gammav2.root";
   TFile* fout = new TFile("fread_pi0_eta_2gamma.root","recreate");
 
   drawpi0(filenamePi,pdf,c,"pi0");
@@ -42,7 +44,7 @@ void drawpi0(TString filename, TPDF* pdf,TCanvas* c,TString particlename)
   fgamma->cd();
   TProfile* pPi0v2[9];
   TH1F* hPi0Sp[9];
-
+  TH1F* hCent = (TH1F*)fgamma->Get("hCent");
   TProfile2D* gPi0 = (TProfile2D*)fgamma->Get("pPi0v2");
   if (!gPi0) 
   {
@@ -68,14 +70,38 @@ void drawpi0(TString filename, TPDF* pdf,TCanvas* c,TString particlename)
   {
     for (int i=2;i<9;i++){
       hPi0Sp[i] = (TH1F*)hPi0Spec->ProjectionX("cc",i+1,i+1);
-      pPi0v2[i]->GetYaxis()->SetTitle("Counts");
-      hPi0Sp[i]->DrawCopy(); //change to a higher pt
+      hPi0Sp[i]->GetYaxis()->SetTitle("Counts");
       gPad->SetLogy(1);
       drawLatex(0.2,0.3,Form("%s %s",particlename.Data(),centname[i].Data()),0.035);
+     TF1* f;
+    if (particlename.Contains("pi0")) f = new TF1("f","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])", 0,15);
+    else if (particlename.Contains("eta")) f = new TF1("f","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*  x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0  .134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3  ], -[4])", 0,15);
+    else {cout <<"please input the correct particle" << endl; return;}
+   
+        // TF1* f = new TF1("f","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])", 0,15);
+    int const SpectraParPi0_centbin[9]={0,0,1,1,2,2,3,4,4};
+    double const SpectraParPi0[5][5]={ 
+                                  {1.67607, -1.77146, 0.0759459, -0.369874, 2.01742},
+                                  {264.787, 0.349324, 0.0475088, 1.01322, 10.903},
+                                  {406.429, 0.361361, 0.0558035, 1.10099, 11.2414},
+                                  {682.788, 0.396488, 0.0690007, 1.06078, 11.0674},
+                                  {992.598, 0.406828, 0.0831998, 1.04464, 11.0797}
+                                 };
+      f->SetParameters(SpectraParPi0[SpectraParPi0_centbin[i]] );
+      //dNdptdy 
+      hPi0Sp[i]->Scale(1./3.0/hPi0Sp[i]->GetBinWidth(1)); 
+      double funInt = f->Integral(0,15);
+      double gammaInt = hPi0Sp[i]->Integral()*hPi0Sp[i]->GetBinWidth(1);
+      double scale = gammaInt/funInt;
+      hPi0Sp[i]->Scale(1./scale); 
+      cout << i << " "<<scale<<endl;
+      hPi0Sp[i]->DrawCopy(); //change to a higher pt
+      f->Draw("same");
       addpdf(pdf);
     }
+
   }
-  gPad->SetLogy(0);
+  // gPad->SetLogy(0);
   fgamma->Close();
 }
 void drawAndWriteGamma(TString filename, TFile* fout,TPDF* pdf, TCanvas* c,TString particlename,double branchratio)
@@ -105,12 +131,31 @@ void drawAndWriteGamma(TString filename, TFile* fout,TPDF* pdf, TCanvas* c,TStri
       hGmSp[i] = (TH1F*)hGammaSpec->ProjectionX(Form("h%s2Gamma%d",particlename.Data(),i),hGammaSpec->GetYaxis()->FindBin(etarange*-0.5),hGammaSpec->GetYaxis()->FindBin(etarange*0.5) ,i+1,i+1);
     else if (i==1)
       hGmSp[1] = (TH1F*)hGammaSpec->ProjectionX(Form("h%s2Gamma_mb",particlename.Data()),hGammaSpec->GetYaxis()->FindBin(etarange*-0.5),hGammaSpec->GetYaxis()->FindBin(etarange*0.5) ,3,9);
-
-    hGmSp[i]->SetDirectory(0);
+    TF1* f;
+    if (particlename.Contains("pi0")) f = new TF1("f","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])", 0,15);
+    else if (particlename.Contains("eta")) f = new TF1("f","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*  x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0  .134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3  ], -[4])", 0,15);
+    else {cout <<"please input the correct particle" << endl; return;}
+    int const SpectraParPi0_centbin[9]={0,0,1,1,2,2,3,4,4};
+  double const SpectraParPi0[5][5]={ 
+                                 {1.67607, -1.77146, 0.0759459, -0.369874, 2.01742},
+                                 {264.787, 0.349324, 0.0475088, 1.01322, 10.903},
+                                 {406.429, 0.361361, 0.0558035, 1.10099, 11.2414},
+                                 {682.788, 0.396488, 0.0690007, 1.06078, 11.0674},
+                                 {992.598, 0.406828, 0.0831998, 1.04464, 11.0797}
+  };
     double events=1;
     if (i>=2) events= hCent->GetBinContent(i+1);
     else if (i==1) events = hCent->GetEntries();
-    hGmSp[i]->Scale(1.*branchratio/(events*hGmSp[i]->GetBinWidth(1)*etarange));
+    hGmSp[i]->Scale(1./(hGmSp[i]->GetBinWidth(1)*etarange));
+    if (i>=2){
+       f->SetParameters(SpectraParPi0[SpectraParPi0_centbin[i]] );
+       double funInt = f->Integral(0,15);
+       double gammaInt = hGmSp[i]->Integral()*hGmSp[i]->GetBinWidth(1);
+       cout << "scale by mother pt: " <<gammaInt/funInt*0.5 << " "<<events<< endl;
+    }
+
+    hGmSp[i]->SetDirectory(0);
+    hGmSp[i]->Scale(1.*branchratio/(events));
     hGmSp[i]->GetYaxis()->SetTitle("dN/dydp_{T}");
     hGmSp[i]->GetXaxis()->SetTitle("p_{T} [GeV]");
     hGmSp[i]->SetLineColor(colors[i-1]);

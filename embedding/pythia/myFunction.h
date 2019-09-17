@@ -23,6 +23,8 @@ namespace Cuts
   int EtaId=221;
   int GammaId = 22;
   int nCent = 9;
+  std::pair<double,double> momentumrange(0, 30);
+  double EtaRange = 1.5; //-1.5,1.5
   int const SpectraParPi0_centbin[9]={0,0,1,1,2,2,3,4,4};
   double const SpectraParPi0[5][5]={ 
                                  {1.67607, -1.77146, 0.0759459, -0.369874, 2.01742},

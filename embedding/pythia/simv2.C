@@ -5,7 +5,7 @@
 #include "TStopwatch.h"
 #include <iostream>
 using namespace std;
-void simv2(int npart=1e7,int rdnb=0,int mode=2 ,TString outname="gammav2")
+void simv2(int npart=1e7,int rdnb=0,int mode=0 ,TString outname="gammav2")
 {
   TStopwatch*  time = new TStopwatch();
   time->Start();
@@ -99,7 +99,7 @@ void fill(TLorentzVector* mother,TLorentzVector* gamma1,TLorentzVector* gamma2, 
    float mdeltaphi = getDeltaPhi(mother->Phi(),EP);
    // pPi0v2->Fill(mother->Perp() ,cent,cos(2*(mother->Phi()-EP)),weight);
    pPi0v2->Fill(mother->Perp() ,cent,cos(2*(mother->Phi()-EP)),ptweight*phiweight);
-   hPi0v2->Fill( mdeltaphi,mother->Perp(), cent, ptweight*phiweight );
+   // hPi0v2->Fill( mdeltaphi,mother->Perp(), cent, ptweight*phiweight );
    hPi0Spec->Fill(mother->Perp(),cent,ptweight);
    fillGamma(gamma1,ptweight,phiweight,EP,cent);
    fillGamma(gamma2,ptweight,phiweight,EP,cent);
@@ -111,7 +111,7 @@ void fillGamma(TLorentzVector* gamma,double ptweight,double phiweight,float EP,i
    float gphi = gamma->Phi();
    // cout <<"weight: "<<weight<<" cent: "<<cent<<" pt: "<<gpt<<" cos(2#delta#phi):"<< cos(2*(gphi-EP))<< " deltaphi: "<<getDeltaPhi(gphi,EP) << endl;
    pGammav2->Fill(gpt,gamma->Eta(),cent,cos(2*(gphi-EP)) ,ptweight*phiweight);
-   hGammav2[cent]->Fill(getDeltaPhi(gphi,EP),gpt,gamma->Eta(),ptweight*phiweight);
+   // hGammav2[cent]->Fill(getDeltaPhi(gphi,EP),gpt,gamma->Eta(),ptweight*phiweight);
    hGammaSpec->Fill(gpt,gamma->Eta(),cent,ptweight);
 }
 void setDecayChannels(int const defirst,int const desecond,int const mdme)
@@ -126,21 +126,22 @@ void setDecayChannels(int const defirst,int const desecond,int const mdme)
 }
 void getKinematics(TLorentzVector& b, double const mass)
 {
-   float const pt = gRandom->Uniform(0,30);
-   float const y = gRandom->Uniform(-1.5, 1.5);
+   float const pt = gRandom->Uniform(Cuts::momentumrange.first,Cuts::momentumrange.second);
+   float const y = gRandom->Uniform( Cuts::EtaRange*-1, Cuts::EtaRange);
    float const phi = TMath::TwoPi() * gRandom->Rndm();
-   // float const mT = sqrt(mass * mass + pt * pt);
-   // float const pz = mT * sinh(y);
-   // float const E = mT * cosh(y);
-   // b.SetPxPyPzE(pt * cos(phi), pt * sin(phi) , pz, E);
-   b.SetPtEtaPhiM(pt,y,phi,mass);
+   float const mT = sqrt(mass * mass + pt * pt);
+   float const pz = mT * sinh(y);
+   float const E = mT * cosh(y);
+   b.SetPxPyPzE(pt * cos(phi), pt * sin(phi) , pz, E);
+   // b.SetPtEtaPhiM(pt,y,phi,mass);
 }
 void getPi0Weight(TLorentzVector* mother,int cent,float EP,double &ptweight,double &phiweight)
 {
+  double ptrangeweight = Cuts::momentumrange.second-Cuts::momentumrange.first;
    float mpt = mother->Perp();
    float mphi = mother->Phi();
    phiweight = 1+2*fPi0v2[cent]->Eval(mpt)*std::cos(2*(mphi-EP));
-   ptweight = fpispectra[cent]->Eval(mpt); 
+   ptweight = fpispectra[cent]->Eval(mpt)*(ptrangeweight)*(2*Cuts::EtaRange); 
 }
 float getDeltaPhi(float mphi,float EP)
 {
@@ -199,8 +200,8 @@ void initHists()
    pGammav2 = new TProfile3D("pGammav2","pGammav2;p_{T}[GeV/c];#eta;Cent",150,0,15,150,-1.5,1.5,9,-0.5,8.5);
    pGammav2->SetDirectory(0);
    for (int ic=0;ic<Cuts::nCent;ic++){
-     hGammav2[ic] = new TH3D(Form("hGammav2_%d",ic),"hGammav2;#delta#phi;p_{T}[GeV/c];#eta;",100,0,TMath::Pi() ,150,0,15,150,-1.5,1.5);
-     hGammav2[ic]->SetDirectory(0);
+     // hGammav2[ic] = new TH3D(Form("hGammav2_%d",ic),"hGammav2;#delta#phi;p_{T}[GeV/c];#eta;",100,0,TMath::Pi() ,150,0,15,150,-1.5,1.5);
+     // hGammav2[ic]->SetDirectory(0);
    }
  
    //gamma spectra
@@ -209,7 +210,7 @@ void initHists()
  
    //for check?
    pPi0v2 = new TProfile2D("pPi0v2","pPi0v2;p_{T};Cent",150,0,15,9,-0.5,8.5);
-   hPi0v2 = new TH3D("hPi0v2","hPi0v2;#delta#phi;p_{T};Cent",100,0,TMath::Pi() ,150,0,15,9,-0.5,8.5);
+   // hPi0v2 = new TH3D("hPi0v2","hPi0v2;#delta#phi;p_{T};Cent",100,0,TMath::Pi() ,150,0,15,9,-0.5,8.5);
    hPi0Spec = new TH2D("hPi0Spec","hPi0Spec;p_{T};Cent",150,0,15,9,-0.5,8.5);
 }
 void Write(TFile* file)
@@ -219,12 +220,12 @@ void Write(TFile* file)
    pGammav2->Write();
    for (int ic=0;ic<Cuts::nCent;ic++)
    {
-      hGammav2[ic]->Write();
+      // hGammav2[ic]->Write();
       // fpispectra[ic]->Write();
       // fPi0v2[ic]->Write();
    }
    hGammaSpec->Write(); 
    pPi0v2->Write(); 
-   hPi0v2->Write();
+   // hPi0v2->Write();
    hPi0Spec->Write();
 }
