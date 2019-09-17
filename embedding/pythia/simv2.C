@@ -5,7 +5,7 @@
 #include "TStopwatch.h"
 #include <iostream>
 using namespace std;
-void simv2(int npart=1e7,int rdnb=0,int mode=1 ,TString outname="gammav2")
+void simv2(int npart=1e7,int rdnb=0,int mode=2 ,TString outname="gammav2")
 {
   TStopwatch*  time = new TStopwatch();
   time->Start();
@@ -34,7 +34,16 @@ void simv2(int npart=1e7,int rdnb=0,int mode=1 ,TString outname="gammav2")
     MomParticleId = Cuts::EtaId;
     Mass = Cuts::M_Eta;
   }
-  else return;
+  else if (mode == 2)
+  {
+    setDecayChannels(590,597,593);  //eta->pipigamma
+    TPythia6::Instance()->SetBRAT(593,100);
+    b_d = new TLorentzVector;
+    MomParticleId = Cuts::EtaId;
+    Mass = Cuts::M_Eta;
+  }
+  else 
+  {cout <<"please input the right mode(0-2)" << endl; return;}
   TClonesArray ptl("TParticle", 10);
   bookHists(mode);
   initHists();
@@ -157,7 +166,7 @@ void bookHists(int mode)
   for (int ic=0;ic<Cuts::nCent;ic++)
   {
     if (mode ==0) fpispectra[ic] = new TF1(Form("pi0spectra_%d",ic),"2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])",0,15); 
-    else if (mode ==1) fpispectra[ic] = new TF1(Form("etaspectra_%d",ic),"2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0.134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3], -[4])",0,15);
+    else if (mode ==1 || mode==2) fpispectra[ic] = new TF1(Form("etaspectra_%d",ic),"2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0.134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3], -[4])",0,15);
     else { cout<<" fatal error! mode is not correct!" <<endl; return;}
     fpispectra[ic]->SetParameters(Cuts::SpectraParPi0[Cuts::SpectraParPi0_centbin[ic]]);
   }
@@ -170,7 +179,7 @@ void bookHists(int mode)
        fPi0v2[ic] = (TF1*)file->Get(Form("fit_%s", namev2[ic].Data()));
     }
   }
-  else if (mode == 1)
+  else if (mode == 1 || mode ==2)
   {
     TFile* file = TFile::Open("data/fitKaonv2.root");
     TString namev2[9]={"40_80","40_80","40_80","40_80","10_40","10_40","10_40","0_10","0_10"};

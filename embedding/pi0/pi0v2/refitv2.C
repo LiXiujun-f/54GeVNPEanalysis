@@ -82,7 +82,4 @@ void refitv2()
     // addpdf(pdf);
   pdf->On();
   pdf->Close(); 
-   
-  
-
 }

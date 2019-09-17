@@ -1,4 +1,4 @@
-//
+//modified from sPhenixStyle, Yuanjing
 //   @file    sPhenixStyle.h         
 //   
 //            sPHENIX Style, based on a style file from ATLAS

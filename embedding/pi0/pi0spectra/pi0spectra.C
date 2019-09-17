@@ -1,4 +1,3 @@
-
 void readpm(TString filename,TString name,TFile* fout);
 void pi0spectra()
 {
@@ -20,7 +19,7 @@ void readpm(TString filename,TString name,TFile* fout)
   string words;
   TString centname[4] = {"0_10","10_20","20_40","40_80"};
   TGraphErrors* gpim[4];
- float tmp; 
+  float tmp; 
      // getline(read,words);
   for (int j=0;j<4;j++)
   { 

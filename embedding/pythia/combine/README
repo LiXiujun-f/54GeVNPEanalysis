@@ -1,0 +1,3 @@
+To read the simulated pi0/eta->gamma v2 and spectra:
+    root calgamma.C
+In this macro, the spectra (dN/dpTdY)  already scaled with the branchratio.
