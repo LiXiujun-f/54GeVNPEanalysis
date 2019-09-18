@@ -17,10 +17,10 @@ void calgamma()
   TPDF* pdf = new TPDF("gammav2plots.pdf");
   pdf->Off();
 
-  // TString filenamePi="pi02gamma_0912.root";
-  TString filenamePi="gammav2.root";
-  // TString filenameEta="eta2gamma_0911.root";
-  TString filenameEta="gammav2.root";
+  TString filenamePi="pi02gamma_0918.root";
+  // TString filenamePi="gammav2.root";
+  TString filenameEta="eta2gamma_0918.root";
+  // TString filenameEta="gammav2.root";
   TFile* fout = new TFile("fread_pi0_eta_2gamma.root","recreate");
 
   drawpi0(filenamePi,pdf,c,"pi0");
@@ -146,6 +146,8 @@ void drawAndWriteGamma(TString filename, TFile* fout,TPDF* pdf, TCanvas* c,TStri
     double events=1;
     if (i>=2) events= hCent->GetBinContent(i+1);
     else if (i==1) events = hCent->GetEntries();
+    if (i>=2) events = 1.67e10;
+    if (i>=7) events = 8.33e9;
     hGmSp[i]->Scale(1./(hGmSp[i]->GetBinWidth(1)*etarange));
     if (i>=2){
        f->SetParameters(SpectraParPi0[SpectraParPi0_centbin[i]] );
