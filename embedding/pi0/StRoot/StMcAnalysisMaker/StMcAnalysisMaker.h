@@ -54,6 +54,10 @@ private:
    TH1F* hEP;
    TH1F* hPi2tot;
    TH2F* hPi0Pt;
+   TH2F* hPi0Pt_norm;
+   TH2F* hPi0Pt_weight;
+   TH3F* hPi0PhiEtaPt; 
+
    TH2F* hMcElectronPtvsCent;
    // TH2F* hMcElectronPtvsCent_test;
    TH2F* hRcElectronPtvsCent;
@@ -67,6 +71,7 @@ private:
   
    TH2F* hElectron;
    TH2F* hElectronPassCut; 
+   TH2F* hElectronVsParent; 
                 
    //check the part
    TH3F* hPartEptetaphi;
@@ -106,7 +111,7 @@ private:
    void pairPartnerElectron(StMuTrack const* const TagE,StMcTrack const * const McTagE, std::map<int,int>& mc_rcpair);
    bool passReconstructionCut(StMuTrack const * const pe_1, StMuTrack const * const pe_2, float weight);
    void fillPhoEv2(StMuTrack const* const TagE,StMcTrack const * const mother,float weight,bool isReco); 
-   void fillPi0v2(StMcTrack const * const mcTrack );
+   void fillPi0v2(StMcTrack const * const mcTrack, int nPi0 );
    bool isGoodTagE(const StMuTrack*) const ;
    bool isGoodPartE(const StMuTrack*) const;
    bool checkTheDecayChannel();

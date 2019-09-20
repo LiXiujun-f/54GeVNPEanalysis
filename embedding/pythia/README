@@ -1,0 +1,4 @@
+mode 0:  pi0->2gamma
+mode 1:  eta->2gamma
+mode 2:  eta->pipigamma % current fraction is too low, so I do not add it.
+ 

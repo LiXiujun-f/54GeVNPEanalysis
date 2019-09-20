@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sat Jun 22 13:50:28 2019 by ROOT version 5.34/30
+// Fri Sep 20 17:46:03 2019 by ROOT version 5.34/30
 // from TTree Tree/Tree
 // found on file: test.tree.root
 //////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+
 #define Ninc 200
 #define Nphe 1000
 // Header file for the classes stored in the TTree if any.
@@ -63,6 +64,7 @@ public :
    Float_t         charge_inc[Ninc];   //[nIncE]
    Float_t         nFit_inc[Ninc];   //[nIncE]
    Float_t         ndEdx_inc[Ninc];   //[nIncE]
+   Float_t         nMax_inc[Ninc];   //[nIncE]
    UInt_t          topomap0_inc[Ninc];   //[nIncE]
    Bool_t          has1hit_inc[Ninc];   //[nIncE]
    Bool_t          has2hit_inc[Ninc];   //[nIncE]
@@ -78,6 +80,7 @@ public :
    Float_t         charge_phe[Nphe];   //[nPhoE]
    Float_t         nFit_phe[Nphe];   //[nPhoE]
    Float_t         ndEdx_phe[Nphe];   //[nPhoE]
+   Float_t         nMax_phe[Nphe];   //[nPhoE]
    Float_t         deltaphi_phe[Nphe];   //[nPhoE]
    Float_t         cos2phi_phe[Nphe];   //[nPhoE]
    UInt_t          topomap0_phe[Nphe];   //[nPhoE]
@@ -91,6 +94,7 @@ public :
    Float_t         charge_parte[Nphe];   //[nPhoE]
    Float_t         nFit_parte[Nphe];   //[nPhoE]
    Float_t         ndEdx_parte[Nphe];   //[nPhoE]
+   Float_t         nMax_parte[Nphe];   //[nPhoE]
    UInt_t          topomap0_parte[Nphe];   //[nPhoE]
    Float_t         DCA_pair[Nphe];   //[nPhoE]
    Float_t         decayL_pair[Nphe];   //[nPhoE]
@@ -146,6 +150,7 @@ public :
    TBranch        *b_charge_inc;   //!
    TBranch        *b_nFit_inc;   //!
    TBranch        *b_ndEdx_inc;   //!
+   TBranch        *b_nMax_inc;   //!
    TBranch        *b_topomap0_inc;   //!
    TBranch        *b_has1hit_inc;   //!
    TBranch        *b_has2hit_inc;   //!
@@ -161,6 +166,7 @@ public :
    TBranch        *b_charge_phe;   //!
    TBranch        *b_nFit_phe;   //!
    TBranch        *b_ndEdx_phe;   //!
+   TBranch        *b_nMax_phe;   //!
    TBranch        *b_deltaphi_phe;   //!
    TBranch        *b_cos2phi_phe;   //!
    TBranch        *b_topomap0_phe;   //!
@@ -174,6 +180,7 @@ public :
    TBranch        *b_charge_parte;   //!
    TBranch        *b_nFit_parte;   //!
    TBranch        *b_ndEdx_parte;   //!
+   TBranch        *b_nMax_parte;   //!
    TBranch        *b_topomap0_parte;   //!
    TBranch        *b_DCA_pair;   //!
    TBranch        *b_decayL_pair;   //!
@@ -197,7 +204,7 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   ClassDef(myTree, 1);
+    ClassDef(myTree, 1);
 };
 
 #endif
@@ -299,6 +306,7 @@ void myTree::Init(TTree *tree)
    fChain->SetBranchAddress("charge_inc", charge_inc, &b_charge_inc);
    fChain->SetBranchAddress("nFit_inc", nFit_inc, &b_nFit_inc);
    fChain->SetBranchAddress("ndEdx_inc", ndEdx_inc, &b_ndEdx_inc);
+   fChain->SetBranchAddress("nMax_inc", nMax_inc, &b_nMax_inc);
    fChain->SetBranchAddress("topomap0_inc", topomap0_inc, &b_topomap0_inc);
    fChain->SetBranchAddress("has1hit_inc", has1hit_inc, &b_has1hit_inc);
    fChain->SetBranchAddress("has2hit_inc", has2hit_inc, &b_has2hit_inc);
@@ -314,6 +322,7 @@ void myTree::Init(TTree *tree)
    fChain->SetBranchAddress("charge_phe", charge_phe, &b_charge_phe);
    fChain->SetBranchAddress("nFit_phe", nFit_phe, &b_nFit_phe);
    fChain->SetBranchAddress("ndEdx_phe", ndEdx_phe, &b_ndEdx_phe);
+   fChain->SetBranchAddress("nMax_phe", nMax_phe, &b_nMax_phe);
    fChain->SetBranchAddress("deltaphi_phe", deltaphi_phe, &b_deltaphi_phe);
    fChain->SetBranchAddress("cos2phi_phe", cos2phi_phe, &b_cos2phi_phe);
    fChain->SetBranchAddress("topomap0_phe", topomap0_phe, &b_topomap0_phe);
@@ -327,6 +336,7 @@ void myTree::Init(TTree *tree)
    fChain->SetBranchAddress("charge_parte", charge_parte, &b_charge_parte);
    fChain->SetBranchAddress("nFit_parte", nFit_parte, &b_nFit_parte);
    fChain->SetBranchAddress("ndEdx_parte", ndEdx_parte, &b_ndEdx_parte);
+   fChain->SetBranchAddress("nMax_parte", nMax_parte, &b_nMax_parte);
    fChain->SetBranchAddress("topomap0_parte", topomap0_parte, &b_topomap0_parte);
    fChain->SetBranchAddress("DCA_pair", DCA_pair, &b_DCA_pair);
    fChain->SetBranchAddress("decayL_pair", decayL_pair, &b_decayL_pair);

@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Sun Jun 23 12:00:16 2019 by ROOT version 5.34/38
+// Fri Sep 20 17:46:03 2019 by ROOT version 5.34/30
 // from TTree Tree/Tree
-// found on file: 0906B0CB92D335B831CF556E7DAEBACA_100.tree.root
+// found on file: test.tree.root
 //////////////////////////////////////////////////////////
 
 #ifndef myTree_h
@@ -12,6 +12,8 @@
 #include <TChain.h>
 #include <TFile.h>
 
+#define Ninc 200
+#define Nphe 1000
 // Header file for the classes stored in the TTree if any.
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -50,59 +52,62 @@ public :
    Float_t         EP_P_sh;
    Float_t         resolution;
    Int_t           nIncE;
-   Int_t           idx_inc[15];   //[nIncE]
-   Float_t         nSigE_inc[15];   //[nIncE]
-   Float_t         beta_inc[15];   //[nIncE]
-   Float_t         pt_inc[15];   //[nIncE]
-   Float_t         eta_inc[15];   //[nIncE]
-   Float_t         phi_inc[15];   //[nIncE]
-   Float_t         deltaphi_inc[15];   //[nIncE]
-   Float_t         cos2phi_inc[15];   //[nIncE]
-   Float_t         gDca_inc[15];   //[nIncE]
-   Float_t         charge_inc[15];   //[nIncE]
-   Float_t         nFit_inc[15];   //[nIncE]
-   Float_t         ndEdx_inc[15];   //[nIncE]
-   UInt_t          topomap0_inc[15];   //[nIncE]
-   Bool_t          has1hit_inc[15];   //[nIncE]
-   Bool_t          has2hit_inc[15];   //[nIncE]
-   Bool_t          has3hit_inc[15];   //[nIncE]
+   Int_t           idx_inc[Ninc];   //[nIncE]
+   Float_t         nSigE_inc[Ninc];   //[nIncE]
+   Float_t         beta_inc[Ninc];   //[nIncE]
+   Float_t         pt_inc[Ninc];   //[nIncE]
+   Float_t         eta_inc[Ninc];   //[nIncE]
+   Float_t         phi_inc[Ninc];   //[nIncE]
+   Float_t         deltaphi_inc[Ninc];   //[nIncE]
+   Float_t         cos2phi_inc[Ninc];   //[nIncE]
+   Float_t         gDca_inc[Ninc];   //[nIncE]
+   Float_t         charge_inc[Ninc];   //[nIncE]
+   Float_t         nFit_inc[Ninc];   //[nIncE]
+   Float_t         ndEdx_inc[Ninc];   //[nIncE]
+   Float_t         nMax_inc[Ninc];   //[nIncE]
+   UInt_t          topomap0_inc[Ninc];   //[nIncE]
+   Bool_t          has1hit_inc[Ninc];   //[nIncE]
+   Bool_t          has2hit_inc[Ninc];   //[nIncE]
+   Bool_t          has3hit_inc[Ninc];   //[nIncE]
    Int_t           nPhoE;
-   Int_t           idx_phe[118];   //[nPhoE]
-   Float_t         nSigE_phe[118];   //[nPhoE]
-   Float_t         beta_phe[118];   //[nPhoE]
-   Float_t         pt_phe[118];   //[nPhoE]
-   Float_t         eta_phe[118];   //[nPhoE]
-   Float_t         phi_phe[118];   //[nPhoE]
-   Float_t         gDca_phe[118];   //[nPhoE]
-   Float_t         charge_phe[118];   //[nPhoE]
-   Float_t         nFit_phe[118];   //[nPhoE]
-   Float_t         ndEdx_phe[118];   //[nPhoE]
-   Float_t         deltaphi_phe[118];   //[nPhoE]
-   Float_t         cos2phi_phe[118];   //[nPhoE]
-   UInt_t          topomap0_phe[118];   //[nPhoE]
-   Int_t           idx_parte[118];   //[nPhoE]
-   Float_t         nSigE_parte[118];   //[nPhoE]
-   Float_t         beta_parte[118];   //[nPhoE]
-   Float_t         gpt_parte[118];   //[nPhoE]
-   Float_t         geta_parte[118];   //[nPhoE]
-   Float_t         gphi_parte[118];   //[nPhoE]
-   Float_t         gDca_parte[118];   //[nPhoE]
-   Float_t         charge_parte[118];   //[nPhoE]
-   Float_t         nFit_parte[118];   //[nPhoE]
-   Float_t         ndEdx_parte[118];   //[nPhoE]
-   UInt_t          topomap0_parte[118];   //[nPhoE]
-   Float_t         DCA_pair[118];   //[nPhoE]
-   Float_t         decayL_pair[118];   //[nPhoE]
-   Float_t         V0x_pair[118];   //[nPhoE]
-   Float_t         V0y_pair[118];   //[nPhoE]
-   Float_t         V0z_pair[118];   //[nPhoE]
-   Float_t         vtx2V0x_pair[118];   //[nPhoE]
-   Float_t         vtx2V0y_pair[118];   //[nPhoE]
-   Float_t         vtx2V0z_pair[118];   //[nPhoE]
-   Float_t         M_pair[118];   //[nPhoE]
-   Float_t         px_pair[118];   //[nPhoE]
-   Float_t         py_pair[118];   //[nPhoE]
-   Float_t         pz_pair[118];   //[nPhoE]
+   Int_t           idx_phe[Nphe];   //[nPhoE]
+   Float_t         nSigE_phe[Nphe];   //[nPhoE]
+   Float_t         beta_phe[Nphe];   //[nPhoE]
+   Float_t         pt_phe[Nphe];   //[nPhoE]
+   Float_t         eta_phe[Nphe];   //[nPhoE]
+   Float_t         phi_phe[Nphe];   //[nPhoE]
+   Float_t         gDca_phe[Nphe];   //[nPhoE]
+   Float_t         charge_phe[Nphe];   //[nPhoE]
+   Float_t         nFit_phe[Nphe];   //[nPhoE]
+   Float_t         ndEdx_phe[Nphe];   //[nPhoE]
+   Float_t         nMax_phe[Nphe];   //[nPhoE]
+   Float_t         deltaphi_phe[Nphe];   //[nPhoE]
+   Float_t         cos2phi_phe[Nphe];   //[nPhoE]
+   UInt_t          topomap0_phe[Nphe];   //[nPhoE]
+   Int_t           idx_parte[Nphe];   //[nPhoE]
+   Float_t         nSigE_parte[Nphe];   //[nPhoE]
+   Float_t         beta_parte[Nphe];   //[nPhoE]
+   Float_t         gpt_parte[Nphe];   //[nPhoE]
+   Float_t         geta_parte[Nphe];   //[nPhoE]
+   Float_t         gphi_parte[Nphe];   //[nPhoE]
+   Float_t         gDca_parte[Nphe];   //[nPhoE]
+   Float_t         charge_parte[Nphe];   //[nPhoE]
+   Float_t         nFit_parte[Nphe];   //[nPhoE]
+   Float_t         ndEdx_parte[Nphe];   //[nPhoE]
+   Float_t         nMax_parte[Nphe];   //[nPhoE]
+   UInt_t          topomap0_parte[Nphe];   //[nPhoE]
+   Float_t         DCA_pair[Nphe];   //[nPhoE]
+   Float_t         decayL_pair[Nphe];   //[nPhoE]
+   Float_t         V0x_pair[Nphe];   //[nPhoE]
+   Float_t         V0y_pair[Nphe];   //[nPhoE]
+   Float_t         V0z_pair[Nphe];   //[nPhoE]
+   Float_t         vtx2V0x_pair[Nphe];   //[nPhoE]
+   Float_t         vtx2V0y_pair[Nphe];   //[nPhoE]
+   Float_t         vtx2V0z_pair[Nphe];   //[nPhoE]
+   Float_t         M_pair[Nphe];   //[nPhoE]
+   Float_t         px_pair[Nphe];   //[nPhoE]
+   Float_t         py_pair[Nphe];   //[nPhoE]
+   Float_t         pz_pair[Nphe];   //[nPhoE]
 
    // List of branches
    TBranch        *b_runId;   //!
@@ -145,6 +150,7 @@ public :
    TBranch        *b_charge_inc;   //!
    TBranch        *b_nFit_inc;   //!
    TBranch        *b_ndEdx_inc;   //!
+   TBranch        *b_nMax_inc;   //!
    TBranch        *b_topomap0_inc;   //!
    TBranch        *b_has1hit_inc;   //!
    TBranch        *b_has2hit_inc;   //!
@@ -160,6 +166,7 @@ public :
    TBranch        *b_charge_phe;   //!
    TBranch        *b_nFit_phe;   //!
    TBranch        *b_ndEdx_phe;   //!
+   TBranch        *b_nMax_phe;   //!
    TBranch        *b_deltaphi_phe;   //!
    TBranch        *b_cos2phi_phe;   //!
    TBranch        *b_topomap0_phe;   //!
@@ -173,6 +180,7 @@ public :
    TBranch        *b_charge_parte;   //!
    TBranch        *b_nFit_parte;   //!
    TBranch        *b_ndEdx_parte;   //!
+   TBranch        *b_nMax_parte;   //!
    TBranch        *b_topomap0_parte;   //!
    TBranch        *b_DCA_pair;   //!
    TBranch        *b_decayL_pair;   //!
@@ -196,6 +204,7 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
+    ClassDef(myTree, 1);
 };
 
 #endif
@@ -206,9 +215,9 @@ myTree::myTree(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("0906B0CB92D335B831CF556E7DAEBACA_100.tree.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("test.tree.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("0906B0CB92D335B831CF556E7DAEBACA_100.tree.root");
+         f = new TFile("test.tree.root");
       }
       f->GetObject("Tree",tree);
 
@@ -297,6 +306,7 @@ void myTree::Init(TTree *tree)
    fChain->SetBranchAddress("charge_inc", charge_inc, &b_charge_inc);
    fChain->SetBranchAddress("nFit_inc", nFit_inc, &b_nFit_inc);
    fChain->SetBranchAddress("ndEdx_inc", ndEdx_inc, &b_ndEdx_inc);
+   fChain->SetBranchAddress("nMax_inc", nMax_inc, &b_nMax_inc);
    fChain->SetBranchAddress("topomap0_inc", topomap0_inc, &b_topomap0_inc);
    fChain->SetBranchAddress("has1hit_inc", has1hit_inc, &b_has1hit_inc);
    fChain->SetBranchAddress("has2hit_inc", has2hit_inc, &b_has2hit_inc);
@@ -312,6 +322,7 @@ void myTree::Init(TTree *tree)
    fChain->SetBranchAddress("charge_phe", charge_phe, &b_charge_phe);
    fChain->SetBranchAddress("nFit_phe", nFit_phe, &b_nFit_phe);
    fChain->SetBranchAddress("ndEdx_phe", ndEdx_phe, &b_ndEdx_phe);
+   fChain->SetBranchAddress("nMax_phe", nMax_phe, &b_nMax_phe);
    fChain->SetBranchAddress("deltaphi_phe", deltaphi_phe, &b_deltaphi_phe);
    fChain->SetBranchAddress("cos2phi_phe", cos2phi_phe, &b_cos2phi_phe);
    fChain->SetBranchAddress("topomap0_phe", topomap0_phe, &b_topomap0_phe);
@@ -325,6 +336,7 @@ void myTree::Init(TTree *tree)
    fChain->SetBranchAddress("charge_parte", charge_parte, &b_charge_parte);
    fChain->SetBranchAddress("nFit_parte", nFit_parte, &b_nFit_parte);
    fChain->SetBranchAddress("ndEdx_parte", ndEdx_parte, &b_ndEdx_parte);
+   fChain->SetBranchAddress("nMax_parte", nMax_parte, &b_nMax_parte);
    fChain->SetBranchAddress("topomap0_parte", topomap0_parte, &b_topomap0_parte);
    fChain->SetBranchAddress("DCA_pair", DCA_pair, &b_DCA_pair);
    fChain->SetBranchAddress("decayL_pair", decayL_pair, &b_decayL_pair);

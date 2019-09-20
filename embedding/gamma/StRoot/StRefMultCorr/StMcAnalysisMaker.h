@@ -46,22 +46,16 @@ private:
 
    int nPi0;
    TH2F* hnHitsvsPt;
-   TH2F* hVzvsmcVz;
    TH2F* hDCAvsPt;
    TH1F* hnPi0;
    TH1F* hRefmult;
    TH1F* hEvent;
    TH1F* hEP;
    TH1F* hPi2tot;
-   TH2F* hPi0Pt;
-   TH2F* hPi0Pt_norm;
-   TH2F* hPi0Pt_weight;
-   TH3F* hPi0PhiEtaPt; 
-
+   TH1F* hPi0Pt;
    TH2F* hMcElectronPtvsCent;
    // TH2F* hMcElectronPtvsCent_test;
    TH2F* hRcElectronPtvsCent;
-   TH2F* hRcElectronMcPtvsCent;
    TH2F* hMomResolution;
    TH3F* hDuplicated;
    TH2F* hDupTracksDpt;
@@ -71,13 +65,11 @@ private:
   
    TH2F* hElectron;
    TH2F* hElectronPassCut; 
-   TH2F* hElectronVsParent; 
                 
    //check the part
    TH3F* hPartEptetaphi;
    TH2F* hPartEnFits;
    TH2F* hPartEdca; 
-   TH2F* hPairDecayL;
    TH3F* hDcaPair;
    TH3F* hMassDiE;
    TH3F* hMassDiEMC;
@@ -85,10 +77,6 @@ private:
    TProfile2D* pPi0Ev2;
    TH3F* hPhoEPtPhiCent;
    TH3F* hPhoEPtPhiCentRaw;
-   TProfile2D* pRecoEv2;
-   TH3F* hRecoEPtPhiCent;
-   TH3F* hRecoEPtPhiCentRaw;
-
    TH3F* hPi0PtPhiCent;
    TH3F* hPi0PtPhiCentRaw;
 
@@ -110,8 +98,8 @@ private:
    bool isGoodRcTrack(StMuTrack const* const rcTrack) const;
    void pairPartnerElectron(StMuTrack const* const TagE,StMcTrack const * const McTagE, std::map<int,int>& mc_rcpair);
    bool passReconstructionCut(StMuTrack const * const pe_1, StMuTrack const * const pe_2, float weight);
-   void fillPhoEv2(StMuTrack const* const TagE,StMcTrack const * const mother,float weight,bool isReco); 
-   void fillPi0v2(StMcTrack const * const mcTrack, int nPi0 );
+   void fillPhoEv2(StMuTrack const* const TagE,StMcTrack const * const mother,float weight); 
+   void fillPi0v2(StMcTrack const * const mcTrack );
    bool isGoodTagE(const StMuTrack*) const ;
    bool isGoodPartE(const StMuTrack*) const;
    bool checkTheDecayChannel();
@@ -151,4 +139,3 @@ inline  bool StMcAnalysisMaker::isBadrun(Int_t runId){
 inline void StMcAnalysisMaker::setOutFileName(std::string s){ mOutfileName = s.c_str();}
 inline void StMcAnalysisMaker::setRefMultCorr(StRefMultCorr* grefmultCorrUtil){ mGRefMultCorrUtil = grefmultCorrUtil;}
 #endif
-

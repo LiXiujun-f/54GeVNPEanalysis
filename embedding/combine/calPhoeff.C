@@ -11,13 +11,20 @@ void fitPhoEv2(TH3F* hPhev2, int centL, int centH, TString name, TPDF* pdf, TFil
 void fitPhoEv2(TH3F* hPhev2,TH3F* hPhev2raw, int centL, int centH, TString name , TPDF* pdf, TFile* fout);
 void ProjectionAndFit(TH2F* hMc,TH2F* hRc,int centL,int centH,TString name ,TPDF* pdf,TFile* fout);
 void CalPhoEv2(TProfile2D* pPhev2_2d, int centL, int centH, TString name , TPDF* pdf, TFile* fout);
-void calPhoeff(TString inputfilename="", TString pdfname="PhoErecoEff.pdf",TString outname="RecoEff.pdf")
+void calPhoeff()
 {
   SetsPhenixStyle();
-  TFile* file = new TFile(inputfilename.Data());
+  // TFile* file = new TFile("embeddingQa.phoE.root.ep0");
+  // TFile* file = new TFile("embeddingQa.phoE.root");
+  // TFile* file = new TFile("test.root");
+  // TFile* file = new TFile("embeddQa0825.root");
+  TFile* file = new TFile("embeddQa_0910.root");
+  // TFile* file = new TFile("embeddQa_phicut0827.root");
+  // TFile* file = new TFile("embeddingQa.phoE.root.0818");
 
+  // TFile* file = new TFile("test.McAna.root");
   TCanvas* c = new TCanvas("c","c",800,600);
-  TPDF* pdf = new TPDF(pdfname.Data());
+  TPDF* pdf = new TPDF("PhoErecoEff.pdf");
   pdf->Off();
   TH2F* hTagE = (TH2F*)file->Get("hTagElectron");
   TH2F* hRecoTagE = (TH2F*)file->Get("hTagElectronPassCut");
@@ -26,7 +33,7 @@ void calPhoeff(TString inputfilename="", TString pdfname="PhoErecoEff.pdf",TStri
   // hTagE->Sumw2();
   // hRecoTagE->Sumw2(); 
 
-  TFile* fout = new TFile(outname.Data() ,"recreate");
+  TFile* fout = new TFile("RecoEff.root","recreate");
   // 0->80%,1->70%,2->60%,3->50%,...,6->10%,7->5%,8->0
   gStyle->SetOptFit(111);
   ProjectionAndFit(hTagE,hRecoTagE,2,5,"RecoEff",pdf,fout);
@@ -57,8 +64,8 @@ void calPhoeff(TString inputfilename="", TString pdfname="PhoErecoEff.pdf",TStri
   
 
   fitPhoEv2(hPhEv2,hPhEv2raw, 2, 8,"PhoE",  pdf, fout);
-  fitPhoEv2(hPhEv2,hPhEv2raw, 2, 5,"PhoE",  pdf, fout);
-  fitPhoEv2(hPhEv2,hPhEv2raw, 7, 8,"PhoE",  pdf, fout);
+  // fitPhoEv2(hPhEv2,hPhEv2raw, 2, 5,"PhoE",  pdf, fout);
+  // fitPhoEv2(hPhEv2,hPhEv2raw, 7, 8,"PhoE",  pdf, fout);
  
   fitPhoEv2(hPhEv2raw, 2, 8,"Raw",  pdf, fout);
   // fitPhoEv2(hPhEv2raw, 2, 5,"Raw",  pdf, fout);
@@ -72,7 +79,7 @@ void calPhoeff(TString inputfilename="", TString pdfname="PhoErecoEff.pdf",TStri
   fitPhoEv2(hPi0v2,hPi0v2raw, 2, 8,"Pi0",  pdf, fout);
   // fitPhoEv2(hPi0v2, 4, 5,"Pi0",  pdf, fout);
 
-  CalPhoEv2(pPi0v2_2d,2,8,"Pi0",pdf,fout);
+  // CalPhoEv2(pPi0v2_2d,2,8,"Pi0",pdf,fout);
   
   gStyle->SetOptFit(0);
   

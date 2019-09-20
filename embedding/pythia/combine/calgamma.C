@@ -133,7 +133,7 @@ void drawAndWriteGamma(TString filename, TFile* fout,TPDF* pdf, TCanvas* c,TStri
       hGmSp[1] = (TH1F*)hGammaSpec->ProjectionX(Form("h%s2Gamma_mb",particlename.Data()),hGammaSpec->GetYaxis()->FindBin(etarange*-0.5),hGammaSpec->GetYaxis()->FindBin(etarange*0.5) ,3,9);
     TF1* f;
     if (particlename.Contains("pi0")) f = new TF1("f","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])", 0,15);
-    else if (particlename.Contains("eta")) f = new TF1("f","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*  x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0  .134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3  ], -[4])", 0,15);
+    else if (particlename.Contains("eta")) f = new TF1("f","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0.134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3], -[4])", 0,15);
     else {cout <<"please input the correct particle" << endl; return;}
     int const SpectraParPi0_centbin[9]={0,0,1,1,2,2,3,4,4};
   double const SpectraParPi0[5][5]={ 
@@ -144,9 +144,9 @@ void drawAndWriteGamma(TString filename, TFile* fout,TPDF* pdf, TCanvas* c,TStri
                                  {992.598, 0.406828, 0.0831998, 1.04464, 11.0797}
   };
     double events=1;
-    if (i>=2) events= hCent->GetBinContent(i+1);
+    if (i>=2) events = hCent->GetBinContent(i+1); //some problem happens the hCent does not represent real events, I donot know why
     else if (i==1) events = hCent->GetEntries();
-    if (i>=2) events = 1.67e10;
+    if (i>=2) events = 1.67e10; // directly use the scale factor taken from pi0 spectra
     if (i>=7) events = 8.33e9;
     hGmSp[i]->Scale(1./(hGmSp[i]->GetBinWidth(1)*etarange));
     if (i>=2){

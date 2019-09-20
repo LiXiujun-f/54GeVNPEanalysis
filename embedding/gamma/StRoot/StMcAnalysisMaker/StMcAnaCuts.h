@@ -51,17 +51,21 @@ namespace McAnaCuts
                                {682.788, 0.396488, 0.0690007, 1.06078, 11.0674},
                                {992.598, 0.406828, 0.0831998, 1.04464, 11.0797}
                              };
-   double const gammaFromPi0[5]={7.6e7, 0.59,0.1,0.71,7.4}; 
+ 
    int const nparVz_mult = 7;
    float const parVz_mult[nparVz_mult]={435.9,-0.02413,-0.003707,0.0002204,1.487e-5,-2.95e-07,-1.866e-8};
    int const nCent = 9 ;
    float const Refmult_cent[nCent] = {7,16,31,54,89,138,205,299,361}; //refmult > par[i],  70-80%, 60-70%, ... ,0-5% 
-  
  
-  int const parentId = 1;
-  int const gammaId = -1;  // specfic for gamma embedding, forbid X->gamma->e
+  int const parentId = 1; 
+  //forbidden the X->gamma->e in gamma embedding
+  int const gammaId = 0; 
   int const dauId1 = 2;
   int const dauId2 = 3; 
+ 
+  TString pi0spectraform="2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])";
+  TString etaspectraform="2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0.134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3], -[4])";
+
   StDedxMethod dedxMethod = kLikelihoodFitId;
 
   float const minPt=0.1; 
