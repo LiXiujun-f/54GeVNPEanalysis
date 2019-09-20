@@ -64,7 +64,7 @@ int StMcAnalysisMaker::Init()
     firedTriggersIndices.push_back(-1);
   };
   mOutfileName.Remove(0,33); 
-  gRandom->SetSeed(mOutfileName.Atoi()*897);
+  gRandom->SetSeed(mOutfileName.Atoi()*123);
   InitHists();  
   LOG_INFO << "Init() - DONE" << endm;
   return kStOk;
@@ -72,19 +72,25 @@ int StMcAnalysisMaker::Init()
 
 bool StMcAnalysisMaker::InitHists()
 {
-  hnPi0 = new TH1F("hnPi0","hnPi0",100,0,100); 
-  hRefmult = new TH1F("hRefmult","hRefmult",500,0,500);
+  // hnPi0 = new TH1F("hnPi0","hnPi0",100,0,100); 
+  hRefmult = new TH1F("hRefmult","hRefmult",600,0,600);
   hEvent = new TH1F("hEvent","hEvent;Cent",9,-0.5,8.5);
-  hVzvsmcVz = new TH2F("hVzvsmcVz","hVzvsmcVz;Vz;mcVz",70,-35,35,70,-35,35 );
+  hVzvsmcVz = new TH2F("hVzvsmcVz","hVzvsmcVz;Vz;mcVz",70,-35,35,70,-35,35);
   hEP = new TH1F("hEP","hEP;#Phi",360,0,TMath::Pi()); 
-  //check the pi pt distribution
-  hPi2tot = new TH1F("hPi2tot","hPi2tot",30,0,0.3);
-  hPi0Pt = new TH2F("hPi0Pt","hPi0Pt;p_{T}[GeV];Cent",120,0,15,9,-0.5,8.5);
-
+  //check the embedd particle pt distribution
+  double highPt = 15;
+  if (McAnaCuts::parentId==0) highPt = 6;
+  double embeddmult = 1.2;
+  if (McAnaCuts::parentId != 1) embeddmult = 0.3; 
+  hPi2tot = new TH1F("hPi2tot","hPi2tot",30,0,embeddmult);
+  hPi0Pt = new TH2F("hPi0Pt","hPi0Pt;p_{T}[GeV];Cent",120,0,highPt,9,-0.5,8.5);
+  hPi0Pt_norm = new TH2F("hPi0Pt_norm","hPi0Pt;p_{T}[GeV];Cent",120,0,highPt,9,-0.5,8.5);
+  hPi0Pt_weight = new TH2F("hPi0Pt_weight","hPi0Pt;p_{T}[GeV];Cent",120,0,highPt,9,-0.5,8.5);
+  hPi0PhiEtaPt = new TH3F("hPi0PhiEtaPt","hPi0PhiEtaPt;p_{T}[GeV];Phi;Eta",120,0,highPt,180,-1*TMath::Pi(),TMath::Pi(),90,-1.8,1.8);
   //check the global tracks (electron) efficiency and QA
   hnHitsvsPt = new TH2F("hnHits","hnHits;nHits;p_{T}",55,0,55,10,0,5); 
   hDCAvsPt = new TH2F("hDCA","hDCA;DCA;p_{T}",100,0,3,10,0,5);
-
+  
   hMcElectronPtvsCent = new TH2F("hMcElectronPtvsCent","hMcElectron;mc p_{T};Cent",80,0,4,9,-0.5,8.5);
   hMcElectronPtvsCent->Sumw2();
   // hMcElectronPtvsCent_test = new TH2F("hMcElectronPtvsCent_test","hMcElectron;p_{T};Cent",80,0,4,9,-0.5,8.5);
@@ -106,6 +112,9 @@ bool StMcAnalysisMaker::InitHists()
   {
     hElectron = new TH2F("hTagElectron","hTagElectron;p_{T};mCent",100,0,4,9,-0.5,8.5);
     hElectron->Sumw2();
+
+    hElectronVsParent = new TH2F("hElectronVsParent","hElectronVsParent;e p_{T}[GeV/c];parent p_{T}",40,0,4,60,0,15);
+
     hElectronPassCut = new TH2F("hTagElectronPassCut","hTagElectronPassCut;p_[T};mCent",100,0,4,9,-0.5,8.5); 
     hElectronPassCut->Sumw2();
 
@@ -143,29 +152,42 @@ bool StMcAnalysisMaker::InitHists()
 
 void StMcAnalysisMaker::bookSpectra(int centrality)
 {
-  // mPi0Spectra = new TF1("pi0spectra","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])",0,15);
-  if (McAnaCuts::parentId==10007) 
-  {
-    mPi0Spectra = new TF1("pi0spectra",McAnaCuts::pi0spectraform.Data(),0,15);
-    TFile* file = TFile::Open("StRoot/macros/fitpionv2.root");
-    TString namev2[9]={"50_60","50_60","50_60","40_50","30_40","20_30","10_20","0_10","0_10"};
-    fPi0v2 = (TF1*)file->Get(Form("fit_%s", namev2[centrality].Data())); 
-  // fPi0v2 = (TF1*)file->Get("fit_20_30"); 
-  file->Close();
-
-  }
-  if (McAnaCuts::parentId==10003) 
-  {
-    mPi0Spectra = new TF1("pi0spectra",McAnaCuts::etaspectraform.Data(),0,15);
-    TFile* file = TFile::Open("StRoot/macros/etav2.root");
-    TString namev2[9]={"50_60","50_60","50_60","40_50","30_40","20_30","10_20","0_10","0_10"};
-  fPi0v2 = (TF1*)file->Get(Form("fit_%s", namev2[centrality].Data())); 
-  // fPi0v2 = (TF1*)file->Get("fit_20_30"); 
-  file->Close();
-
-  }
-  mPi0Spectra->SetParameters(McAnaCuts::SpectraParPi0[McAnaCuts::SpectraParPi0_centbin[mCentrality]]);
-  }
+   // mPi0Spectra = new TF1("pi0spectra","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])",0,15);
+   // pi0
+   if (McAnaCuts::parentId!=1)
+   {
+    if (McAnaCuts::parentId==10007) 
+    {
+       mPi0Spectra = new TF1("pi0spectra",McAnaCuts::pi0spectraform.Data(),0,15);
+       TFile* file = TFile::Open("StRoot/macros/fitpionv2.root");
+       TString namev2[9]={"50_60","50_60","50_60","40_50","30_40","20_30","10_20","0_10","0_10"};
+       fPi0v2 = (TF1*)file->Get(Form("fit_%s", namev2[centrality].Data())); 
+       // fPi0v2 = (TF1*)file->Get("fit_20_30"); 
+       file->Close();
+    }
+    //Eta
+    if (McAnaCuts::parentId==10017) 
+    {
+       mPi0Spectra = new TF1("pi0spectra",McAnaCuts::etaspectraform.Data(),0,15);
+       TFile* file = TFile::Open("StRoot/macros/fitKaonv2.root");
+       TString namev2[9]={"40_80","40_80","40_80","40_80","10_40","10_40","10_40","0_10","0_10"};
+       fPi0v2 = (TF1*)file->Get(Form("fit_%s", namev2[centrality].Data())); 
+       // fPi0v2 = (TF1*)file->Get("fit_20_30"); 
+       file->Close();
+    }
+    mPi0Spectra->SetParameters(McAnaCuts::SpectraParPi0[McAnaCuts::SpectraParPi0_centbin[mCentrality]]);
+   } 
+   //gamma conversion
+   else if (McAnaCuts::parentId==1)
+   {
+      TFile* file = TFile::Open("StRoot/macros/fout_pi0_eta_gamma_0918.root");
+      int idx = centrality;
+      if (idx<2) idx = 2;
+      mPi0Spectra = (TF1*)file->Get(Form("fGMSp_comb_%d",idx));
+      fPi0v2 = (TF1*)file->Get(Form("fGMv2_comb_%d",idx));
+      file->Close();
+   }
+}
 //__________________________________
 int StMcAnalysisMaker::Make()
 {
@@ -222,7 +244,8 @@ int StMcAnalysisMaker::Make()
   mpVtx=mMuDst->event()->primaryVertexPosition();
   // cout<<"start refmult"<<endl;
   // bool goodevent = fabs(mpVtx.z())<35 && fabs(mpVtx.perp()) < McAnaCuts::vr && fabs(mpVtx.z()-mMuDst->event()->vpdVz())<McAnaCuts::VzVpdvz;
-  bool goodevent = fabs(mpVtx.z())<35&&fabs(mpVtx.z()-mMuDst->event()->vpdVz())<McAnaCuts::VzVpdvz;
+  bool pileup = mMuDst->event()->btofTrayMultiplicity() < mMuDst->event()->refMult()*2.88-155;
+  bool goodevent = fabs(mpVtx.z())<35 && !pileup;
   if (!goodevent) 
   {
     cout <<"is not good event  "<<endl;
@@ -273,6 +296,7 @@ int StMcAnalysisMaker::Make()
   if (passTrigger())
   {
     fillTracksStatus = fillTracks(nRTracks, nMcTracks);
+    // checkTheDecayChannel();
   }
   else
   {
@@ -280,8 +304,8 @@ int StMcAnalysisMaker::Make()
   }
 
   // int fillEventCountStatus = fillEventCounts((float)nRTracks, (float)nMcTracks);
-
   // return fillTracksStatus && fillEventCountStatus;
+
   return fillTracksStatus;
 }
 
@@ -309,6 +333,10 @@ int StMcAnalysisMaker::fillTracks(int& nRTracks, int& nMcTracks)
     ++nMcTracks;
     // cout <<"mcTrack key: "<< mcTrack->key() << " "<< mcTrack->geantId() << endl;
     fillMcTrack(mcTrack);
+    if (mcTrack->geantId()==McAnaCuts::parentId) 
+    {
+      nPi0++;
+    }
     int nCom = -999;
     StTrack const * rcTrack = findPartner(mcTrack,nCom); 
     if (!rcTrack || nCom<=10) {   
@@ -321,9 +349,33 @@ int StMcAnalysisMaker::fillTracks(int& nRTracks, int& nMcTracks)
       // cout<< "paired rc: "<<rcTrack->key()<< " idtruth "<< rcTrack->idTruth()<<endl;
     }
   }
-  hnPi0->Fill(nPi0);
+  // hnPi0->Fill(nPi0);
   hPi2tot->Fill(1.*nPi0/mMuDst->event()->refMult()); 
-
+  // fill mother histogram
+  if (nPi0>0)
+  {
+    for (unsigned int iTrk = 0;  iTrk < mMcEvent->tracks().size(); ++iTrk)
+    {
+      StMcTrack* const mcTrack = mMcEvent->tracks()[iTrk];
+      if (!mcTrack)
+      {
+         LOG_WARN << "Empty mcTrack container" << endm;
+         continue;
+      }
+      // cout << " parent  "<< mcTrk->parent()->geantId() << endl;
+      if (mcTrack->geantId()==McAnaCuts::parentId) 
+      {
+        // cout << " test if the key is the same "<< mMcEvent->tracks()[mcTrk->key()-1]->key() << " " << mcTrk->key()<<endl; 
+        double ptweight = mPi0Spectra->Eval(mcTrack->pt());
+        hPi0Pt->Fill(mcTrack->pt(),mCentrality ,mCentWeight);
+        hPi0Pt_norm->Fill(mcTrack->pt(),mCentrality ,mCentWeight*(1./(1.*nPi0)));
+        hPi0Pt_weight->Fill(mcTrack->pt(),mCentrality ,mCentWeight*(1./(1.*nPi0))*ptweight);
+        hPi0PhiEtaPt->Fill(mcTrack->pt(),mcTrack->momentum().phi(),mcTrack->momentum().pseudoRapidity(),mCentWeight*(1./(1.*nPi0))*ptweight);
+        fillPi0v2(mcTrack,(1./(1.*nPi0)));
+        // cout <<" mcTrk pi0 parent: "<< (mcTrk->parent()) << endl;
+      }
+     }
+  }
   //more than one track 
   // cout <<"fillRcTrack... total "<<  mMuDst->globalTracks()->GetEntries()<<endl;
   // cout << "StEvent: "<< (mEvent->trackNodes()).size()<<endl;
@@ -398,17 +450,6 @@ int StMcAnalysisMaker::fillTracks(int& nRTracks, int& nMcTracks)
 
 void StMcAnalysisMaker::fillMcTrack(StMcTrack const* const mcTrk)
 {
-  // cout << " parent  "<< mcTrk->parent()->geantId() << endl;
-  if (mcTrk->geantId()==McAnaCuts::parentId) 
-  {
-    // cout << " test if the key is the same "<< mMcEvent->tracks()[mcTrk->key()-1]->key() << " " << mcTrk->key()<<endl; 
-    nPi0++;    
-    hPi0Pt->Fill(mcTrk->pt(),mCentrality ,mCentWeight);
-    fillPi0v2(mcTrk);
-    // cout <<" mcTrk pi0 parent: "<< (mcTrk->parent()) << endl;
-  } 
-  else 
-  {
     if ( mcTrk->geantId() == McAnaCuts::dauId1 ||  mcTrk->geantId() == McAnaCuts::dauId2)
     {
       // cout <<" test the mother key "<<mcTrk->key() <<" " << mcTrk->parent()->key()<<endl;; 
@@ -421,8 +462,8 @@ void StMcAnalysisMaker::fillMcTrack(StMcTrack const* const mcTrk)
         // hMcElectronPtvsCent_test->Fill(mcTrk->momentum().perp(),mCentrality,mCentWeight);
       }
     }
-  }
 }
+
 void StMcAnalysisMaker::fillRcTrack( StMuTrack const* const rcTrack,StMcTrack const* const mcTrack)
 {
   if (mcTrack->geantId()!=McAnaCuts::dauId1 &&  mcTrack->geantId()!=McAnaCuts::dauId2) return;
@@ -462,6 +503,7 @@ void StMcAnalysisMaker::pairPartnerElectron(StMuTrack const* const TagE,StMcTrac
   {
     weight = 1./nPi0*mPi0Spectra->Eval(mother->pt())*mCentWeight;  // set a scale factor 
     fillPhoEv2(TagE,mother,weight,0);
+    hElectronVsParent->Fill(McTagE->momentum().perp(),mother->pt(),weight);
   }
   else if (mother->geantId() == McAnaCuts::gammaId)  //gamma
   {
@@ -471,9 +513,24 @@ void StMcAnalysisMaker::pairPartnerElectron(StMuTrack const* const TagE,StMcTrac
       return;
     }
     weight = 1./nPi0*mPi0Spectra->Eval(grandparent->pt())*mCentWeight;  // set a scale factor 
+    hElectronVsParent->Fill(McTagE->momentum().perp(),grandparent->pt(),weight);
     fillPhoEv2(TagE,grandparent,weight,0);
   }
-  hElectron->Fill(TagE->pt(), mCentrality,weight);
+  // else if (mother->geantId() == McAnaCuts::dauId2 || mother->geantId() == McAnaCuts::dauId1)
+  // {
+  //    //I find some electrons are from a parent e+ or e-
+  //    StMcTrack const * const  grandparent = McTagE->parent()->parent();
+  //   if ((!grandparent) || grandparent->geantId()!= McAnaCuts::parentId) {
+  //     cout <<"This electron does not come from pi0->e or pi0->gamma->e!" << endl;
+  //     return;
+  //   }
+  //   weight = 1./nPi0*mPi0Spectra->Eval(grandparent->pt())*mCentWeight;  // set a scale factor 
+  //   fillPhoEv2(TagE,grandparent,weight,0);    
+  // }
+  //ignore other posibilities, as we do not set weight for other situations
+  //such as pi0->gamma->e->e pi0->e->e->e etc, the last electrons' pt are very small, mostly far less than the minipt offset.
+  else return;
+  hElectron->Fill(TagE->pt(), mCentrality,weight); // the weight already include centrality weight
 
   //partner electron are global tracks
   for (unsigned int ipart =0;ipart<mMuDst->globalTracks()->GetEntries();ipart++)
@@ -501,6 +558,7 @@ void StMcAnalysisMaker::pairPartnerElectron(StMuTrack const* const TagE,StMcTrac
     int motherId = -999;
     motherId = mother->key();
     //check if partner e come from the same mother as tag e
+    //maybe its parent is electron/positron ..
     if (!McPartE->parent()) continue;
     else if (McPartE->parent()->key()!=motherId) continue;
 
@@ -529,6 +587,15 @@ void StMcAnalysisMaker::pairPartnerElectron(StMuTrack const* const TagE,StMcTrac
         }
         fillPhoEv2(TagE,grandparent,weight,1);
       }
+      // else if (mother->geantId() == McAnaCuts::dauId1 || mother->geantId()==McAnaCuts::dauId2)  //in case the electron interact with detector meterial
+      // {
+      //   StMcTrack const * const  grandparent = McTagE->parent()->parent();
+      //   if ((!grandparent) || grandparent->geantId()!= McAnaCuts::parentId) {
+      //     cout <<"This electron does not come from pi0->e or pi0->e->e!" << endl;
+      //     return;
+      //   }
+      //   fillPhoEv2(TagE,grandparent,weight,1);
+      // }
     }
   }
 }
@@ -559,7 +626,7 @@ void StMcAnalysisMaker::fillPhoEv2(StMuTrack const* const TagE,StMcTrack const *
   }
 }
 
-void StMcAnalysisMaker::fillPi0v2(StMcTrack const * const mcTrack )
+void StMcAnalysisMaker::fillPi0v2(StMcTrack const * const mcTrack,int nPi0 )
 {
   float ptweight = mPi0Spectra->Eval(mcTrack->pt()); 
   float mother_v2 = fPi0v2->Eval(mcTrack->pt()); // it should be added after collected the v2 inputs
@@ -571,8 +638,8 @@ void StMcAnalysisMaker::fillPi0v2(StMcTrack const * const mcTrack )
   float delta = mcphi-mEP;
   if (delta<0) delta+=2*TMath::Pi();
   else if (delta>TMath::Pi()) delta-=TMath::Pi();
-  hPi0PtPhiCent->Fill(mcTrack->pt(),delta, mCentrality , 10.0/(1.0*mMuDst->event()->refMult())* phiweight * ptweight*mCentWeight); 
-  hPi0PtPhiCentRaw->Fill(mcTrack->pt(),delta, mCentrality, 10.0/(1.0*mMuDst->event()->refMult())* ptweight*mCentWeight ); 
+  hPi0PtPhiCent->Fill(mcTrack->pt(),delta, mCentrality , (1./(1.0*nPi0)) * phiweight * ptweight*mCentWeight); 
+  hPi0PtPhiCentRaw->Fill(mcTrack->pt(),delta, mCentrality, (1./(1.0*nPi0)) * ptweight*mCentWeight ); 
 }
 
 bool StMcAnalysisMaker::passReconstructionCut(StMuTrack const * const pe_1, StMuTrack const * const pe_2, float weight)
@@ -669,7 +736,7 @@ bool StMcAnalysisMaker::isGoodPartE(StMuTrack const* const rcTrack) const
   int nHitsFit = rcTrack->nHitsFit();
   int nHitsdEdx = rcTrack->nHitsDedx();
   int nHitsMax = rcTrack->nHitsPoss();
-  bool passnHits = nHitsFit >15;
+  bool passnHits = nHitsFit >15 && nHitsFit/(1.0*nHitsMax)>McAnaCuts::nFit2nMax ;
   // bool passnHits = nHitsFit >McAnaCuts::nHitsFit &&
   //   nHitsFit/(1.*nHitsMax)>McAnaCuts::nFit2nMax &&
   //   fabs(nHitsdEdx)>McAnaCuts::nHitsdEdx;
@@ -800,7 +867,8 @@ bool StMcAnalysisMaker::checkTheDecayChannel()
       motherIdxMap.insert(std::pair<int,int>( mcTrack->key() ,NumPi0 ));
       NumPi0++;
       std::vector<int> vpi0;
-      vpi0.push_back(mcTrack->key());
+      // vpi0.push_back(mcTrack->key());
+      vpi0.push_back(mcTrack->geantId());
       decayChain.push_back(vpi0);
     }
     else 
@@ -808,12 +876,15 @@ bool StMcAnalysisMaker::checkTheDecayChannel()
       StMcTrack* mother = mcTrack->parent();
       if (!mother) {
         LOG_FATAL<<"Have particles not pi0 or from pi0 decay???" << endm;
+        cout <<mcTrack->geantId() <<endl;
         continue;
       }
       if (mother->geantId()==McAnaCuts::parentId)
       {
         //here skip check, as mother mctrack store befor the daughter.
-        decayChain[motherIdxMap[mother->key()]].push_back(mcTrack->key()); 
+        // decayChain[motherIdxMap[mother->key()]].push_back(mcTrack->key()); 
+        decayChain[motherIdxMap[mother->key()]].push_back(mcTrack->geantId()); 
+        cout<<mcTrack->geantId()<<" ("<<mcTrack->key()<<") parent: "<< mcTrack->parent()->geantId() << endl;
       }
       else 
       {
@@ -825,11 +896,22 @@ bool StMcAnalysisMaker::checkTheDecayChannel()
         }    
         if (grandmother->geantId() == McAnaCuts::parentId)
         {
-          decayChain[motherIdxMap[grandmother->key()]].push_back(mcTrack->key()); 
+          // decayChain[motherIdxMap[grandmother->key()]].push_back(mcTrack->key()); 
+          decayChain[motherIdxMap[grandmother->key()]].push_back(mcTrack->geantId()); 
+          cout <<mcTrack->geantId() <<"("<<mcTrack->key()<<", "<<mcTrack->pt()<<") parent(from "<<grandmother->geantId()<<", "<< grandmother->pt()<<"): "<< mcTrack->parent()->geantId()<<"("<<mother->pt()<<")"<< endl;
         }
         else 
         {
-          LOG_WARN<< "Have particles neither from pi0->e or pi0->others->e ???" <<endl;
+          cout<< "Have particles neither from pi0->e or pi0->others->e ???" <<endl;
+          StMcTrack* grandgrandmother = grandmother->parent();
+          if (grandgrandmother)
+          {
+             cout <<"the decay chain is: "<<grandgrandmother->geantId()<<"("<<grandgrandmother->key()<<") "
+               <<grandmother->geantId()<<"("<<grandmother->key()<<", "<< grandmother->pt()<<") "
+               <<mother->geantId()<<"("<<mother->key()<<", "<<mother->pt()<<") "
+               <<mcTrack->geantId()<<"("<<mcTrack->key()<<", "<<mcTrack->pt()<<") "<< endl;
+             
+          }
         }
       }
     }
@@ -886,11 +968,19 @@ int StMcAnalysisMaker::getCentralityBin(float vz,int runId,float mult,float &wei
 
 float StMcAnalysisMaker::reweight(float x) const
 {
-  x+=gRandom->Rndm();
-  // float p[7] = {3.9,-204.4,1.85,24.3,-0.01746,6405,3.7e-5};
-  float p[5] = {0.811,238.9,24.31,-25,6.325e-5};
-  // return 1;
-  if (x>70) return 1;
-  // else return p[0] + p[1]/(p[2]*x + p[3]) + p[4]*(p[2]*x + p[3]) + p[5]/(p[2]*x + p[3])/(p[2]*x + p[3]) + p[6]*(p[2]*x + p[3])*(p[2]*x + p[3]);
-  else return p[0] + p[1]/(p[2]*x + p[3]) + p[4]*(p[2]*x + p[3]);
+   x+=gRandom->Rndm();
+   float p[5] = {0.811,238.9,24.31,-25,6.325e-5};
+   //this is specfic for the run17 54 GeV analysis
+   // for pi0 and eta embedding
+   // the centrality distribution is not very flat in 0-5%
+   if (McAnaCuts::parentId==10007 || McAnaCuts::parentId == 100017)
+   {
+      if (x>70 && x<McAnaCuts::Refmult_cent[8]) return 1.;
+      else if (x>McAnaCuts::Refmult_cent[8]) return 0.8;
+   }
+   else if (McAnaCuts::parentId==1)
+   {
+     if (x>70) return 1;
+   }
+    else return p[0] + p[1]/(p[2]*x + p[3]) + p[4]*(p[2]*x + p[3]);
 }

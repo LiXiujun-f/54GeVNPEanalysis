@@ -64,8 +64,8 @@ void calPhoeff()
   
 
   fitPhoEv2(hPhEv2,hPhEv2raw, 2, 8,"PhoE",  pdf, fout);
-  fitPhoEv2(hPhEv2,hPhEv2raw, 2, 5,"PhoE",  pdf, fout);
-  fitPhoEv2(hPhEv2,hPhEv2raw, 7, 8,"PhoE",  pdf, fout);
+  // fitPhoEv2(hPhEv2,hPhEv2raw, 2, 5,"PhoE",  pdf, fout);
+  // fitPhoEv2(hPhEv2,hPhEv2raw, 7, 8,"PhoE",  pdf, fout);
  
   fitPhoEv2(hPhEv2raw, 2, 8,"Raw",  pdf, fout);
   // fitPhoEv2(hPhEv2raw, 2, 5,"Raw",  pdf, fout);
@@ -79,7 +79,7 @@ void calPhoeff()
   fitPhoEv2(hPi0v2,hPi0v2raw, 2, 8,"Pi0",  pdf, fout);
   // fitPhoEv2(hPi0v2, 4, 5,"Pi0",  pdf, fout);
 
-  CalPhoEv2(pPi0v2_2d,2,8,"Pi0",pdf,fout);
+  // CalPhoEv2(pPi0v2_2d,2,8,"Pi0",pdf,fout);
   
   gStyle->SetOptFit(0);
   
