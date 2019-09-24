@@ -25,7 +25,7 @@
 #include "TVector3.h"
 #include "TLorentzVector.h"
 #include "TStopwatch.h"
-// #include "THnSparse.h"
+#include "THnSparse.h"
 #include "myTree.h"
 using namespace std;
 
@@ -114,6 +114,8 @@ class StMiniTreeAnalysis
 
     TH2F* hDcavsPt_Gm;
     TH2F* hDcavsPt_Gm_LS;
+    TH2F* hDcavsPt;
+    TH2F* hDcavsPt_LS;
     TH2F* hDcavsPt_Dz;
     TH2F* hDcavsPt_Dz_LS;
     TH2F* hNFitsvsPt_LS;
@@ -124,6 +126,8 @@ class StMiniTreeAnalysis
     TH3F* hPartEptetaphi_Dz;
     TH3F* hPartEptetaphi_Gm_LS;
     TH3F* hPartEptetaphi_Gm;
+    THnSparseF* hPartETagEetapt;
+    THnSparseF* hPartETagEetapt_LS;
     TH2F* hPairDCA;
     TH2F* hPairDCALS;
     TH2F* hDecayL_LS;

@@ -26,7 +26,8 @@ void HFev2()
   int centL = 3,centH=9;
   SetsPhenixStyle(); 
   // TFile* file = TFile::Open("incEv2.root");
-  TFile* file = TFile::Open("incEv2_addqa_loose0825.root");
+  // TFile* file = TFile::Open("incEv2_addqa_loose0825.root");
+  TFile* file = TFile::Open("incEv2_0924.root");
   TCanvas* c = new TCanvas("c","c");
   TPDF* pdf = new TPDF("plots.pdf"); 
   pdf->Off();
@@ -51,7 +52,8 @@ void HFev2()
 
   // TH1F* hreco = ProjectionAndFit("embeddingQa.phoE.root", centL-1,centH-1 ,"RecoEff",pdf );
   // TH1F* hreco = ProjectionAndFit("embeddQa0825.root", centL-1,centH-1 ,"RecoEff",pdf );
-  TH1F* hreco = ProjectionAndFit("embeddQa_0910.root", centL-1,centH-1 ,"RecoEff",pdf );
+  // TH1F* hreco = ProjectionAndFit("embeddQa_0910.root", centL-1,centH-1 ,"RecoEff",pdf );
+  TH1F* hreco = ProjectionAndFit("embedd_comb0924.root", centL-1,centH-1 ,"RecoEff",pdf );
   // TH1F* hreco = ProjectionAndFit("pi0/embeddQa_tightcut.root", centL-1,centH-1 ,"RecoEff",pdf );
   TFile* fPIDv2 = TFile::Open("prev2.root");
   TGraphErrors* gKs = (TGraphErrors*)fPIDv2->Get("ks_0_80_62");
@@ -207,12 +209,8 @@ void HFev2()
   fprevious->Close();
   //
   TF1* phe62v2 = new TF1("phe62v2","0.9*pol5(0)",0,5);
-  // TF1* phe62v2 = new TF1("phe62v2","pol5",0,5);
-  // double par62[5] = {0.00338,0.18,-0.1,0.026,-0.0028};
-  // double par62[5] = {-0.02064,0.3289,-0.2923,0.103,-0.01232};
-  // double par62[6] = {0.03558,0.09212,0.02658,-0.05893,0.02284,-0.002781};
-  // double par62[6] = {0.03482,0.1064,-0.005653,-0.03191,0.01347,-0.001653};
-  double par62[6] = {0.008145,0.1855,-0.07343,-0.02234,0.02459,-0.00508};
+  // double par62[6] = {0.008145,0.1855,-0.07343,-0.02234,0.02459,-0.00508};
+  double par62[6] = { };
   phe62v2->SetParameters(par62); 
   phe62v2->Draw();
   addpdf(pdf);

@@ -25,9 +25,10 @@ void compare2PE_my()
   // TString mcdata = "rescaleFile/rescale_gamma.root";
   // TString mcdata = "rescaleFile/rescale_pi0.root";
   // drawQaNhits("NFit",pdf,c,"qa2.root",mcdata);
-  drawQaNhits("NFit",pdf,c,"qa5.root",mcdata);
+  // drawQaNhits("NFit",pdf,c,"qa5.root",mcdata);
   // drawQaNhits("NFit",pdf,c,"incEv2_0905.root",mcdata);
-  // drawQaDca("DCA",pdf,c,"qa5.root",mcdata);
+  drawQaNhits("NFit",pdf,c,"incEv2_0923.root",mcdata);
+  drawQaDca("DCA",pdf,c,"incEv2_0923.root",mcdata);
   drawPartPtEtaPhi("Partner e",pdf ,c ,realdata,mcdata); 
   drawPairDca("pair DCA",pdf,c,realdata,mcdata);
   drawDecayL("pair DecayLength",pdf,c,realdata,mcdata);
@@ -66,8 +67,8 @@ void drawQaDca(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   // hDCAdata = (TH2F*)file->Get(name[1]);
   // hDCAdataLS = (TH2F*)file->Get(name[2]);
   file = TFile::Open(real.Data());
-  TH3F* hDCAdata = (TH3F*)file->Get(name[1]);
-  TH3F* hDCAdataLS = (TH3F*)file->Get(name[2]);
+  TH2F* hDCAdata = (TH2F*)file->Get(name[1]);
+  TH2F* hDCAdataLS = (TH2F*)file->Get(name[2]);
 
   hDCAdataLS->SetDirectory(0);
   hDCAdata->SetDirectory(0);
@@ -78,12 +79,11 @@ void drawQaDca(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   c->Draw();
   c->Divide(3,2);  
   int ipad=1;
-  // for (int ip=1;ip<=20;ip++)
-  for (int ip=1;ip<=15;ip++)
+  for (int ip=1;ip<=10;ip++)
   {
-    TH1* hrc = (TH1*)hDCArc->ProjectionY("hrc",hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinLowEdge(ip*4+1)),hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinUpEdge(ip*4+4)));;
-    TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata",ip*4+1,ip*4+4, hDCAdata->GetZaxis()->FindBin(-1),hDCAdata->GetZaxis()->FindBin(1) );
-    cout << hDCAdata->GetXaxis()->GetBinLowEdge(ip*4+1)<<" "<< hDCAdata->GetXaxis()->GetBinUpEdge(ip*4+4) << endl;
+    TH1* hrc = (TH1*)hDCArc->ProjectionY("hrc",hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinLowEdge(ip)),hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinUpEdge(ip)));;
+    TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata",ip,ip);
+    cout << hDCAdata->GetXaxis()->GetBinLowEdge(ip)<<" "<< hDCAdata->GetXaxis()->GetBinUpEdge(ip) << endl;
 
     hrc->Scale(1./hrc->Integral());
     hrc->Scale(1./hrc->GetBinWidth(1));
@@ -97,7 +97,7 @@ void drawQaDca(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
     c->cd(ipad);
     hrc->DrawCopy();
     hdata->DrawCopy("same");
-    drawLatex(0.6,0.6,Form("%0.1f<p_{T}<%0.1f",hDCAdata->GetXaxis()->GetBinLowEdge(ip*4+1),hDCAdata->GetXaxis()->GetBinUpEdge(ip*4+4)),0.035);
+    drawLatex(0.6,0.6,Form("%0.1f<p_{T}<%0.1f",hDCAdata->GetXaxis()->GetBinLowEdge(ip),hDCAdata->GetXaxis()->GetBinUpEdge(ip)),0.035);
     
     ipad++;
     
@@ -226,17 +226,26 @@ void drawPartPtEtaPhi(TString head, TPDF* pdf, TCanvas* c,TString real,TString m
   addpdf(pdf,c);
 
   c->Clear();
-  c->Divide(2,1);
-  c->cd(1);
-  TH1* hrc_y = (TH1*)hDCArc->ProjectionY("hrc_y");
-  TH1* hdata_y = (TH1*)hDCAdata->ProjectionY("hdata_y");
-  NormHist(hrc_y,kBlue);
-  NormHist(hdata_y,kRed);
-  hrc_y->DrawCopy();
-  hdata_y->DrawCopy("same");
-  drawLatex(0.2,0.6,Form("%s Eta", head.Data()));
+  // c->Divide(2,1);
+  // c->cd(1);
+  int const nbins = 9;
+  double ptedge[nbins+1]={0.2,0.3,0.4,0.6,1.0,1.4,1.8,2.2,2.6,3};
+  for (int i=0;i<nbins;i++)
+  {
+    TH1* hrc_y = (TH1*)hDCArc->ProjectionY("hrc_y", hDCArc->GetXaxis()->FindBin(ptedge[i]),  hDCArc->GetXaxis()->FindBin(ptedge[i+1]), 1, hDCArc->GetNbinsY());
+    TH1* hdata_y = (TH1*)hDCAdata->ProjectionY("hdata_y",hDCAdata->GetXaxis()->FindBin(ptedge[i]), hDCAdata->GetXaxis()->FindBin(ptedge[i]),1,hDCAdata->GetNbinsY());
+    NormHist(hrc_y,kBlue);
+    NormHist(hdata_y,kRed);
+    hrc_y->DrawCopy();
+    hdata_y->DrawCopy("same");
+    // drawLatex(0.2,0.6,Form("%s Eta", head.Data()));
+    drawLatex(0.2,0.6,Form("%s Eta %0.1f<pt<%0.1f", head.Data(), ptedge[i], ptedge[i+1]));
+    addpdf(pdf);
+  }
 
-  c->cd(2);
+  // c->cd(2);
+  c->Clear();
+  c->cd();
   TH1* hrc_z = (TH1*)hDCArc->ProjectionZ("hrc_z",1,hDCArc->GetNbinsX(),hDCArc->GetYaxis()->FindBin(-0.5),hDCArc->GetYaxis()->FindBin(0.5));
   TH1* hdata_z = (TH1*)hDCAdata->ProjectionZ("hdata_z",1,hDCAdata->GetNbinsX(),hDCAdata->GetYaxis()->FindBin(-0.5),hDCAdata->GetYaxis()->FindBin(0.5));
   hrc_z->Rebin(4);
@@ -264,6 +273,49 @@ void drawPairDca(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   file->Close();
   hDCAdata->Add(hDCAdataLS,-1);
   
+  c->Clear();
+  TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc");;
+  TH1* hdata = (TH1*)hDCAdata->ProjectionX("hdata");
+ 
+  hrc->Scale(1./hrc->Integral());
+  hrc->Scale(1./hrc->GetBinWidth(1));
+  hdata->Scale(1./hdata->Integral());
+  hdata->Scale(1./hdata->GetBinWidth(1));
+  hrc->SetMarkerColor(kBlue);
+  hrc->SetLineColor(kBlue);
+  hdata->SetLineColor(kRed);
+  hdata->SetMarkerColor(kRed);
+
+  hrc->DrawCopy();
+  hdata->DrawCopy("same");
+  drawLatex(0.6,0.6,"pair DCA",0.035);
+  addpdf(pdf,c); 
+}
+void drawPairDcaAll(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc,TString pi0,TString eta,TString gamma)
+{
+  TFile* file = TFile::Open(mc.Data());
+  TString name[3]={"hDcaPair","hPairDCA","hPairDCALS"};
+  TH3F* hDCArc = (TH3F*)file->Get(name[0]);
+  hDCArc->SetDirectory(0);
+  file->Close();
+  file = TFile::Open(real.Data());
+  TFile* fsource[3];
+  fsource[0] = TFile::Open(pi0.Data());
+  fsource[1] = TFile::Open(eta.Data());
+  fsource[2] = TFile::Open(gamma.Data());
+  TH2F* hDCAdata = (TH2F*)file->Get(name[1]);
+  TH2F* hDCAdataLS = (TH2F*)file->Get(name[2]);
+  hDCAdataLS->SetDirectory(0);
+  hDCAdata->SetDirectory(0);
+  file->Close();
+  hDCAdata->Add(hDCAdataLS,-1);
+  
+  for (int is=0;is<3;i++)
+  {
+     fsource[is]->Get();
+  }
+
+
   c->Clear();
   TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc");;
   TH1* hdata = (TH1*)hDCAdata->ProjectionX("hdata");

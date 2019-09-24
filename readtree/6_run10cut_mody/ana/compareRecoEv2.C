@@ -14,17 +14,18 @@ void compareRecoEv2()
   hphoE->GetXaxis()->SetTitle("p_{T}");
   file->Close();
   // file = new TFile("RecoEff0825.root"); 
-  file = new TFile("RecoEff_0910.root"); 
+  // file = new TFile("RecoEff_0910.root"); 
+  file = new TFile("RecoEff_0924.root"); 
   TH1F*  hRecoEv2_2_8 = (TH1F*)file->Get("hRecoEv2_2_8");
   hRecoEv2_2_8->SetDirectory(0);
   hRecoEv2_2_8->SetMarkerColor(kBlue);
   hRecoEv2_2_8->SetLineColor(kBlue);
-  // hRecoEv2_2_8->Scale(0.9);
+  hRecoEv2_2_8->Scale(0.9);
 
   // TF1* fRecoE_2_8 = (TF1*)file->Get("fRecoE_2_8");
   TH1F*  hPhoEv2_2_8= (TH1F*)file->Get("hPhoEv2_2_8");
   hPhoEv2_2_8->SetDirectory(0);
-  // hPhoEv2_2_8->Scale(0.9);
+  hPhoEv2_2_8->Scale(0.9);
    
   hphoE->Draw();
   hphoE->GetYaxis()->SetRangeUser(0,0.2);
