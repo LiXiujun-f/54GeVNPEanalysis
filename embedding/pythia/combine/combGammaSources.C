@@ -9,6 +9,11 @@ TGraph* geta_gamma_v2[9];
 TGraph* gpi0_gamma_v2[9];
 TF1* fdirpho_v2[9];
 TF1* fdirpho_sp[9];
+TF1* feta_gamma_sp[9];
+TF1* fpi0_gamma_sp[9];
+TF1* feta_gamma_v2[9];
+TF1* fpi0_gamma_v2[9];
+
 double dirphosum(double* x,double* par)
 {
   double sum=0;
@@ -31,6 +36,36 @@ double dirphov2mb(double* x,double* par)
   }
   return combv2/sum;
 }
+double Pi0Spectra(double* x,double* par)
+{
+  int idx = par[0];
+  int idx_dirpho = par[1];
+  return gpi0_gamma_sp[idx]->Eval(x[0]);
+}
+double EtaSpectra(double* x,double* par)
+{
+  int idx = par[0];
+  int idx_dirpho = par[1];
+  return geta_gamma_sp[idx]->Eval(x[0]);
+}
+double Etav2(double* x,double* par)
+{
+  int idx = par[0];
+  int idx_dirpho = par[1];
+  double w1 = geta_gamma_sp[idx]->Eval(x[0]);
+  double w2 = gpi0_gamma_sp[idx]->Eval(x[0]);
+  double w3 = fdirpho_sp[idx_dirpho]->Eval(x[0]);
+  return geta_gamma_v2[idx]->Eval(x[0]);
+}
+double Pi0v2(double* x,double* par)
+{
+  int idx = par[0];
+  int idx_dirpho = par[1];
+  double w1 = geta_gamma_sp[idx]->Eval(x[0]);
+  double w2 = gpi0_gamma_sp[idx]->Eval(x[0]);
+  double w3 = fdirpho_sp[idx_dirpho]->Eval(x[0]);
+  return gpi0_gamma_v2[idx]->Eval(x[0]);
+}
 double CombineSpectra(double* x,double* par)
 {
   int idx = par[0];
@@ -49,6 +84,7 @@ double Combinev2(double* x,double* par)
 }
 void combGammaSources()
 {
+  // gStyle->SetLineWidth(2.5);
   TCanvas* c = new TCanvas("c","c");
   TPDF* pdf = new TPDF("comb_pi0_eta_gamma.pdf");
   TFile* file = new TFile("fread_pi0_eta_2gamma.root");
@@ -62,11 +98,13 @@ void combGammaSources()
   {
     fdirpho_v2[i] = (TF1*)((TF1*)filedirphov2->Get(Form("fitdirphov2_%s",centname[i].Data())))->Clone(Form("dirpho_v2_%d",i));
     fdirpho_sp[i] = (TF1*)((TF1*)filedirphosp->Get(Form("fitdirphoInv_pt_%s",centname[i].Data() )))->Clone(Form("dirpho_sp_%d",i));
-    fdirpho_sp[i]->SetLineColor(kGreen);
-    fdirpho_v2[i]->SetLineColor(kGreen);
+    fdirpho_sp[i]->SetLineColor(kGreen+2);
+    fdirpho_v2[i]->SetLineColor(kGreen+2);
   }
   fdirpho_sp[1] = new TF1("dirpho_sp_mb",dirphosum,0,20,1);
   fdirpho_v2[1] = new TF1("dirpho_v2_mb",dirphov2mb,0,20,1);
+  fdirpho_v2[1]->SetLineColor(kGreen+2);
+  fdirpho_sp[1]->SetLineColor(kGreen+2);
   //2-8, 1 is the 0-60%
   for (int ic=1;ic<9;ic++)
   {
@@ -81,21 +119,56 @@ void combGammaSources()
     fcombsp[ic]->SetParameter(1,ic);
     fcombv2[ic]->SetParameter(0,ic);
     fcombv2[ic]->SetParameter(1,ic);
-   
+ 
+    feta_gamma_sp[ic] = new TF1(Form("fGMSp_eta_%d",ic),EtaSpectra,0,15,2);
+    feta_gamma_v2[ic] = new TF1(Form("fGMv2_eta_%d",ic),Etav2,0,15,2);
+    feta_gamma_sp[ic]->SetParameter(0,ic);
+    feta_gamma_sp[ic]->SetParameter(1,ic);
+    feta_gamma_v2[ic]->SetParameter(0,ic);
+    feta_gamma_v2[ic]->SetParameter(1,ic);
+
+    fpi0_gamma_sp[ic] = new TF1(Form("fGMSp_pi0_%d",ic),Pi0Spectra,0,15,2);
+    fpi0_gamma_v2[ic] = new TF1(Form("fGMv2_pi0_%d",ic),Pi0v2,0,15,2);
+    fpi0_gamma_sp[ic]->SetParameter(0,ic);
+    fpi0_gamma_sp[ic]->SetParameter(1,ic);
+    fpi0_gamma_v2[ic]->SetParameter(0,ic);
+    fpi0_gamma_v2[ic]->SetParameter(1,ic);
+
     fcombsp[ic]->Draw();
+    fcombsp[ic]->GetXaxis()->SetTitle("p_{T} [GeV]");
     gpi0_gamma_sp[ic]->SetLineColor(kBlue);
+    geta_gamma_sp[ic]->SetLineWidth(2.5);
+    gpi0_gamma_sp[ic]->SetLineWidth(2.5);
+    fcombsp[ic]->SetLineWidth(2.5);
+    fdirpho_sp[ic]->SetLineWidth(2.5);
+    geta_gamma_sp[ic]->SetLineWidth(2.5);
     gpi0_gamma_sp[ic]->Draw("same");
     geta_gamma_sp[ic]->Draw("same");
     fdirpho_sp[ic]->Draw("same");
+    // fcombsp[ic]->Draw("same");
     gPad->SetLogy(1);
+    TLegend* legsp = new TLegend(0.6,0.7,0.88,0.88);
+    legsp->AddEntry(gpi0_gamma_sp[ic],"#pi^{0}->#gamma","l");
+    legsp->AddEntry(geta_gamma_sp[ic],"#eta->#gamma","l");
+    legsp->AddEntry(fdirpho_sp[ic],"direct photon","l");
+    legsp->AddEntry(fcombsp[ic],"combined spectra","l");
+    // legsp->SetHeader(Form("%ic",ic));
+    legsp->Draw("same");
+
     addpdf(pdf);
     gPad->SetLogy(0);
-
+    gPad->Clear();
     fcombv2[ic]->Draw();
     gpi0_gamma_v2[ic]->SetLineColor(kBlue);
     gpi0_gamma_v2[ic]->Draw("same");
     geta_gamma_v2[ic]->Draw("same");
     fdirpho_v2[ic]->Draw("same");
+    TLegend* leg = new TLegend(0.6,0.7,0.88,0.88);
+    leg->AddEntry(gpi0_gamma_v2[ic],"#pi^{0}->#gamma","l");
+    leg->AddEntry(geta_gamma_v2[ic],"#eta->#gamma","l");
+    leg->AddEntry(fdirpho_v2[ic],"direct photon","l");
+    leg->AddEntry(fcombv2[ic],"combined v2","l");
+    leg->Draw("same");
     addpdf(pdf);
   }
 
@@ -106,6 +179,12 @@ void combGammaSources()
   {
     fcombsp[ic]->Write();
     fcombv2[ic]->Write();
+    feta_gamma_sp[ic]->Write();
+    feta_gamma_v2[ic]->Write();
+    fpi0_gamma_sp[ic]->Write();
+    fpi0_gamma_v2[ic]->Write();
+    fdirpho_v2[ic]->Write();
+    fdirpho_sp[ic]->Write();
   }
   fout->Close();
 }

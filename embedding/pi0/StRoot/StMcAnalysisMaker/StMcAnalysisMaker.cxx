@@ -180,18 +180,21 @@ void StMcAnalysisMaker::bookSpectra(int centrality)
    //gamma conversion
    else if (McAnaCuts::parentId==1)
    {
-      TFile* file = TFile::Open("StRoot/macros/fout_pi0_eta_gamma_0918.root");
+      // TFile* file = TFile::Open("StRoot/macros/fout_pi0_eta_gamma_0918.root");
+      TFile* file = TFile::Open("StRoot/macros/fout_pi0_eta_gamma_0926.root");
       int idx = centrality;
       if (idx<2) idx = 2;
-      mPi0Spectra = (TF1*)file->Get(Form("fGMSp_comb_%d",idx));
-      fPi0v2 = (TF1*)file->Get(Form("fGMv2_comb_%d",idx));
+      // mPi0Spectra = (TF1*)file->Get(Form("fGMSp_comb_%d",idx));
+      mPi0Spectra = (TF1*)file->Get(Form("%s_%d", McAnaCuts::GammaParentSpName.Data(), idx));
+      // fPi0v2 = (TF1*)file->Get(Form("fGMv2_comb_%d",idx));
+      fPi0v2 = (TF1*)file->Get(Form("%s_%d", McAnaCuts::GammaParentV2Name.Data(), idx));
       file->Close();
-   }
+    }
 }
 //__________________________________
 int StMcAnalysisMaker::Make()
 {
-  // cout<< "start new event.."<<endl;
+  cout<< "start new event.."<<endl;
   StMuDstMaker* muDstMaker = (StMuDstMaker*)GetMaker("MuDst");
 
   if (!muDstMaker)
@@ -222,7 +225,7 @@ int StMcAnalysisMaker::Make()
     LOG_WARN << "No StEvent" << endm;
     return kStWarn;
   }
-  // cout<< "load event Mc event finish..."<<endl;
+  cout<< "load event Mc event finish..."<<endl;
   // cout<<"Get StAssociationMaker" <<endl;
   mAssoc = (StAssociationMaker*)GetMaker("StAssociationMaker");
   if (!mAssoc)
@@ -284,7 +287,7 @@ int StMcAnalysisMaker::Make()
   mEP = gRandom->Rndm()*TMath::Pi();
   // mEP = 0;
   hEP->Fill(mEP);
-  // cout<<"refmult finish..." <<endl;
+  cout<<"refmult finish..." <<endl;
   hRefmult->Fill(mMuDst->event()->refMult()); 
   hEvent->Fill(mCentrality,mCentWeight);
   // Fill
@@ -320,7 +323,7 @@ int StMcAnalysisMaker::fillTracks(int& nRTracks, int& nMcTracks)
 
   // key -1 is the index and idTruth is equal to key if this rctrack is a MC track 
   std::map<int,int> mc_rcpair; 
-  // cout <<"fillMcTrack" <<endl;
+  // cout <<"fillMcTrack"  << mMcEvent->tracks().size() <<endl;
   for (unsigned int iTrk = 0;  iTrk < mMcEvent->tracks().size(); ++iTrk)
   {
     StMcTrack* const mcTrack = mMcEvent->tracks()[iTrk];
@@ -351,6 +354,7 @@ int StMcAnalysisMaker::fillTracks(int& nRTracks, int& nMcTracks)
   }
   // hnPi0->Fill(nPi0);
   hPi2tot->Fill(1.*nPi0/mMuDst->event()->refMult()); 
+  // cout << "total mother particle: "<<nPi0 << endl;
   // fill mother histogram
   if (nPi0>0)
   {
@@ -362,9 +366,9 @@ int StMcAnalysisMaker::fillTracks(int& nRTracks, int& nMcTracks)
          LOG_WARN << "Empty mcTrack container" << endm;
          continue;
       }
-      // cout << " parent  "<< mcTrk->parent()->geantId() << endl;
       if (mcTrack->geantId()==McAnaCuts::parentId) 
       {
+        // cout << " parent  "<< mcTrack->geantId() << endl;
         // cout << " test if the key is the same "<< mMcEvent->tracks()[mcTrk->key()-1]->key() << " " << mcTrk->key()<<endl; 
         double ptweight = mPi0Spectra->Eval(mcTrack->pt());
         hPi0Pt->Fill(mcTrack->pt(),mCentrality ,mCentWeight);
@@ -678,7 +682,8 @@ bool StMcAnalysisMaker::passReconstructionCut(StMuTrack const * const pe_1, StMu
 
   bool passPEtopocut = fabs(DcaDaughters) < McAnaCuts::EEdcaDaughter;
 
-  bool passMassCut = mother.m()<0.15; // this is to check if the mass smearing make the mass non-zero
+  // bool passMassCut = mother.m()<0.15; // this is to check if the mass smearing make the mass non-zero
+  bool passMassCut = mother.m()<McAnaCuts::InvMass_pair; // this is to check if the mass smearing make the mass non-zero
 
   //fill a mass histogram to compare with the real data peak
   if (passPEtopocut) hMassDiE->Fill(mother.m(),pe_1->primaryTrack()->pt() , mCentrality,weight); 
@@ -968,19 +973,11 @@ int StMcAnalysisMaker::getCentralityBin(float vz,int runId,float mult,float &wei
 
 float StMcAnalysisMaker::reweight(float x) const
 {
-   x+=gRandom->Rndm();
-   float p[5] = {0.811,238.9,24.31,-25,6.325e-5};
-   //this is specfic for the run17 54 GeV analysis
-   // for pi0 and eta embedding
-   // the centrality distribution is not very flat in 0-5%
-   if (McAnaCuts::parentId==10007 || McAnaCuts::parentId == 100017)
-   {
-      if (x>70 && x<McAnaCuts::Refmult_cent[8]) return 1.;
-      else if (x>McAnaCuts::Refmult_cent[8]) return 0.8;
-   }
-   else if (McAnaCuts::parentId==1)
-   {
-     if (x>70) return 1;
-   }
-    else return p[0] + p[1]/(p[2]*x + p[3]) + p[4]*(p[2]*x + p[3]);
+  x+=gRandom->Rndm();
+  // float p[7] = {3.9,-204.4,1.85,24.3,-0.01746,6405,3.7e-5};
+  float p[5] = {0.811,238.9,24.31,-25,6.325e-5};
+  // return 1;
+  if (x>70) return 1;
+  // else return p[0] + p[1]/(p[2]*x + p[3]) + p[4]*(p[2]*x + p[3]) + p[5]/(p[2]*x + p[3])/(p[2]*x + p[3]) + p[6]*(p[2]*x + p[3])*(p[2]*x + p[3]);
+  else return p[0] + p[1]/(p[2]*x + p[3]) + p[4]*(p[2]*x + p[3]);
 }

@@ -62,14 +62,19 @@ namespace McAnaCuts
   int const gammaId = 1; 
   int const dauId1 = 2;
   int const dauId2 = 3; 
- 
+  TString const GammaParentSpName = "dirpho_sp"; // this is specific for gamma->ee
+  TString const GammaParentV2Name = "dirpho_v2"; // this is specific for gamma->ee
+  // fGMSp_comb fGMv2_comb fGMSp_eta fGMv2_eta fGMSp_pi0  fGMv2_pi0  dirpho_v2  dirpho_sp
+
   TString pi0spectraform="2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])";
   TString etaspectraform="2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0.134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3], -[4])";
 
   StDedxMethod dedxMethod = kLikelihoodFitId;
 
   float const minPt=0.1; 
-  float const partnerPt = 0.2;
+  // float const partnerPt = 0.2;
+  float const partnerPt = 0.25;
+  float const InvMass_pair = 0.1; 
   float const tagPt = 0.2;
   
   float vr = 2;

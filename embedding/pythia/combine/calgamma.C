@@ -136,13 +136,13 @@ void drawAndWriteGamma(TString filename, TFile* fout,TPDF* pdf, TCanvas* c,TStri
     else if (particlename.Contains("eta")) f = new TF1("f","2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0.134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3], -[4])", 0,15);
     else {cout <<"please input the correct particle" << endl; return;}
     int const SpectraParPi0_centbin[9]={0,0,1,1,2,2,3,4,4};
-  double const SpectraParPi0[5][5]={ 
+    double const SpectraParPi0[5][5]={ 
                                  {1.67607, -1.77146, 0.0759459, -0.369874, 2.01742},
                                  {264.787, 0.349324, 0.0475088, 1.01322, 10.903},
                                  {406.429, 0.361361, 0.0558035, 1.10099, 11.2414},
                                  {682.788, 0.396488, 0.0690007, 1.06078, 11.0674},
                                  {992.598, 0.406828, 0.0831998, 1.04464, 11.0797}
-  };
+    };
     double events=1;
     if (i>=2) events = hCent->GetBinContent(i+1); //some problem happens the hCent does not represent real events, I donot know why
     else if (i==1) events = hCent->GetEntries();

@@ -39,7 +39,8 @@ void generateRecaleHists(TString inputfilename="data/embeddQa_pi0_0918.root", TS
   double totalnPi0 = hPi0->Integral(); 
   cout << "total num pi0 (or eta/gamma) in the embedding: "<< totalnPi0 << endl;
 
-  int scaleEvents = 250e6;
+  // int scaleEvents = 250e6;
+  int scaleEvents = 1e5;
   double scalefactor = scaleEvents*branchratio*ptrange*etarange/totalnPi0;  
   cout <<"scalefactor: "<< scalefactor <<" branchratio: "<<branchratio<<" scale to "<<scaleEvents<<" events" << endl;
   
@@ -48,7 +49,7 @@ void generateRecaleHists(TString inputfilename="data/embeddQa_pi0_0918.root", TS
   //the embedding use flat phi and eta, pt distribution.
   // TH1F* hRefmult = readAndScale<TH1F>("hRefmult",scalefactor,fin,fout);
   // readScaleAndWrite<TH1F>("hRefmult",scalefactor,fin,fout);
-  // readScaleAndWrite<TH1F>("hEvent",scalefactor,fin,fout);
+  readScaleAndWrite<TH1F>("hEvent",scalefactor/ptrange/etarange/branchratio,fin,fout);
   readScaleAndWrite<TH2F>("hPi0Pt_weight",scalefactor,fin,fout);
   // readScaleAndWrite<TH2F>("hnHits",scalefactor,fin,fout);//global track  without any weight
   // readScaleAndWrite<TH2F>("hDCA",scalefactor,fin,fout); //global track  without any weight

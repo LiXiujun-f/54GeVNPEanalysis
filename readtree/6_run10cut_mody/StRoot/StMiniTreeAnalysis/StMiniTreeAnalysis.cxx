@@ -206,6 +206,10 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
     // bool passTPChit = (mTree->topomap0_phe[itrk2]>>8 & 0x7) && (mTree->topomap0_parte[itrk2]>>8 & 0x7);
     bool passTPChit = (mTree->topomap0_phe[itrk2]>>8 & 0x7) ;
     bool passPhiCut = !( fabs(mTree->phi_phe[itrk2])<anaCuts::PhiCut.first && fabs(mTree->phi_phe[itrk2])>anaCuts::PhiCut.second);
+    //this cut is a check for the pi contamination to the partner electron
+    //will not apply this cut for the final result
+    bool isTightPidPartE = fabs(mTree->nSigE_parte[itrk2])<2.5; 
+    // bool isPartnerElectron = isSecondPE(mTree->nSigE_parte[itrk2],mTree->beta_parte[itrk2],mTree->gpt_parte[itrk2]) && isTightPidPartE; 
     bool isPartnerElectron = isSecondPE(mTree->nSigE_parte[itrk2],mTree->beta_parte[itrk2],mTree->gpt_parte[itrk2]); 
     bool passPEtopocut = mTree->DCA_pair[itrk2] < anaCuts::EEdcaDaughter;
     //
@@ -221,7 +225,8 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
                        fabs(mTree->geta_parte[itrk2])<anaCuts::Eta &&   
                        // fabs(mTree->gDca_parte[itrk2])<anaCuts::Dca &&     //only for check
                        // fabs(mTree->gpt_parte[itrk2])>anaCuts::GPt;
-                       fabs(mTree->gpt_parte[itrk2])>anaCuts::GPt  &&
+                       // fabs(mTree->gpt_parte[itrk2])>anaCuts::GPt  &&
+                       fabs(mTree->gpt_parte[itrk2])>anaCuts::GPt_Parte  &&
                        // fabs(mTree->ndEdx_parte[itrk2])>=anaCuts::NHitsDedx &&
                        fabs(mTree->nFit_parte[itrk2]/(1.*mTree->nMax_parte[itrk2])) >= anaCuts::NHitsFit2Poss &&
                        fabs(mTree->nFit_parte[itrk2]) >= anaCuts::nFit_parte;
@@ -230,11 +235,10 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
     bool isgoodtofmatch_PartE = 
                        fabs(mTree->geta_parte[itrk2])<anaCuts::eEta &&   
                        fabs(mTree->gDca_parte[itrk2])<anaCuts::Dca &&
-                       fabs(mTree->gpt_parte[itrk2])>anaCuts::GPt  &&
+                       fabs(mTree->gpt_parte[itrk2])>anaCuts::GPt &&
                        fabs(mTree->ndEdx_parte[itrk2])>=anaCuts::NHitsDedx &&
                        fabs(mTree->nFit_parte[itrk2]/(1.*mTree->nMax_parte[itrk2])) >= anaCuts::NHitsFit2Poss &&
                        fabs(mTree->nFit_parte[itrk2]) >= anaCuts::NHitsFit;
-    
     if (!isgoodtrack_PartE || !isgoodtrack_PhoE) continue;
     TLorentzVector mother;
     mother.SetXYZM(mTree->px_pair[itrk2],mTree->py_pair[itrk2],mTree->pz_pair[itrk2],mTree->M_pair[itrk2]);
@@ -259,11 +263,11 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
       if (mTree->M_pair[itrk2]<0.3) 
       {
          if (mTree->M_pair[itrk2]<0.15 && unlike) {
-            hPairDCA->Fill( mTree->DCA_pair[itrk2],cent,weight);     
+            hPairDCA->Fill( mTree->DCA_pair[itrk2],mTree->pt_phe[itrk2],cent,weight);     
             hDecayL->Fill( V0.Perp(),mTree->gpt_parte[itrk2] ,weight);
          }
          if ( mTree->M_pair[itrk2]<0.15 && (!unlike)){
-            hPairDCALS->Fill( mTree->DCA_pair[itrk2],cent,weight);     
+            hPairDCALS->Fill( mTree->DCA_pair[itrk2],mTree->pt_phe[itrk2],cent,weight);     
             hDecayL_LS->Fill( V0.Perp(),mTree->gpt_parte[itrk2] ,weight);
          }
       } // mass cut  
@@ -273,13 +277,14 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
       bool unlike = mTree->charge_phe[itrk2] * mTree->charge_parte[itrk2] <0;
       if (mTree->M_pair[itrk2]<0.3) 
       {
-         if (mTree->M_pair[itrk2]<0.15 && unlike && passTPChit) 
+         if (mTree->M_pair[itrk2]<anaCuts::MassCut && unlike && passTPChit) 
          {
             pTagEv2->Fill(mTree->pt_phe[itrk2],cent,cos2deltaPhi/anaCuts::resolution[cent],weight);
             hPhEv2vsPtvsCent->Fill(deltaPhi,mTree->pt_phe[itrk2],cent,weight);
             hV0->Fill(mTree->V0x_pair[itrk2],mTree->V0y_pair[itrk2],mTree->V0z_pair[itrk2]);
             // if (mTree->M_pair[itrk2]<0.1) hNFitsvsPt->Fill(mTree->gpt_parte[itrk2],mTree->nFit_parte[itrk2],weight);
             hNFitsvsPt->Fill(mTree->gpt_parte[itrk2],mTree->nFit_parte[itrk2],weight);
+            hNFitsvsTagPt->Fill(mTree->pt_phe[itrk2],mTree->nFit_parte[itrk2],weight);
             //for tof match calculation
             if (isgoodtofmatch_PartE)
             {
@@ -295,10 +300,11 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
               hPartEptetaphi_Dz->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight); 
               hDcavsPt_Dz->Fill(mTree->gpt_parte[itrk2],mTree->gDca_parte[itrk2],weight);
             }
-              hDcavsPt->Fill(mTree->gpt_parte[itrk2],mTree->gDca_parte[itrk2],weight);
+            hDcavsPt->Fill(mTree->gpt_parte[itrk2],mTree->gDca_parte[itrk2],weight);
             //Tag e pt eta phi?
             //the phi distribution can be well described by embedding, so we focus on eta distribution
-            hPartETagEetapt->Fill(mTree->pt_phe[itrk2],mTree->gpt_parte[itrk2],mTree->eta_phe[itrk2],mTree->geta_parte[itrk2],weight ); 
+            double etafillarray[4]={mTree->pt_phe[itrk2],mTree->gpt_parte[itrk2],mTree->eta_phe[itrk2],mTree->geta_parte[itrk2]};
+            hPartETagEetapt->Fill(etafillarray,weight); 
 
             //for gamma conversion QA
             if (mTree->decayL_pair[itrk2]>3.5) 
@@ -314,7 +320,7 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
          //    //check sideband v2
          // }
          //like sign
-         if ( mTree->M_pair[itrk2]<0.15 && (!unlike) && passTPChit)
+         if ( mTree->M_pair[itrk2]<anaCuts::MassCut && (!unlike) && passTPChit)
          {
            pTagEv2_LS->Fill(mTree->pt_phe[itrk2],cent,cos2deltaPhi/anaCuts::resolution[cent],weight);
            hPhEv2vsPtvsCentLS->Fill(deltaPhi,mTree->pt_phe[itrk2],cent,weight);
@@ -331,13 +337,16 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
            hPartEptetaphi_LS->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight);
            // if (mTree->M_pair[itrk2]<0.1) hNFitsvsPt_LS->Fill(mTree->gpt_parte[itrk2],mTree->nFit_parte[itrk2]);
            hNFitsvsPt_LS->Fill(mTree->gpt_parte[itrk2],mTree->nFit_parte[itrk2],weight);
+           hNFitsvsTagPt_LS->Fill(mTree->pt_phe[itrk2],mTree->nFit_parte[itrk2],weight);
            if (mTree->decayL_pair[itrk2]<2)
            {  
               hPartEptetaphi_Dz_LS->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight);
               hDcavsPt_Dz_LS->Fill(mTree->gpt_parte[itrk2],mTree->gDca_parte[itrk2],weight);
            }
            hDcavsPt_LS->Fill(mTree->gpt_parte[itrk2],mTree->gDca_parte[itrk2],weight);
-           hPartETagEetapt_LS->Fill(mTree->pt_phe[itrk2],mTree->gpt_parte[itrk2],mTree->eta_phe[itrk2],mTree->geta_parte[itrk2],weight ); 
+           //tag e eta and part eta distribution
+           double etafillarray[4]={mTree->pt_phe[itrk2],mTree->gpt_parte[itrk2],mTree->eta_phe[itrk2],mTree->geta_parte[itrk2]};
+           hPartETagEetapt_LS->Fill(etafillarray, weight ); 
            //for gamma conversion QA
            if (mTree->decayL_pair[itrk2]>3.5) 
            {  
@@ -486,6 +495,9 @@ void StMiniTreeAnalysis::initHists(int nRunNum)
   hDcavsPt_Gm = new TH2F("hDcavsPt_Gm","hDcavsPt;p_{T};gDca;",10,0,5,100,0,3);
   hDcavsPt_Dz_LS = new TH2F("hDcavsPt_Dz_LS","hDcavsPt_LS;p_{T};gDca;",10,0,5,100,0,3);
   hDcavsPt_Dz = new TH2F("hDcavsPt_Dz","hDcavsPt;p_{T};gDca;",10,0,5,100,0,3);
+  hNFitsvsTagPt_LS = new TH2F("hNFitsvsTagPt_LS","hNFitsvsTagPt_LS;Tag e p_{T};NFits",10,0,5,50,0,50);
+  hNFitsvsTagPt = new TH2F("hNFitsvsTagPt","hNFitsvsTagPt;Tag e p_{T};NFits",10,0,5,50,0,50);
+
   hNFitsvsPt_LS = new TH2F("hNFitsvsPt_LS","hNFitsvsPt_LS;p_{T};NFits",10,0,5,50,0,50);
   hNFitsvsPt = new TH2F("hNFitsvsPt","hNFitsvsPt;p_{T};NFits",10,0,5,50,0,50);
   hPartEptetaphi = new TH3F("hPartEptetaphi", "hPartEptetaphi;p_{T};#eta;#phi",100,0,4,100,-1,1,180,-1*TMath::Pi(),TMath::Pi() );
@@ -501,12 +513,12 @@ void StMiniTreeAnalysis::initHists(int nRunNum)
   //tage pt;
   double xmin[nAxis] = {0, 0,-1,-1.2};
   double xmax[nAxis] = {2, 2, 1,1.2 };
-  hPartETagEetapt = new THnSparseF("hPartETagEetapt","hPartETagEetapt;Tag e p_{T};Part e p_{T};Tag e #eta;Part e #eta",nAxis,xmin,xmax);
-  hPartETagEetapt_LS = new THnSparseF("hPartETagEetapt_LS","hPartETagEetapt_LS;Tag e p_{T};Part e p_{T};Tag e #eta;Part e #eta",nAxis,xmin,xmax);
+  hPartETagEetapt = new THnSparseF("hPartETagEetapt","hPartETagEetapt;Tag e p_{T};Part e p_{T};Tag e #eta;Part e #eta",nAxis,nbins,xmin,xmax);
+  hPartETagEetapt_LS = new THnSparseF("hPartETagEetapt_LS","hPartETagEetapt_LS;Tag e p_{T};Part e p_{T};Tag e #eta;Part e #eta",nAxis,nbins,xmin,xmax);
 
-  hPairDCA = new TH2F("hPairDCA","hPairDCA;DCA;Cent", 100,0,3,9,-0.5,8.5);
+  hPairDCA = new TH3F("hPairDCA","hPairDCA;DCA;p_{T};Cent", 100,0,3,80,0,4,9,-0.5,8.5);
   hDecayL= new TH2F("hDecayL","hDecayL;DecayL;p_{T}", 150,0,30,60,0,4);
-  hPairDCALS = new TH2F("hPairDCALS","hPairDCALS;DCA;Cent", 100,0,3,9,-0.5,8.5);
+  hPairDCALS = new TH3F("hPairDCALS","hPairDCALS;DCA;p_{T};Cent", 100,0,3,80,0,4,9,-0.5,8.5);
   hDecayL_LS= new TH2F("hDecayL_LS","hDecayL_LS;DecayL;p_{T}", 150,0,30,60,0,4);
 }
 //------------------------------------------------------------
@@ -555,6 +567,9 @@ void StMiniTreeAnalysis::WriteHists(TFile* out)
   hDcavsPt_Gm->Write();
   hNFitsvsPt->Write();
   hNFitsvsPt_LS->Write();
+  hNFitsvsTagPt->Write();
+  hNFitsvsTagPt_LS->Write();
+
   hPartEptetaphi->Write();
   hPartEptetaphi_LS->Write();
   hPartEptetaphi_Gm_LS->Write();
@@ -585,7 +600,8 @@ bool StMiniTreeAnalysis::isSecondPE(float nSigE,float beta,float pt)
    // if (pt>0.8) isTPCElectron =  nSigE<2 && nSigE>0;
    // else isTPCElectron = nSigE<2 && nSigE>(nSigE*3.5-2.8); 
    // return isTPCElectron && isTOFElectron;
-   return true;
+   // return true;
+   return fabs(nSigE)<anaCuts::nESigma_partner;
 }
 bool StMiniTreeAnalysis::isElectron(float nSigE,float beta,float pt)
 {

@@ -120,6 +120,9 @@ class StMiniTreeAnalysis
     TH2F* hDcavsPt_Dz_LS;
     TH2F* hNFitsvsPt_LS;
     TH2F* hNFitsvsPt;
+    TH2F* hNFitsvsTagPt_LS;
+    TH2F* hNFitsvsTagPt;
+
     TH3F* hPartEptetaphi;
     TH3F* hPartEptetaphi_LS;
     TH3F* hPartEptetaphi_Dz_LS;
@@ -128,8 +131,8 @@ class StMiniTreeAnalysis
     TH3F* hPartEptetaphi_Gm;
     THnSparseF* hPartETagEetapt;
     THnSparseF* hPartETagEetapt_LS;
-    TH2F* hPairDCA;
-    TH2F* hPairDCALS;
+    TH3F* hPairDCA;
+    TH3F* hPairDCALS;
     TH2F* hDecayL_LS;
     TH2F* hDecayL;
     TH2F* hPartETpc; 

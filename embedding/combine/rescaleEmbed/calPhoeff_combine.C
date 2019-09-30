@@ -11,7 +11,7 @@ void fitPhoEv2(TH3F* hPhev2, int centL, int centH, TString name, TPDF* pdf, TFil
 void fitPhoEv2(TH3F* hPhev2,TH3F* hPhev2raw, int centL, int centH, TString name , TPDF* pdf, TFile* fout);
 void ProjectionAndFit(TH2F* hMc,TH2F* hRc,int centL,int centH,TString name ,TPDF* pdf,TFile* fout);
 void CalPhoEv2(TProfile2D* pPhev2_2d, int centL, int centH, TString name , TPDF* pdf, TFile* fout);
-void calPhoeff_combine(TString inputfilename="rescale_combine.root", TString pdfname="PhoErecoEff.pdf",TString outname="RecoEff.root")
+void calPhoeff_combine(TString inputfilename="rescale_combine.root", TString pdfname="PhoErecoEff_comb.pdf",TString outname="RecoEff_comb.root")
 {
   SetsPhenixStyle();
   TFile* file = new TFile(inputfilename.Data());

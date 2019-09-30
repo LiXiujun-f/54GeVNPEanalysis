@@ -27,7 +27,8 @@ void HFev2()
   SetsPhenixStyle(); 
   // TFile* file = TFile::Open("incEv2.root");
   // TFile* file = TFile::Open("incEv2_addqa_loose0825.root");
-  TFile* file = TFile::Open("incEv2_0924.root");
+  // TFile* file = TFile::Open("incEv2_0924.root");
+  TFile* file = TFile::Open("incEv2_0929.root");
   TCanvas* c = new TCanvas("c","c");
   TPDF* pdf = new TPDF("plots.pdf"); 
   pdf->Off();
@@ -46,6 +47,10 @@ void HFev2()
   hmgpi->SetDirectory(0);
   fpurity->Close();
  
+  //for sys err of reco eff
+  TFile* fsysReco = TFile::Open("gTotSysErr.root");
+  TGraph* gTotSysErr = (TGraph*)fsysReco->Get("Graph")->Clone("gTotSysErr");
+
   // TFile* freco = TFile::Open("RecoEff.root");
   // TH1F* hreco = (TH1F*)freco->Get("hRecoEff_2_8");
   // hreco->SetDirectory(0);
@@ -53,7 +58,8 @@ void HFev2()
   // TH1F* hreco = ProjectionAndFit("embeddingQa.phoE.root", centL-1,centH-1 ,"RecoEff",pdf );
   // TH1F* hreco = ProjectionAndFit("embeddQa0825.root", centL-1,centH-1 ,"RecoEff",pdf );
   // TH1F* hreco = ProjectionAndFit("embeddQa_0910.root", centL-1,centH-1 ,"RecoEff",pdf );
-  TH1F* hreco = ProjectionAndFit("embedd_comb0924.root", centL-1,centH-1 ,"RecoEff",pdf );
+  // TH1F* hreco = ProjectionAndFit("embedd_comb0924.root", centL-1,centH-1 ,"RecoEff",pdf );
+  TH1F* hreco = ProjectionAndFit("embedd_comb0929.root", centL-1,centH-1 ,"RecoEff",pdf );
   // TH1F* hreco = ProjectionAndFit("pi0/embeddQa_tightcut.root", centL-1,centH-1 ,"RecoEff",pdf );
   TFile* fPIDv2 = TFile::Open("prev2.root");
   TGraphErrors* gKs = (TGraphErrors*)fPIDv2->Get("ks_0_80_62");
@@ -208,9 +214,9 @@ void HFev2()
   // gPhoE62->Draw("psame");
   fprevious->Close();
   //
-  TF1* phe62v2 = new TF1("phe62v2","0.9*pol5(0)",0,5);
+  TF1* phe62v2 = new TF1("phe62v2","0.98*pol5(0)",0,5);
   // double par62[6] = {0.008145,0.1855,-0.07343,-0.02234,0.02459,-0.00508};
-  double par62[6] = { };
+  double par62[6] = {0.04015,0.02978,0.1155,-0.1099,0.03608,-0.004092 };
   phe62v2->SetParameters(par62); 
   phe62v2->Draw();
   addpdf(pdf);
@@ -286,7 +292,8 @@ void HFev2()
     double phev2 = phe62v2->Eval(hPhe->GetBinCenter(ib+1));
     double pt = hPhe->GetBinCenter(ib+1);
     // if (pt>1)  phev2 = hphoE->GetBinContent(ib+1);
-    double phev2err = 0.04;
+    // double phev2err = 0.04;
+    double phev2err = gTotSysErr->Eval(pt);
     // if (pt>1) phev2err = hphoE->GetBinError(ib+1)/hphoE->GetBinContent(ib+1); 
     
     double incev2 = pEv2->GetBinContent(ib+1);

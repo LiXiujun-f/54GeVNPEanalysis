@@ -15,17 +15,18 @@ void compareRecoEv2()
   file->Close();
   // file = new TFile("RecoEff0825.root"); 
   // file = new TFile("RecoEff_0910.root"); 
-  file = new TFile("RecoEff_0924.root"); 
+  // file = new TFile("RecoEff_0924.root"); 
+  file = new TFile("RecoEff_comb0929.root"); 
   TH1F*  hRecoEv2_2_8 = (TH1F*)file->Get("hRecoEv2_2_8");
   hRecoEv2_2_8->SetDirectory(0);
   hRecoEv2_2_8->SetMarkerColor(kBlue);
   hRecoEv2_2_8->SetLineColor(kBlue);
-  hRecoEv2_2_8->Scale(0.9);
+  hRecoEv2_2_8->Scale(0.95);
 
   // TF1* fRecoE_2_8 = (TF1*)file->Get("fRecoE_2_8");
   TH1F*  hPhoEv2_2_8= (TH1F*)file->Get("hPhoEv2_2_8");
   hPhoEv2_2_8->SetDirectory(0);
-  hPhoEv2_2_8->Scale(0.9);
+  hPhoEv2_2_8->Scale(0.95);
    
   hphoE->Draw();
   hphoE->GetYaxis()->SetRangeUser(0,0.2);
@@ -36,8 +37,8 @@ void compareRecoEv2()
 // return;
   TLegend* leg = new TLegend(0.5 ,0.2 ,0.8 ,0.5 );
   leg->AddEntry(hphoE,"data: reco. e v_{2}","lp");
-  leg->AddEntry(hRecoEv2_2_8,"embedd: reco. e v_{2} #times 0.88","lp");
-  leg->AddEntry(hPhoEv2_2_8,"embedd: total e v_{2} #times 0.88","lp");
+  leg->AddEntry(hRecoEv2_2_8,"embedd: reco. e v_{2} #times 0.95","lp");
+  leg->AddEntry(hPhoEv2_2_8,"embedd: total e v_{2} #times 0.95","lp");
   leg->Draw();
 
   TH1F* hratio = (TH1F*)hphoE->Clone("hratio");
@@ -48,7 +49,7 @@ void compareRecoEv2()
   for (int i=0;i<hphoE->GetNbinsX();i++)
   {
      double mean = hphoE->GetBinContent(i+1); 
-     double fitfun = fRecoE_2_8->Eval(hphoE->GetBinCenter(i+1))*0.88;
+     double fitfun = fRecoE_2_8->Eval(hphoE->GetBinCenter(i+1))*0.95;
      hratio->SetBinContent(i+1,(fitfun-mean)/mean);
      hratio->SetBinError(i+1,0);
   }
