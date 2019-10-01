@@ -208,7 +208,7 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
     bool passPhiCut = !( fabs(mTree->phi_phe[itrk2])<anaCuts::PhiCut.first && fabs(mTree->phi_phe[itrk2])>anaCuts::PhiCut.second);
     //this cut is a check for the pi contamination to the partner electron
     //will not apply this cut for the final result
-    bool isTightPidPartE = fabs(mTree->nSigE_parte[itrk2])<2.5; 
+    // bool isTightPidPartE = fabs(mTree->nSigE_parte[itrk2])<2.5; 
     // bool isPartnerElectron = isSecondPE(mTree->nSigE_parte[itrk2],mTree->beta_parte[itrk2],mTree->gpt_parte[itrk2]) && isTightPidPartE; 
     bool isPartnerElectron = isSecondPE(mTree->nSigE_parte[itrk2],mTree->beta_parte[itrk2],mTree->gpt_parte[itrk2]); 
     bool passPEtopocut = mTree->DCA_pair[itrk2] < anaCuts::EEdcaDaughter;
@@ -288,9 +288,9 @@ int StMiniTreeAnalysis::getIncEv2(float EP_M_sh,float EP_P_sh,int cent,float wei
             //for tof match calculation
             if (isgoodtofmatch_PartE)
             {
-              hPartETpc->Fill(mTree->gpt_parte[itrk2],cent,weight);
-              if (mTree->beta_parte[itrk2]>0) 
-                hPartETof->Fill(mTree->gpt_parte[itrk2],cent,weight);
+               hPartETpc->Fill(mTree->gpt_parte[itrk2],cent,weight);
+               if (mTree->beta_parte[itrk2]>0) 
+                 hPartETof->Fill(mTree->gpt_parte[itrk2],cent,weight);
             }
 
             hPartEptetaphi->Fill(mTree->gpt_parte[itrk2],mTree->geta_parte[itrk2],mTree->gphi_parte[itrk2] ,weight);

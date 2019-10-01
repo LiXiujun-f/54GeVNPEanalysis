@@ -28,7 +28,9 @@ namespace anaCuts
    float const GPt_Parte=0.25;
    // float const GPt = 0.15;
    int const NHitsFit = 20;
-   int const nFit_parte = 15;
+   //from both embedding and data, cut on 20 will not lose eff
+   // int const nFit_parte = 15;
+   int const nFit_parte = 20;
    int const NHitsDedx = 15;
    float const NHitsFit2Poss = 0.52;
    float const Dca = 1.5;// < cm
@@ -42,7 +44,7 @@ namespace anaCuts
    float const kTpc=2;
    float const pTpc=2;
    float const piTpc=2;
-   float const nESigma_partner=3.5;
+   float const nESigma_partner=3;
    float const nESigma_Tag=2; 
    
    std::pair<float,float> PhiCut = {1.95,1.25};

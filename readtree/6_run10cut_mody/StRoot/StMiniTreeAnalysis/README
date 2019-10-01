@@ -1,0 +1,4 @@
+---0925--change electron pair inv mass>0.1  and partner e gPt>0.3
+---0926--change partner e gPt>0.25 to reduce sys err but still ensure the eff.
+---0929--add |nSigmaE|<3 for partner electron to supress the misPID background. This kind of background will not contribute to the final yield in invarent mass distribution, but UL-LS eta distribution is strange.
+---0930--change partner electron cut to nHitsFit<20, as the counts between 15<nHitsFit<20 is low. Also add histogram XXXX(partner e nHitsFit and pair DCA, pair decayLength) vs Tag e, it is to calculate the sys err

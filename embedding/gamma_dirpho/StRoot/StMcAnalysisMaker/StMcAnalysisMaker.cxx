@@ -124,6 +124,7 @@ bool StMcAnalysisMaker::InitHists()
 
     //check the partner electron QA 
     hPartEnFits = new TH2F("hPartEnFits","hPartEnFits;p_{T};nHitsFit",100,0,4,45,10,55);
+    hPartEnFitsTagEpt = new TH2F("hPartEnFitsTagEpt","hPartEnFits;p_{T};nHitsFit",100,0,4,45,10,55);
     hPartEdca = new TH2F("hPartEdca","hPartEdca;p_{T};DCA",100,0,4,50,0,3); 
     hPartEptetaphi = new TH3F("hPartEptetaphi","hPartEptetaphi;pt;Eta;Phi",100,0,4,50,-1,1,180,-3.14,3.14);
     hPairDecayL = new TH2F("hPairDecayL","hPairDecayL;DecayL;p_{T}",150,0,30,60,0,4);
@@ -580,6 +581,7 @@ void StMcAnalysisMaker::pairPartnerElectron(StMuTrack const* const TagE,StMcTrac
       //fill electron histrogram
       hElectronPassCut->Fill(TagE->pt(),mCentrality,weight); 
       hPartEnFits->Fill(PartE->pt(),PartE->nHitsFit(),weight);
+      hPartEnFitsTagEpt->Fill(TagE->pt(),PartE->nHitsFit(),weight);
       hPartEdca->Fill(PartE->pt(),PartE->dcaGlobal().mag(),weight);
       hPartEptetaphi->Fill(PartE->pt(),PartE->momentum().pseudoRapidity(),PartE->momentum().phi(),weight);
       if (mother->geantId() == McAnaCuts::parentId)
@@ -745,7 +747,8 @@ bool StMcAnalysisMaker::isGoodPartE(StMuTrack const* const rcTrack) const
   int nHitsFit = rcTrack->nHitsFit();
   int nHitsdEdx = rcTrack->nHitsDedx();
   int nHitsMax = rcTrack->nHitsPoss();
-  bool passnHits = nHitsFit >15 && nHitsFit/(1.0*nHitsMax)>McAnaCuts::nFit2nMax ;
+  // bool passnHits = nHitsFit >15 && nHitsFit/(1.0*nHitsMax)>McAnaCuts::nFit2nMax ;
+  bool passnHits = nHitsFit > McAnaCuts::nFit_PartE && nHitsFit/(1.0*nHitsMax)>McAnaCuts::nFit2nMax ;
   // bool passnHits = nHitsFit >McAnaCuts::nHitsFit &&
   //   nHitsFit/(1.*nHitsMax)>McAnaCuts::nFit2nMax &&
   //   fabs(nHitsdEdx)>McAnaCuts::nHitsdEdx;
