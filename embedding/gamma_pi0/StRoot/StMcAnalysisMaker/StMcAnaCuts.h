@@ -32,6 +32,7 @@ namespace McAnaCuts
   float const eta = 0.8;
   float const partnerEta = 1;
   float const gDCA = 1.5;
+  int const nFit_PartE = 20;
   int const nHitsFit = 20;
   int const nHitsdEdx= 15;
   float const nFit2nMax = 0.52;

@@ -40,7 +40,7 @@ void generateRecaleHists(TString inputfilename="data/embeddQa_pi0_0918.root", TS
   cout << "total num pi0 (or eta/gamma) in the embedding: "<< totalnPi0 << endl;
 
   // int scaleEvents = 250e6;
-  int scaleEvents = 1e5;
+  int scaleEvents = 1e7;
   double scalefactor = scaleEvents*branchratio*ptrange*etarange/totalnPi0;  
   cout <<"scalefactor: "<< scalefactor <<" branchratio: "<<branchratio<<" scale to "<<scaleEvents<<" events" << endl;
   
@@ -59,6 +59,7 @@ void generateRecaleHists(TString inputfilename="data/embeddQa_pi0_0918.root", TS
   readScaleAndWrite<TH3F>("hMassDiEMC",scalefactor,fin,fout);
   readScaleAndWrite<TH3F>("hDcaPair",scalefactor,fin,fout);
   readScaleAndWrite<TH2F>("hPartEnFits",scalefactor,fin,fout);
+  readScaleAndWrite<TH2F>("hPartEnFitsTagEpt",scalefactor,fin,fout);
   readScaleAndWrite<TH2F>("hPartEdca",scalefactor,fin,fout);
   readScaleAndWrite<TH3F>("hPartEptetaphi",scalefactor,fin,fout);
   readScaleAndWrite<TH2F>("hPairDecayL",scalefactor,fin,fout);

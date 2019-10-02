@@ -76,6 +76,7 @@ private:
    //check the part
    TH3F* hPartEptetaphi;
    TH2F* hPartEnFits;
+   TH2F* hPartEnFitsTagEpt;
    TH2F* hPartEdca; 
    TH2F* hPairDecayL;
    TH3F* hDcaPair;

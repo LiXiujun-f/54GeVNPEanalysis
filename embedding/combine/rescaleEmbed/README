@@ -1,0 +1,19 @@
+scaleAndcombine.sh --> combine diff embedding
+    required file: 
+    data/   -> embedding ana output file for pi0/eta/gamma
+    generateRecaleHists.C    
+
+    outout file:
+    rescaleFile/
+    rescale_combine.root 
+compare2PE_my.C --> compaire embedding to real data
+                --> as well as sys. error calculation
+    required file:
+    rescale_combine.root or other embedding output files
+    incEv2_0930.root or other output file from read data ana
+    output file:
+    sysFromEmbedd.root -> sys error
+    qa2.pdf -> QA plots
+calTotSysErr.C --> calculate tot err from embedding 
+
+    

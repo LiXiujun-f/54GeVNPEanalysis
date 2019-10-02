@@ -54,7 +54,7 @@ StMcAnalysisMaker::StMcAnalysisMaker(const char *name, const char *title): StMak
 int StMcAnalysisMaker::Init()
 {
   // mGRefMultCorrUtil = new StRefMultCorr("refMult");
-  // mGRefMultCorrUtil = CentralityMaker::instance()->getRefMultCorr();
+  mGRefMultCorrUtil = CentralityMaker::instance()->getRefMultCorr();
   mOutfileName = mOutfileName.ReplaceAll(".root", "");
   mFile = new TFile(Form("%s.McAna.root", mOutfileName.Data()), "recreate");
   assert(mFile && !mFile->IsZombie());
@@ -124,6 +124,7 @@ bool StMcAnalysisMaker::InitHists()
 
     //check the partner electron QA 
     hPartEnFits = new TH2F("hPartEnFits","hPartEnFits;p_{T};nHitsFit",100,0,4,45,10,55);
+    hPartEnFitsTagEpt = new TH2F("hPartEnFitsTagEpt","hPartEnFits;p_{T};nHitsFit",100,0,4,45,10,55);
     hPartEdca = new TH2F("hPartEdca","hPartEdca;p_{T};DCA",100,0,4,50,0,3); 
     hPartEptetaphi = new TH3F("hPartEptetaphi","hPartEptetaphi;pt;Eta;Phi",100,0,4,50,-1,1,180,-3.14,3.14);
     hPairDecayL = new TH2F("hPairDecayL","hPairDecayL;DecayL;p_{T}",150,0,30,60,0,4);
@@ -263,13 +264,12 @@ int StMcAnalysisMaker::Make()
   //                                mEvent->primaryVertex()->position().z()); 
   //                                // mEvent->primaryVertex()->position().z(), 
   //                                // mEvent->runInfo()->zdcCoincidenceRate() );
-  //   if (mGRefMultCorrUtil->isBadRun(mEvent->runId()))
-  //   {
-  //     LOG_INFO << "This is a bad run from mGRefMultCorrUtil! Skip! " << endm;
-  //     return kStSkip;
-  //   }
+  //   // if (mGRefMultCorrUtil->isBadRun(mEvent->runId()))
+  //   // {
+  //   //   LOG_INFO << "This is a bad run from mGRefMultCorrUtil! Skip! " << endm;
+  //   //   return kStSkip;
+  //   // }
   //   mCentrality  = mGRefMultCorrUtil->getCentralityBin9();
-  //   cout << " centrality "<< mCentrality << " refMult "<<  mMuDst->event()->refMult()<<endl;
   // }
   // else
   // {
@@ -280,8 +280,13 @@ int StMcAnalysisMaker::Make()
   mCentWeight = 1.;
   double refmultcor=0;
   mCentrality = getCentralityBin(mpVtx.z(),mEvent->runId(),mMuDst->event()->refMult(),mCentWeight,refmultcor); 
+  // cout <<"centrality "<<mCentrality<<" " << getCentralityBin(mpVtx.z(),mEvent->runId(),mMuDst->event()->refMult(),mCentWeight,refmultcor)<<endl; 
   // mCentrality = getCentralityBin(mpVtx.z(),mEvent->runId(),mMuDst->event()->refMult()/(1.+0.201),mCentWeight,refmultcor); 
-  if (mCentrality<0) return kStSkip;
+  if (mCentrality<0) { 
+  //  cout << mEvent->primaryVertex()->position().z()<< endl;
+    return kStSkip; 
+  }
+  //mCentWeight = mGRefMultCorrUtil->getWeight();
   hVzvsmcVz->Fill(mpVtx.z(),mMcEvent->primaryVertex()->position().z());
   bookSpectra(mCentrality); 
   mEP = gRandom->Rndm()*TMath::Pi();
@@ -576,6 +581,7 @@ void StMcAnalysisMaker::pairPartnerElectron(StMuTrack const* const TagE,StMcTrac
       //fill electron histrogram
       hElectronPassCut->Fill(TagE->pt(),mCentrality,weight); 
       hPartEnFits->Fill(PartE->pt(),PartE->nHitsFit(),weight);
+      hPartEnFitsTagEpt->Fill(TagE->pt(),PartE->nHitsFit(),weight);
       hPartEdca->Fill(PartE->pt(),PartE->dcaGlobal().mag(),weight);
       hPartEptetaphi->Fill(PartE->pt(),PartE->momentum().pseudoRapidity(),PartE->momentum().phi(),weight);
       if (mother->geantId() == McAnaCuts::parentId)
@@ -741,7 +747,8 @@ bool StMcAnalysisMaker::isGoodPartE(StMuTrack const* const rcTrack) const
   int nHitsFit = rcTrack->nHitsFit();
   int nHitsdEdx = rcTrack->nHitsDedx();
   int nHitsMax = rcTrack->nHitsPoss();
-  bool passnHits = nHitsFit >15 && nHitsFit/(1.0*nHitsMax)>McAnaCuts::nFit2nMax ;
+  // bool passnHits = nHitsFit >15 && nHitsFit/(1.0*nHitsMax)>McAnaCuts::nFit2nMax ;
+  bool passnHits = nHitsFit >20  && nHitsFit/(1.0*nHitsMax)>McAnaCuts::nFit2nMax ;
   // bool passnHits = nHitsFit >McAnaCuts::nHitsFit &&
   //   nHitsFit/(1.*nHitsMax)>McAnaCuts::nFit2nMax &&
   //   fabs(nHitsdEdx)>McAnaCuts::nHitsdEdx;
