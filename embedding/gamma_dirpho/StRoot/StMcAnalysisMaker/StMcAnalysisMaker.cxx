@@ -182,7 +182,8 @@ void StMcAnalysisMaker::bookSpectra(int centrality)
    else if (McAnaCuts::parentId==1)
    {
       // TFile* file = TFile::Open("StRoot/macros/fout_pi0_eta_gamma_0918.root");
-      TFile* file = TFile::Open("StRoot/macros/fout_pi0_eta_gamma_0926.root");
+      // TFile* file = TFile::Open("StRoot/macros/fout_pi0_eta_gamma_0926.root");
+      TFile* file = TFile::Open("StRoot/macros/fout_pi0_eta_gamma_1002.root");
       int idx = centrality;
       if (idx<2) idx = 2;
       // mPi0Spectra = (TF1*)file->Get(Form("fGMSp_comb_%d",idx));
@@ -465,9 +466,19 @@ void StMcAnalysisMaker::fillMcTrack(StMcTrack const* const mcTrk)
       // only check the dalitz decay particles
       // if (mcTrk->parent()->geantId() == 10007 && mcTrk->pt()>McAnaCuts::minPt && fabs(mcTrk->pseudoRapidity())<McAnaCuts::partnerEta)
       // if ( mcTrk->pt()>McAnaCuts::minPt && fabs(mcTrk->pseudoRapidity())<McAnaCuts::eta)
+      double weight = 1;
+      if (McAnaCuts::parentId>0){
+        if (mcTrk->parent()) 
+        {
+          if (mcTrk->parent()->geantId()==McAnaCuts::parentId())
+             weight = mPi0Spectra->Eval(mcTrk->parent()->pt());
+          else return;
+        }
+        else return;
+      }
       if ( mcTrk->pt()>McAnaCuts::minPt && fabs(mcTrk->pseudoRapidity())<McAnaCuts::TagEta)
       {
-        hMcElectronPtvsCent->Fill(mcTrk->pt(),mCentrality,mCentWeight);
+        hMcElectronPtvsCent->Fill(mcTrk->pt(),mCentrality,mCentWeight*weight);
         // hMcElectronPtvsCent_test->Fill(mcTrk->momentum().perp(),mCentrality,mCentWeight);
       }
     }

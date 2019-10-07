@@ -19,7 +19,7 @@ TGraph* gDcasys;
 TGraph* gnHitsSys;
 TGraph* gInvMassSys;
 TGraph* gPairDca;
-TGraph* gPartPtSys;
+// TGraph* gPartPtSys;
 
 void NormHist(TH1* h1, int color, int x1=0, int x2=0);
 void calSys(TH1F* hdata,TH1F* hmc, double x0, double x1, double x2,double x3);
@@ -36,10 +36,12 @@ void compare2PE_my()
   // TString realdata = "incEv2_0925.root";
   // TString realdata = "incEv2_0929.root";
   TString realdata = "incEv2_0930.root";
+  // TString realdata = "incEv2_1001.root";
   // TString realdata = "checkMisPID.root";
   // TString realdata = "qa5.root";
   // TString mcdata = "embeddQa0825.root";
   // TString mcdata = "embeddQa_phicut0827.root";
+  // TString mcdata = "rescale_combine1002.root";
   TString mcdata = "rescale_combine.root";
   // TString mcdata = "rescaleFile/rescale_gamma.root";
   // TString mcdata = "rescaleFile/rescale_pi0.root";
@@ -68,6 +70,7 @@ void compare2PE_my()
   gDcasys->Write();
   gnHitsSys->Write();
   gInvMassSys->Write();
+  gPairDca->Write();
   sysFromEmbedd->Close();
 }
 //----------------------------------------------------------------------
@@ -104,16 +107,16 @@ void drawElectronComponent(TString totalMc, TString pi0Mc, TString etaMc, TStrin
    {
       file[ip] = TFile::Open(filename[ip].Data());
       cout << filename[ip].Data()<< endl;
-      hTagE2D[ip]=(TH2F*)file[ip]->Get("hTagElectron");
+      hTagE2D[ip]=(TH2F*)file[ip]->Get("hTagElectronPassCut");
       // hTagE2D[ip]=(TH2F*)file[ip]->Get("hPi0Pt_weight");
       hTagE2D[ip]->SetDirectory(0);
       // if (ip==1) hTagE2D[ip]->Scale(2*99);
       // hRecoE2D[ip]=(TH2F*)file[ip]->Get("hTagElectronPassCut");
       hRecoE2D[ip]=(TH2F*)file[ip]->Get("hPi0Pt_weight");
       hRecoE2D[ip]->SetDirectory(0);
-      hTagE[ip] = (TH1F*)hTagE2D[ip]->ProjectionX(Form("hTagE_%s",histname[ip].Data()),3,9);
+      hTagE[ip] = (TH1F*)hTagE2D[ip]->ProjectionX(Form("hTagE_%s",histname[ip].Data()),3,6);
       hTagE[ip]->SetDirectory(0);
-      hRecoE[ip] = (TH1F*)hRecoE2D[ip]->ProjectionX(Form("hRecoE_%s",histname[ip].Data()),3,9);
+      hRecoE[ip] = (TH1F*)hRecoE2D[ip]->ProjectionX(Form("hRecoE_%s",histname[ip].Data()),3,6);
       hRecoE[ip]->SetDirectory(0);
    }
    c->cd(); 
@@ -359,8 +362,11 @@ void drawNhitsTagePt(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc
   double  x[20],y[20];
   int ibin=0;
   
-  int const nbins = 7;
-  double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,3};
+  // int const nbins = 7;
+  // double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,3};
+
+  int const nbins = 8;
+  double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
 
   // for (int ip=1;ip<=20;ip++)
   for (int ip=0;ip<=nbins;ip++)
@@ -378,7 +384,7 @@ void drawNhitsTagePt(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc
     hdata->SetLineColor(kRed);
     hdata->SetMarkerColor(kRed);
 
-    y[ibin]=calSys(hdata,hrc,20,50,25,50);
+    y[ibin]=calSys(hdata,hrc,21,50,25,50);
     x[ibin]=hDCAdata->GetXaxis()->GetBinCenter(ip);
     ibin++;
 
@@ -407,7 +413,7 @@ void drawNhitsTagePt(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc
   gnHitsSys->SetName("gPartEnHitsSys");
   TH1* hrc = (TH1*)hDCArc->ProjectionY("hrc");
   TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata");
-  cout << "nHits sys:  " <<calSys(hdata,hrc,20,50,25,50)<<endl;
+  cout << "nHits sys:  " <<calSys(hdata,hrc,21,50,25,50)<<endl;
 }
 //----------------------------------------------------------------------
 void drawPartPtEtaPhi(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
@@ -432,8 +438,11 @@ void drawPartPtEtaPhi(TString head, TPDF* pdf, TCanvas* c,TString real,TString m
   file->Close();
   hDCAdata->Add(hDCAdataLS,-1);
   
-  int const nbins = 9;
-  double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,2.2,2.6,3};
+  // int const nbins = 9;
+  // double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,2.2,2.6,3};
+
+  int const nbins = 8;
+  double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
 
   // c->Clear();
   TH1* hrc_x = (TH1*)hDCArc->ProjectionX("hrc_x");
@@ -449,6 +458,13 @@ void drawPartPtEtaPhi(TString head, TPDF* pdf, TCanvas* c,TString real,TString m
   cout <<"partner e pt cut sys "<< calSys(hdata_x,hrc_x,0.25,5,0.3,5 )<< endl;
   c->Clear();
   
+  TH1F* ratio = (TH1F*)hrc_x->Clone("hrc2data_x");
+  ratio->Divide(hdata_x);
+  ratio->GetYaxis()->SetRangeUser(0,2);
+  ratio->Draw();
+  addpdf(pdf,c);
+  c->Clear();
+
   c->cd();
   int numOfPlots=4;
   c->Divide(2,2);
@@ -526,8 +542,13 @@ void drawPairDca(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   drawLatex(0.6,0.6,"pair DCA (full p_{T} range)",0.035);
   addpdf(pdf,c); 
 
-  int const nbins = 7;
-  double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,3};
+  // int const nbins = 7;
+  // double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,3};
+  
+  int const nbins = 8;
+// double ptedge[nbin+1]={0.2,0.3,0.4,0.5,0.6,0.7,0.85,1,1.2,1.6,2.0,2.8};
+// double ptedge[nbins+1]={0.2,0.42,0.67,0.85,1,1.2,1.6,2.0,2.8};
+  double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
 
   c->Clear();
   int iv=3,ih=2;
@@ -587,10 +608,11 @@ void drawDecayL(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
    c->Clear();
    TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc");;
    TH1* hdata = (TH1*)hDCAdata->ProjectionX("hdata");
-   
-   hrc->Scale(1./hrc->Integral(hrc->GetXaxis()->FindBin(0),hrc->GetXaxis()->FindBin(2)));
+ 
+   hrc->Rebin();  
+   hrc->Scale(1./hrc->Integral(hrc->GetXaxis()->FindBin(0),hrc->GetXaxis()->FindBin(30)));
    hrc->Scale(1./hrc->GetBinWidth(1));
-   hdata->Scale(1./hdata->Integral(hdata->GetXaxis()->FindBin(0),hdata->GetXaxis()->FindBin(2)));
+   hdata->Scale(1./hdata->Integral(hdata->GetXaxis()->FindBin(0),hdata->GetXaxis()->FindBin(30)));
    hdata->Scale(1./hdata->GetBinWidth(1));
    hrc->SetMarkerColor(kBlue);
    hrc->SetLineColor(kBlue);
@@ -607,8 +629,11 @@ void drawDecayL(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
    drawLatex(0.6,0.6,Form("%s",head.Data()),0.035);
    addpdf(pdf,c); 
 
-   int const nbins = 7;
-   double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,3};
+   // int const nbins = 7;
+   // double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,3};
+
+   int const nbins = 8;
+   double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
    c->Clear();
    c->Divide(3,2);
    int ipad=1;
@@ -775,8 +800,10 @@ void drawInvMass(TString head,TPDF* pdf,TCanvas* c, TString real, TString mc)
   // int const nbins = 9;
   // double ptedge[nbins+1]={0.2,0.3,0.4,0.6,1.0,1.4,1.8,2.2,2.6,3.2};
   
+  // int const nbins = 7;
+  // double ptedge[nbins+1]={0.2,0.3,0.4,0.6,1.0,1.4,1.8,3.2};
   int const nbins = 7;
-  double ptedge[nbins+1]={0.2,0.3,0.4,0.6,1.0,1.4,1.8,3.2};
+  double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.4,1.8,3.2};
 
   double x[nbins],y[nbins];
   for (int i=0;i<nbins;i++)
@@ -851,9 +878,18 @@ void drawSysGraph(TPDF* pdf, TCanvas* c)
    TH1F* hbkgd =  new TH1F("hbkgd","hbkgd;p_{T} [GeV/c];Sys. Err" , 10,0, 4);
    hbkgd->GetYaxis()->SetRangeUser(0,0.1);
    // hbkgd->Draw();
-   gDcasys->Draw();
+   // gDcasys->Draw();
+   // gDcasys->GetXaxis()->SetRangeUser(0,3);
+   // addpdf(pdf,c);
+   gPairDca->Draw();
+
+   // gPairDca->GetXaxis()->SetRangeUser(0,3);
    addpdf(pdf,c);
+
    c->Clear();
    gInvMassSys->Draw();
+   addpdf(pdf,c);
+   c->Clear();
+   gnHitsSys->Draw();
    addpdf(pdf,c);
 }

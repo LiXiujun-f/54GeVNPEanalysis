@@ -41,7 +41,8 @@ gammaDalitzBranch="1."
 # gammaDalitzBranch="0.9"
 # gammaEmbeddfile="data/embeddQa_gamma_0918.root"
 # gammaEmbeddfile3="data/embeddQa_gamma_dirpho_0929.root"
-gammaEmbeddfile3="data/embeddQa_gamma_dirpho_0930.root"
+# gammaEmbeddfile3="data/embeddQa_gamma_dirpho_0930.root"
+gammaEmbeddfile3="data/embeddQa_gamma_dirpho_1002.root"
 gammaRescalefile3="$outDir/rescale_gamma_dirpho.root"
 root -b -q generateRecaleHists.C\(\"$gammaEmbeddfile3\",\"$gammaRescalefile3\",$gammaDalitzBranch\)
 

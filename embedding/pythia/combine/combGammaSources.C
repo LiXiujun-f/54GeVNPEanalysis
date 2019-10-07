@@ -19,9 +19,10 @@ double dirphosum(double* x,double* par)
   double sum=0;
   for (int i=2;i<9;i++)
   {
-    sum+ = fdirpho_sp[i]->Eval(x[0]);
+    if (i>=7) sum+ = fdirpho_sp[i]->Eval(x[0])*0.5;
+    else if (i<7) sum+ = fdirpho_sp[i]->Eval(x[0]);
   }
-  return sum/7.0;
+  return sum/(0.5*2+1*5);
 }
 double dirphov2mb(double* x,double* par)
 {
@@ -31,7 +32,8 @@ double dirphov2mb(double* x,double* par)
   for (int i=2;i<9;i++)
   {
     sum+ = fdirpho_sp[i]->Eval(x[0]);
-    w[i] = fdirpho_sp[i]->Eval(x[0]);
+    if (i>=7)  w[i] = fdirpho_sp[i]->Eval(x[0])*0.5;
+    else if (i<7)  w[i] = fdirpho_sp[i]->Eval(x[0]);
     combv2+=w[i]*fdirpho_v2[i]->Eval(x[0]);
   }
   return combv2/sum;

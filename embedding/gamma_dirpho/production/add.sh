@@ -7,8 +7,7 @@
 START=`date +%s`
 tmp="tmplist.txt"
 # out="../embeddingQa.phoE.root"
-# out="../embeddQa_gamma_dirpho_0929.root"
-out="../embeddQa_gamma_dirpho_0930.root"
+out="../embeddQa_gamma_dirpho_1002.root"
 N=`ls *.root | wc -l`
 rm -rf ${tmp}
 ls *.root > ${tmp}

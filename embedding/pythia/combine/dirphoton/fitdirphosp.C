@@ -39,6 +39,14 @@ void fitdirphosp()
   TGraphErrors* g200_2[2];
   TGraphErrors* g200_3[8];
   TGraphErrors* g200_comb[3]; // combine the g200_3 into 3 centbin
+  TGraphErrors* g62PP_scale[3];
+  TGraphErrors* g63PP1_scale[3];
+  TGraphErrors* g63PP2_scale[3];
+
+  TGraphErrors* g62PP;
+  TGraphErrors* g63PP1;
+  TGraphErrors* g63PP2;
+
   TString centname[]={"0_20","20_40","40_60","0_5","5_10","10_15","15_20","20_30","30_40","40_50","50_60"};
   TF1* fit[3];
   TF1* fit_pt[3];
@@ -50,7 +58,10 @@ void fitdirphosp()
   TPDF* pdf = new TPDF("dirphospectra.pdf");
   pdf->Off();
 
-  double scalefactor[3]={ pow(341./519., 1.23 ), pow( 151.75/225.4,1.23) , pow( 57.77/85.5,1.23) };
+  double scalefactor_200[3]={ pow(341./519., 1.225 ), pow( 151.75/225.4,1.225) , pow( 57.77/85.5,1.225) };
+  // double scalefactor_200[3]={ 1./pow(519.025, 1.25 ), 1./pow( 225.425,1.25) , 1./pow( 85.475,1.25) };
+  // double scalefactor_62pp[3]={1./pow(1.864,1.25)/35.11, 1./pow(1.864,1.25)/35.11, 1./pow(1.864,1.25)/35.11};
+  double scalefactor_62pp[3]={ 656.59/35.61, 241.1/35.61, 70.69/35.61};
   for (int i=0;i<2;i++)
   {
     g62[i] = (TGraphErrors*)file->Get(Form("dirpho_62_%s",centname[i].Data()));
@@ -59,7 +70,7 @@ void fitdirphosp()
     {
        double x,y;
        g200_2[i]->GetPoint(ip,x,y);
-       g200_2[i]->SetPoint(ip,x,y*scalefactor[i] );
+       g200_2[i]->SetPoint(ip,x,y*scalefactor_200[i] );
     }
     // for (int ip=0;ip<g62[i]->GetN();ip++)
     // {
@@ -76,7 +87,7 @@ void fitdirphosp()
     {
        double x,y;
        g200_1[i]->GetPoint(ip,x,y);
-       g200_1[i]->SetPoint(ip,x,y*scalefactor[i] );
+       g200_1[i]->SetPoint(ip,x,y*scalefactor_200[i] );
     }
 
     addpdf(pdf);
@@ -102,7 +113,7 @@ void fitdirphosp()
         erry=terry*terry;
      }
     
-     y=y*0.25*scalefactor[0];
+     y=y*scalefactor_200[0]/4.;
      erry = sqrt(erry);
      g200_comb[0]->SetPoint(ib,x,y);
      g200_comb[0]->SetPointError(ib,0 ,erry);
@@ -124,7 +135,7 @@ void fitdirphosp()
         y+=ty;
         erry=terry*terry;
      }
-     y=y*0.5*scalefactor[1];
+     y=y*0.5*scalefactor_200[1];
      erry = sqrt(erry);
      g200_comb[1]->SetPoint(ib,x,y);
      // cout<<"combine: " << x <<" " << y<< endl;
@@ -146,11 +157,72 @@ void fitdirphosp()
         y+=ty;
         erry=terry*terry;
      }
-     y=y*0.5*scalefactor[2];
+     y=y*0.5*scalefactor_200[2];
      erry = sqrt(erry);
      g200_comb[2]->SetPoint(ib,x,y);
      g200_comb[2]->SetPointError(ib,0 ,erry);
   }
+
+  TGraphErrors* g62PP = (TGraphErrors*)file->Get("dirpho_62_pp");
+  TGraphErrors* g63PP1 = (TGraphErrors*)file->Get("dirpho_63_pp1");
+  TGraphErrors* g63PP2 = (TGraphErrors*)file->Get("dirpho_63_pp2");
+
+  for (int ic=0;ic<3;ic++)
+  {
+    g62PP_scale[ic] = (TGraphErrors*)g62PP->Clone(Form("dirpho_62pp_%s",centname[ic]));
+    for (int ib=0;ib<g62PP->GetN();ib++)
+    {
+       double x=0,y=0,errx=0,erry=0;
+       double tx,ty,terrx,terry;
+       g62PP->GetPoint(ib,tx,ty);
+       terry = g62PP->GetErrorY(ib);
+       x=tx;
+       y=ty;
+       erry=terry*scalefactor_62pp[ic];
+       y=y*scalefactor_62pp[ic];
+       g62PP_scale[ic]->SetPoint(ib,x,y);
+       g62PP_scale[ic]->SetPointError(ib,0 ,erry);
+    }
+    setGraphStyle(g62PP_scale[ic] ,kGreen+2 );
+  }
+
+  for (int ic=0;ic<3;ic++)
+  {
+    g63PP1_scale[ic] = (TGraphErrors*)g63PP1->Clone(Form("dirpho_63pp1_%s",centname[ic]));
+    for (int ib=0;ib<g63PP1->GetN();ib++)
+    {
+       double x=0,y=0,errx=0,erry=0;
+       double tx,ty,terrx,terry;
+       g63PP1->GetPoint(ib,tx,ty);
+       terry = g63PP1->GetErrorY(ib);
+       x=tx;
+       y=ty;
+       erry=terry*scalefactor_62pp[ic];
+       y=y*scalefactor_62pp[ic];
+       g63PP1_scale[ic]->SetPoint(ib,x,y);
+       g63PP1_scale[ic]->SetPointError(ib,0 ,erry);
+    }
+    setGraphStyle(g63PP1_scale[ic] ,kGreen+2 );
+  }
+
+  for (int ic=0;ic<3;ic++)
+  {
+    g63PP2_scale[ic] = (TGraphErrors*)g63PP2->Clone(Form("dirpho_63pp2_%s",centname[ic]));
+    for (int ib=0;ib<g63PP2->GetN();ib++)
+    {
+       double x=0,y=0,errx=0,erry=0;
+       double tx,ty,terrx,terry;
+       g63PP2->GetPoint(ib,tx,ty);
+       terry = g63PP2->GetErrorY(ib);
+       x=tx;
+       y=ty;
+       erry=terry*scalefactor_62pp[ic];
+       y=y*scalefactor_62pp[ic];
+       g63PP2_scale[ic]->SetPoint(ib,x,y);
+       g63PP2_scale[ic]->SetPointError(ib,0 ,erry);
+    }
+    setGraphStyle(g63PP2_scale[ic] ,kGreen+2 );
+  } 
 
   TH1F* h = new TH1F("h","h",20,0,20);
   h->GetYaxis()->SetRangeUser(1e-12,1);
@@ -160,8 +232,8 @@ void fitdirphosp()
   TH1F* h = new TH1F("h","h",5,0,15);
   for (int i=0;i<3;i++)
   {
-     c->Clear();
-     h->Draw();
+     // c->Clear();
+     h->Draw("same");
      h->GetYaxis()->SetRangeUser(-0.15,0.3);
      // fit[i] = new TF1(Form("fitdirphosp_%s",centname[i].Data()), myFit,0,15,7);
      fit[i] = new TF1(Form("fitdirphoInv_%s",centname[i].Data()),myFit,0,15,4);
@@ -175,7 +247,14 @@ void fitdirphosp()
      if (i<2) setGraphStyle(g200_2[i],kMagenta);
 
      gmult[i]->Add(g200_1[i]);
-     gmult[i]->Add(g200_comb[i]);
+     gmult[i]->Add(g62PP_scale[i]);
+     gmult[i]->Add(g63PP1_scale[i]);
+     gmult[i]->Add(g63PP2_scale[i]);
+     //
+     //we will not use 200 GeV spectra at high pt
+     // gmult[i]->Add(g200_comb[i]);
+     // instead we will take pp data to do the scaling
+     //
      if (i<2) 
      {
        gmult[i]->Add(g200_2[i]);
@@ -188,6 +267,7 @@ void fitdirphosp()
      fit[i]->Draw("same");
      fit[i]->GetParameters(par);
      fit_pt[i]->SetParameters(par);
+     // gPad->SetLogx();
      addpdf(pdf);
   }
 
@@ -197,8 +277,8 @@ void fitdirphosp()
 
   for (int i=0;i<3;i++)
   {
-   gmult[i]->Write();
-   fit[i]->Write(); 
-   fit_pt[i]->Write(); 
+    gmult[i]->Write();
+    fit[i]->Write(); 
+    fit_pt[i]->Write(); 
   } 
 }

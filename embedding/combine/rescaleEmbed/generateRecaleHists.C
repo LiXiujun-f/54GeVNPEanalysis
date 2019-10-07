@@ -40,7 +40,7 @@ void generateRecaleHists(TString inputfilename="data/embeddQa_pi0_0918.root", TS
   cout << "total num pi0 (or eta/gamma) in the embedding: "<< totalnPi0 << endl;
 
   // int scaleEvents = 250e6;
-  int scaleEvents = 1e7;
+  int scaleEvents = 3e8;
   double scalefactor = scaleEvents*branchratio*ptrange*etarange/totalnPi0;  
   cout <<"scalefactor: "<< scalefactor <<" branchratio: "<<branchratio<<" scale to "<<scaleEvents<<" events" << endl;
   

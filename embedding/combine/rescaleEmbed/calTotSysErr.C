@@ -1,28 +1,37 @@
+#include "sPhenixStyle.h"
 void calTotSysErr()
 {
-  int const nItems = 3;
-  double sys[nItems] = {0.42,0.18,1.5};
-  double totalsys;
-  for (int i=0;i<nItems;i++)
-  {
-    totalsys=sys[i]*sys[i];
-  }
+  SetsPhenixStyle();
+  // int const nItems = 3;
+  // double sys[nItems] = {0.42,0.18,1.5};
+    // for (int i=0;i<nItems;i++)
+  // {
+  //   totalsys=sys[i]*sys[i];
+  // }
   //totalsys=sqrt(totalsys);
-  totalsys*=0.01*0.01;
-  cout << totalsys <<endl; 
-
+  int const nbins = 8;
+  double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
+  double totalsys[nbins],x[nbins];
+  double partPtCutSys = 0.0084;
   TFile* fsys = TFile::Open("sysFromEmbedd.root");
-  TGraph* g = (TGraph*)fsys->Get("gInvMassSys");
-  int const  nbins=20;
-  double x[nbins],y[nbins];
-
-  for (int i=0;i<g->GetN();i++)
-  {
-     g->GetPoint(i,x[i],y[i]);
-     y[i]=totalsys+y[i]*y[i];
-     y[i]=sqrt(y[i]);
+  TGraph* gInvMassSys = (TGraph*)fsys->Get("gInvMassSys");
+  TGraph* gPairDca = (TGraph*)fsys->Get("gPairDca");
+  TGraph* gPartEnHitsSys = (TGraph*)fsys->Get("gPartEnHitsSys");
+  
+  for (int i=0;i<nbins;i++)
+  { 
+    x[i]=0.5*(ptedge[i]+ptedge[i+1]);
+    totalsys[i] = 0;
+    totalsys[i] += gPartEnHitsSys->Eval(x[i])*gPartEnHitsSys->Eval(x[i]);
+    totalsys[i] += gPairDca->Eval(x[i])*gPairDca->Eval(x[i]);
+    totalsys[i] += gInvMassSys->Eval(x[i])*gInvMassSys->Eval(x[i]);
+    totalsys[i] += partPtCutSys*partPtCutSys;
+    totalsys[i]=sqrt(totalsys[i]);
   }
-  TGraph* gtot = new TGraph(g->GetN(),x,y);
+
+  TGraph* gtot = new TGraph(nbins,x,totalsys);
+  gtot->GetXaxis()->SetTitle("Tag e p_{T}");
+  gtot->Draw("PA"); 
   gtot->SaveAs("gTotSysErr.root");
  
 }

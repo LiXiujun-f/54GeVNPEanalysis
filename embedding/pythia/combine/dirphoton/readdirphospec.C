@@ -215,6 +215,48 @@ void readdirphospec()
   TGraphErrors* g16 = new TGraphErrors(13, x16 ,y16,0,toterr16);
   g16->SetName("dirpho_200_50_60");
 
+  getline(read,input); 
+  cout << input <<endl;
+  getline(read,input); 
+  cout << input <<endl;
+  double x17[8], y17[8], stat17[8], sys17[8],toterr17[8];
+  for (int i=0;i<8;i++)
+  {
+     read>>x17[i]>>y17[i]>>stat17[i]>>sys17[i];
+     cout<<x17[i]<<" "<<y17[i]<<" "<<stat17[i]<<" "<<sys17[i]<<endl;
+     toterr17[i]=sqrt(stat17[i]*stat17[i]+sys17[i]*sys17[i]);
+  }
+  TGraphErrors* g17 = new TGraphErrors(8, x17 ,y17,0,toterr17);
+  g17->SetName("dirpho_62_pp");
+
+  getline(read,input); 
+  cout << input <<endl;
+  getline(read,input); 
+  cout << input <<endl;
+  double x18[8], y18[8], stat18[8], sys18[8],toterr18[8];
+  for (int i=0;i<8;i++)
+  {
+     read>>x18[i]>>y18[i]>>stat18[i]>>sys18[i];
+     cout<<x18[i]<<" "<<y18[i]<<" "<<stat18[i]<<" "<<sys18[i]<<endl;
+     toterr18[i]=sqrt(stat18[i]*stat18[i]+sys18[i]*sys18[i]);
+  }
+  TGraphErrors* g18 = new TGraphErrors(8, x18 ,y18,0,toterr18);
+  g18->SetName("dirpho_63_pp1");
+
+  getline(read,input); 
+  cout << input <<endl;
+  getline(read,input); 
+  cout << input <<endl;
+  double x19[10], y19[10], stat19[10], sys19[10],toterr19[10];
+  for (int i=0;i<10;i++)
+  {
+     read>>x19[i]>>y19[i]>>toterr19[i];
+     cout<<x19[i]<<" "<<y19[i]<<" "<<toterr19[i]<<endl;
+     // toterr19[i]=sqrt(stat19[i]*stat19[i]+sys19[i]*sys19[i]);
+  }
+  TGraphErrors* g19 = new TGraphErrors(10, x19 ,y19,0,toterr19);
+  g19->SetName("dirpho_63_pp2");
+
   g1->Write();
   g2->Write();
   g3->Write();
@@ -230,4 +272,7 @@ void readdirphospec()
   g14->Write();
   g15->Write();
   g16->Write();
+  g17->Write();
+  g18->Write();
+  g19->Write();
 } 
