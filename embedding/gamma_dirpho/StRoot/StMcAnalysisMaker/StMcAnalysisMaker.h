@@ -56,6 +56,7 @@ private:
    TH2F* hPi0Pt;
    TH2F* hPi0Pt_norm;
    TH2F* hPi0Pt_weight;
+   TH2F* hPi0Pt_ptwt;
    TH3F* hPi0PhiEtaPt; 
 
    TH2F* hMcElectronPtvsCent;

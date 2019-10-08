@@ -58,7 +58,7 @@ void compare2PE_my()
   drawDecayL("pair DecayLength",pdf,c,realdata,mcdata);
   //
   // //below are QA for the data
-  drawDataQa("Tag e for real data",pdf,c,realdata,mcdata);
+  // drawDataQa("Tag e for real data",pdf,c,realdata,mcdata);
   drawTofMatchingEff("Tof match",pdf,c,realdata,mcdata,2,8);
   
   drawSysGraph(pdf,c );
@@ -642,10 +642,10 @@ void drawDecayL(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
       c->cd(ipad);
       TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc", hDCArc->GetYaxis()->FindBin(ptedge[ip]),hDCArc->GetYaxis()->FindBin(ptedge[ip+1]));
       TH1* hdata = (TH1*)hDCAdata->ProjectionX("hdata",hDCAdata->GetYaxis()->FindBin(ptedge[ip]),hDCAdata->GetYaxis()->FindBin(ptedge[ip+1]));
-      
-      hrc->Scale(1./hrc->Integral(hrc->GetXaxis()->FindBin(0),hrc->GetXaxis()->FindBin(2)));
+      hrc->Rebin();   
+      hrc->Scale(1./hrc->Integral(hrc->GetXaxis()->FindBin(0),hrc->GetXaxis()->FindBin(20)));
       hrc->Scale(1./hrc->GetBinWidth(1));
-      hdata->Scale(1./hdata->Integral(hdata->GetXaxis()->FindBin(0),hdata->GetXaxis()->FindBin(2)));
+      hdata->Scale(1./hdata->Integral(hdata->GetXaxis()->FindBin(0),hdata->GetXaxis()->FindBin(20)));
       hdata->Scale(1./hdata->GetBinWidth(1));
       hrc->SetMarkerColor(kBlue);
       hrc->SetLineColor(kBlue);

@@ -86,6 +86,7 @@ bool StMcAnalysisMaker::InitHists()
   hPi0Pt = new TH2F("hPi0Pt","hPi0Pt;p_{T}[GeV];Cent",120,0,highPt,9,-0.5,8.5);
   hPi0Pt_norm = new TH2F("hPi0Pt_norm","hPi0Pt;p_{T}[GeV];Cent",120,0,highPt,9,-0.5,8.5);
   hPi0Pt_weight = new TH2F("hPi0Pt_weight","hPi0Pt;p_{T}[GeV];Cent",120,0,highPt,9,-0.5,8.5);
+  hPi0Pt_ptwt = new TH2F("hPi0Pt_ptwt","hPi0Pt;p_{T}[GeV];Cent",120,0,highPt,9,-0.5,8.5);
   hPi0PhiEtaPt = new TH3F("hPi0PhiEtaPt","hPi0PhiEtaPt;p_{T}[GeV];Phi;Eta",120,0,highPt,180,-1*TMath::Pi(),TMath::Pi(),90,-1.8,1.8);
   //check the global tracks (electron) efficiency and QA
   hnHitsvsPt = new TH2F("hnHits","hnHits;nHits;p_{T}",55,0,55,10,0,5); 
@@ -380,6 +381,7 @@ int StMcAnalysisMaker::fillTracks(int& nRTracks, int& nMcTracks)
         hPi0Pt->Fill(mcTrack->pt(),mCentrality ,mCentWeight);
         hPi0Pt_norm->Fill(mcTrack->pt(),mCentrality ,mCentWeight*(1./(1.*nPi0)));
         hPi0Pt_weight->Fill(mcTrack->pt(),mCentrality ,mCentWeight*(1./(1.*nPi0))*ptweight);
+        hPi0Pt_ptwt->Fill(mcTrack->pt(),mCentrality ,mCentWeight*ptweight);
         hPi0PhiEtaPt->Fill(mcTrack->pt(),mcTrack->momentum().phi(),mcTrack->momentum().pseudoRapidity(),mCentWeight*(1./(1.*nPi0))*ptweight);
         fillPi0v2(mcTrack,(1./(1.*nPi0)));
         // cout <<" mcTrk pi0 parent: "<< (mcTrk->parent()) << endl;
@@ -470,7 +472,7 @@ void StMcAnalysisMaker::fillMcTrack(StMcTrack const* const mcTrk)
       if (McAnaCuts::parentId>0){
         if (mcTrk->parent()) 
         {
-          if (mcTrk->parent()->geantId()==McAnaCuts::parentId())
+          if (mcTrk->parent()->geantId()==McAnaCuts::parentId)
              weight = mPi0Spectra->Eval(mcTrk->parent()->pt());
           else return;
         }
