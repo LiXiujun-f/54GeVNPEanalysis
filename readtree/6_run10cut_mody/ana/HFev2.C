@@ -61,9 +61,9 @@ void HFev2()
   // TH1F* hreco = ProjectionAndFit("embeddQa_0910.root", centL-1,centH-1 ,"RecoEff",pdf );
   // TH1F* hreco = ProjectionAndFit("embedd_comb0924.root", centL-1,centH-1 ,"RecoEff",pdf );
   // TH1F* hreco = ProjectionAndFit("embedd_comb0929.root", centL-1,centH-1 ,"RecoEff",pdf );
-  TH1F* hreco = ProjectionAndFit("embedd_comb1002.root", centL-1,centH-1 ,"RecoEff",pdf );
+  TH1F* hreco = ProjectionAndFit("embed/embedd_comb1002.root", centL-1,centH-1 ,"RecoEff",pdf );
   // TH1F* hreco = ProjectionAndFit("pi0/embeddQa_tightcut.root", centL-1,centH-1 ,"RecoEff",pdf );
-  TFile* fPIDv2 = TFile::Open("prev2.root");
+  TFile* fPIDv2 = TFile::Open("chargeparticle/prev2.root");
   TGraphErrors* gKs = (TGraphErrors*)fPIDv2->Get("ks_0_80_62");
   TGraphErrors* gPi = (TGraphErrors*)fPIDv2->Get("pionplus_0_80_62");
   TGraphErrors* gP = (TGraphErrors*)fPIDv2->Get("proton_0_80_62");
@@ -318,7 +318,9 @@ void HFev2()
     double hfev2 = (nince*incev2-phev2*nphe);
     hfev2=hfev2-nince*piratio*piv2-nince*kratio*kv2-nince*pratio*pv2-nince*mgpiratio*piv2;
     hfev2/=1.*(eratio*nince-nphe);
-  
+   // HF electron yield before single electron efficiency correction
+    hHFe_cor->SetBinContent(ib+1,nince*eratio-nphe);
+    
     hratio->SetBinContent(ib+1,nince*eratio);
     
     // double hfev2err = getHFev2Err(incev2, pEv2->GetBinError(ib+1), nince,0,phev2,phev2*0.06,nphe,sqrt(nphe),eff,eff*0.05); 
@@ -436,6 +438,9 @@ void HFev2()
   hHFv2stat->Write();
   pEv2->Write();
   hphoE->Write(); 
+  hPheCor->Write();
+  hPhe->Write();
+  hHFe_cor->Write();  
   pdf->On();
   pdf->Close();
   fout->Close();

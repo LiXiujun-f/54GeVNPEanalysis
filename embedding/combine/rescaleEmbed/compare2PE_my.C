@@ -35,8 +35,8 @@ void compare2PE_my()
   // TString realdata = "incEv2_0924.root";
   // TString realdata = "incEv2_0925.root";
   // TString realdata = "incEv2_0929.root";
-  TString realdata = "incEv2_0930.root";
-  // TString realdata = "incEv2_1001.root";
+  // TString realdata = "incEv2_0930.root";
+  TString realdata = "incEv2_1001.root";
   // TString realdata = "checkMisPID.root";
   // TString realdata = "qa5.root";
   // TString mcdata = "embeddQa0825.root";
@@ -114,9 +114,9 @@ void drawElectronComponent(TString totalMc, TString pi0Mc, TString etaMc, TStrin
       // hRecoE2D[ip]=(TH2F*)file[ip]->Get("hTagElectronPassCut");
       hRecoE2D[ip]=(TH2F*)file[ip]->Get("hPi0Pt_weight");
       hRecoE2D[ip]->SetDirectory(0);
-      hTagE[ip] = (TH1F*)hTagE2D[ip]->ProjectionX(Form("hTagE_%s",histname[ip].Data()),3,6);
+      hTagE[ip] = (TH1F*)hTagE2D[ip]->ProjectionX(Form("hTagE_%s",histname[ip].Data()),3,9);
       hTagE[ip]->SetDirectory(0);
-      hRecoE[ip] = (TH1F*)hRecoE2D[ip]->ProjectionX(Form("hRecoE_%s",histname[ip].Data()),3,6);
+      hRecoE[ip] = (TH1F*)hRecoE2D[ip]->ProjectionX(Form("hRecoE_%s",histname[ip].Data()),3,9);
       hRecoE[ip]->SetDirectory(0);
    }
    c->cd(); 
@@ -134,6 +134,17 @@ void drawElectronComponent(TString totalMc, TString pi0Mc, TString etaMc, TStrin
       leg1->AddEntry(hTagE[ip],legendname[ip].Data(),"lp");
    }
    leg1->Draw();
+   addpdf(pdf,c);
+   
+   TFile* fout = TFile::Open("out1002.root");
+   TH1F* hphe = (TH1F*)fout->Get("hPheectra");
+   for (int ib=1;ib<=hphe->GetNbinsX();ib++)
+   {
+      hphe->SetBinContent(ib,hphe->GetBinContent(ib)/(1*hphe->GetBinWidth(ib)));
+   }
+   hphe->Scale(8.e6);
+   hphe->Draw();
+   hTagE[0]->Draw("same");
    addpdf(pdf,c);
    //Draw reconstructed electrons
    // c->Clear();
@@ -206,12 +217,18 @@ void drawQaDca(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   c->Divide(3,2);  
   int ipad=1;
   double x[20],y[20];
+  int const nbins = 8;
+  double ptedge[nbins+1]={0.25,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
+
   int ibin=0;
-  for (int ip=1;ip<=10;ip++)
+  // for (int ip=1;ip<=10;ip++)
+  for (int ip=1;ip<=nbins;ip++)
   {
-    TH1* hrc = (TH1*)hDCArc->ProjectionY("hrc",hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinLowEdge(ip)),hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinUpEdge(ip)));;
-    TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata",ip,ip);
-    cout << hDCAdata->GetXaxis()->GetBinLowEdge(ip)<<" "<< hDCAdata->GetXaxis()->GetBinUpEdge(ip) << endl;
+    // TH1* hrc = (TH1*)hDCArc->ProjectionY("hrc",hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinLowEdge(ip)),hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinUpEdge(ip)));;
+    // TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata",ip,ip);
+    // cout << hDCAdata->GetXaxis()->GetBinLowEdge(ip)<<" "<< hDCAdata->GetXaxis()->GetBinUpEdge(ip) << endl;
+    TH1* hrc = (TH1*)hDCArc->ProjectionY("hrc",hDCArc->GetXaxis()->FindBin(ptedge[ip-1]),hDCArc->GetXaxis()->FindBin(ptedge[ip]));;
+    TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata",hDCAdata->GetXaxis()->FindBin(ptedge[ip-1]),hDCAdata->GetXaxis()->FindBin(ptedge[ip]));
 
     hrc->Scale(1./hrc->Integral());
     hrc->Scale(1./hrc->GetBinWidth(1));
@@ -223,7 +240,8 @@ void drawQaDca(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
     hdata->SetMarkerColor(kRed);
     
     //calculate the error
-    x[ibin] = hDCAdata->GetXaxis()->GetBinCenter(ip);
+    // x[ibin] = hDCAdata->GetXaxis()->GetBinCenter(ip);
+    x[ibin] = ptedge[ip]*0.5+ptedge[ip+1]*0.5;
     y[ibin] = calSys(hdata, hrc, 0.1 , 2,0.1, 3);
     ibin++;
 
@@ -283,17 +301,23 @@ void drawQaNhits(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   c->Divide(3,2);  
   int ipad=1;
   double  x[20],y[20];
+  int const nbins = 8;
+  double ptedge[nbins+1]={0.25,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
+
   int ibin=0;
-   
   // for (int ip=1;ip<=20;ip++)
-  for (int ip=1;ip<=10;ip++)
+  // for (int ip=1;ip<=10;ip++)
+  for (int ip=1;ip<=nbins;ip++)
   {
 
     // if (ip<3) continue;
     // TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc",hDCArc->GetYaxis()->FindBin(hDCAdata->GetXaxis()->GetBinLowEdge(ip*4+1)),hDCArc->GetYaxis()->FindBin(hDCAdata->GetXaxis()->GetBinUpEdge(ip*4+4)), hDCArc->GetZaxis()->FindBin(-0.8),hDCArc->GetZaxis()->FindBin(0.8) );;
-    TH1* hrc = (TH1*)hDCArc->ProjectionY("hrc",hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinLowEdge(ip)),hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinUpEdge(ip)));;
-    TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata",ip,ip);
+    // TH1* hrc = (TH1*)hDCArc->ProjectionY("hrc",hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinLowEdge(ip)),hDCArc->GetXaxis()->FindBin(hDCAdata->GetXaxis()->GetBinUpEdge(ip)));;
+    // TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata",ip,ip);
     // cout << hDCAdata->GetXaxis()->GetBinLowEdge(ip)<<" "<< hDCAdata->GetXaxis()->GetBinUpEdge(ip) << endl;
+    
+    TH1* hrc = (TH1*)hDCArc->ProjectionY("hrc",hDCArc->GetXaxis()->FindBin(ptedge[ip-1]),hDCArc->GetXaxis()->FindBin(ptedge[ip]));;
+    TH1* hdata = (TH1*)hDCAdata->ProjectionY("hdata",hDCAdata->GetXaxis()->FindBin(ptedge[ip-1]),hDCAdata->GetXaxis()->FindBin(ptedge[ip]));
 
     hrc->Scale(1./hrc->Integral(hrc->GetXaxis()->FindBin(21),hrc->GetXaxis()->FindBin(45)));
     hrc->Scale(1./hrc->GetBinWidth(1));
@@ -307,7 +331,8 @@ void drawQaNhits(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
     c->cd(ipad);
     hrc->DrawCopy();
     hdata->DrawCopy("same");
-    drawLatex(0.2,0.6,Form("Part e: %0.1f<p_{T}<%0.1f",hDCAdata->GetXaxis()->GetBinLowEdge(ip),hDCAdata->GetXaxis()->GetBinUpEdge(ip)),0.035);
+    // drawLatex(0.2,0.6,Form("Part e: %0.1f<p_{T}<%0.1f",hDCAdata->GetXaxis()->GetBinLowEdge(ip),hDCAdata->GetXaxis()->GetBinUpEdge(ip)),0.035);
+    drawLatex(0.2,0.6,Form("Part e: %0.1f<p_{T}<%0.1f",ptedge[ip-1],ptedge[ip]),0.035);
     
     ipad++;
     
@@ -366,7 +391,7 @@ void drawNhitsTagePt(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc
   // double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,3};
 
   int const nbins = 8;
-  double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
+  double ptedge[nbins+1]={0.25,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
 
   // for (int ip=1;ip<=20;ip++)
   for (int ip=0;ip<=nbins;ip++)
@@ -385,7 +410,8 @@ void drawNhitsTagePt(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc
     hdata->SetMarkerColor(kRed);
 
     y[ibin]=calSys(hdata,hrc,21,50,25,50);
-    x[ibin]=hDCAdata->GetXaxis()->GetBinCenter(ip);
+    // x[ibin]=hDCAdata->GetXaxis()->GetBinCenter(ip);
+    x[ibin]=ptedge[ip]*0.5+ptedge[ip+1];
     ibin++;
 
     c->cd(ipad);
@@ -442,7 +468,7 @@ void drawPartPtEtaPhi(TString head, TPDF* pdf, TCanvas* c,TString real,TString m
   // double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,2.2,2.6,3};
 
   int const nbins = 8;
-  double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
+  double ptedge[nbins+1]={0.25,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
 
   // c->Clear();
   TH1* hrc_x = (TH1*)hDCArc->ProjectionX("hrc_x");
@@ -548,7 +574,7 @@ void drawPairDca(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   int const nbins = 8;
 // double ptedge[nbin+1]={0.2,0.3,0.4,0.5,0.6,0.7,0.85,1,1.2,1.6,2.0,2.8};
 // double ptedge[nbins+1]={0.2,0.42,0.67,0.85,1,1.2,1.6,2.0,2.8};
-  double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
+  double ptedge[nbins+1]={0.25,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
 
   c->Clear();
   int iv=3,ih=2;
@@ -633,7 +659,7 @@ void drawDecayL(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
    // double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,3};
 
    int const nbins = 8;
-   double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
+   double ptedge[nbins+1]={0.25,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
    c->Clear();
    c->Divide(3,2);
    int ipad=1;
@@ -708,7 +734,7 @@ void drawDataQa(TString head,TPDF* pdf,TCanvas* c, TString real, TString mc)
    c->Divide(2,2);
    // bool finishThispage=false;
    int const nbins = 8;
-   double ptedge[nbins+1]={0.2,0.3,0.4,0.6,1.0,1.4,1.8,2.2,2.5};
+   double ptedge[nbins+1]={0.25,0.3,0.4,0.6,1.0,1.4,1.8,2.2,2.5};
    for (int i=0;i<nbins;i++)
    {
      c->Clear();
@@ -803,7 +829,7 @@ void drawInvMass(TString head,TPDF* pdf,TCanvas* c, TString real, TString mc)
   // int const nbins = 7;
   // double ptedge[nbins+1]={0.2,0.3,0.4,0.6,1.0,1.4,1.8,3.2};
   int const nbins = 7;
-  double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.4,1.8,3.2};
+  double ptedge[nbins+1]={0.25,0.4,0.65,0.85,1,1.4,1.8,3.2};
 
   double x[nbins],y[nbins];
   for (int i=0;i<nbins;i++)

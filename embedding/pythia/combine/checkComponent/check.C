@@ -22,8 +22,8 @@ void check()
 
     for (int ic=0;ic<9;ic++)
     {
-       // fpispectra[ic] = new TF1(Form("pi0spectra_%d",ic),"2*2*0.99*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])",0,15);
-       fpispectra[ic] = new TF1(Form("etaspectra_%d",ic),"2*0.4*0.48*2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0.134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3], -[4])",0,15);
+       fpispectra[ic] = new TF1(Form("pi0spectra_%d",ic),"2*0.988*2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*x-[2]*x*x)+x/[3], -[4])",0,15);
+       // fpispectra[ic] = new TF1(Form("etaspectra_%d",ic),"2*0.4*0.48*2*TMath::Pi()*x*[0]*pow(TMath::Exp(-1*[1]*sqrt(x*x+0.547862*0.547862-0.134977*0.134977)-[2]*(x*x+0.547862*0.547862-0.134977*0.134977))+sqrt(x*x+0.547862*0.547862-0.134977*0.134977)/[3], -[4])",0,15);
        fpispectra[ic]->SetParameters(SpectraParPi0[SpectraParPi0_centbin[ic]]);
     }
    
@@ -31,12 +31,13 @@ void check()
     TF1* fpi2gamma[9];
     for (int ic=2;ic<9;ic++)
     {
-       // fpi2gamma[ic] = (TF1*)file->Get(Form("fGMSp_pi0_%d",ic));
-       fpi2gamma[ic] = (TF1*)file->Get(Form("fGMSp_eta_%d",ic));
+       fpi2gamma[ic] = (TF1*)file->Get(Form("fGMSp_pi0_%d",ic));
+       // fpi2gamma[ic] = (TF1*)file->Get(Form("fGMSp_eta_%d",ic));
        // fpi2gamma[ic] = (TF1*)file->Get(Form("fGMSp_comb_%d",ic));
        fpi2gamma[ic]->SetLineColor(kBlue);
        fpi2gamma[ic]->Draw();
        fpispectra[ic]->Draw("same");
+       cout <<"integral: pi0*2*0.988 "<<fpispectra[ic]->Integral(0.2,15)<<" pi0->gamma"<<fpi2gamma[ic]->Integral(0.2,15) << endl;
        // gPad->Update();
        addpdf(pdf,c);
     } 

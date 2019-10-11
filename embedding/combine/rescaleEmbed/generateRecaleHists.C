@@ -32,7 +32,7 @@ void generateRecaleHists(TString inputfilename="data/embeddQa_pi0_0918.root", TS
   cout<<"check the etarange: "<<etarange<< endl;
   
   TH2F* hPi0Pt_norm = (TH2F*)fin->Get("hPi0Pt_norm"); 
-  TH1F* hPi0 = (TH1F*)hPi0Pt_norm->ProjectionX("hPi0Pt_x", 3,6); //use 20-60% as the scale range
+  TH1F* hPi0 = (TH1F*)hPi0Pt_norm->ProjectionX("hPi0Pt_x", 3,9); //use 20-60% as the scale range
   double ptrange = hPi0->Integral()/(1.0*hPi0->Integral(hPi0->FindBin(1),hPi0->FindBin(11)))*10; 
   cout <<"check the ptrange: "<< ptrange<< endl;
 
@@ -40,7 +40,8 @@ void generateRecaleHists(TString inputfilename="data/embeddQa_pi0_0918.root", TS
   cout << "total num pi0 (or eta/gamma) in the embedding: "<< totalnPi0 << endl;
 
   // int scaleEvents = 250e6;
-  int scaleEvents = 3e8;
+  // int scaleEvents = 3e8*0.95;
+  int scaleEvents = 3e6*0.95;
   double scalefactor = scaleEvents*branchratio*ptrange*etarange/totalnPi0;  
   cout <<"scalefactor: "<< scalefactor <<" branchratio: "<<branchratio<<" scale to "<<scaleEvents<<" events" << endl;
   

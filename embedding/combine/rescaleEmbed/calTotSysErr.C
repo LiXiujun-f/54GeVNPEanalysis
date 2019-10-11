@@ -12,7 +12,8 @@ void calTotSysErr()
   int const nbins = 8;
   double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
   double totalsys[nbins],x[nbins];
-  double partPtCutSys = 0.0084;
+  // double partPtCutSys = 0.0084;
+  double partPtCutSys = 0.0072;
   TFile* fsys = TFile::Open("sysFromEmbedd.root");
   TGraph* gInvMassSys = (TGraph*)fsys->Get("gInvMassSys");
   TGraph* gPairDca = (TGraph*)fsys->Get("gPairDca");

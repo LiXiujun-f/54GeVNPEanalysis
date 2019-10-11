@@ -20,7 +20,7 @@ root -b -q generateRecaleHists.C\(\"$etaEmbeddfile\",\"$etaRescalefile\",$etaDal
 
 echo "scale gamma pi0"
 # gammaDalitzBranch="1."
-gammaDalitzBranch="1" #scale factor=0.8 looks most close to data?
+gammaDalitzBranch="0.67" #scale factor=0.8 looks most close to data?
 # gammaEmbeddfile="data/embeddQa_gamma_0918.root"
 # gammaEmbeddfile1="data/embeddQa_gamma_pi0_0929.root"
 gammaEmbeddfile1="data/embeddQa_gamma_pi0_0930.root"
