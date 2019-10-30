@@ -237,7 +237,9 @@ void fitdirphosp()
      h->GetYaxis()->SetRangeUser(-0.15,0.3);
      // fit[i] = new TF1(Form("fitdirphosp_%s",centname[i].Data()), myFit,0,15,7);
      fit[i] = new TF1(Form("fitdirphoInv_%s",centname[i].Data()),myFit,0,15,4);
+     fit[i]->SetNpx(15000);
      fit_pt[i] = new TF1(Form("fitdirphoInv_pt_%s",centname[i].Data()),dNdpTdY,0,15,4);
+     fit_pt[i]->SetNpx(15000);
      fit_pt[i]->GetYaxis()->SetTitle("dNdp_{T}dY");
      fit[i]->SetParameters(par);
      gmult[i] = new TMultiGraph();

@@ -1,16 +1,32 @@
 void drawline(double x1, double y1, double x2, double y2, int color);
 void drawerrbar(double x, double y, double ysys, double xwidth, double shortlinesize, int color,float size);
 void drawGraphWithSys(TString fname,TString gname , TString gnamesys, int color,int style,float size);
+void drawLatex(double x,double y,const char* txt,double size)
+{
+  TLatex lat;
+  lat.SetTextSize(size);
+  lat.DrawLatexNDC ( x, y, txt);
+}
 void plotNPEv2()
 {
   gROOT->Reset();
 
+  TFile* fpsys = new TFile("out_sys.root");
+  TH1F* hHFv2_psys =  (TH1F*)fpsys->Get("hHFv2stat");
+  hHFv2_psys->SetDirectory(0);
+  TH1F* hs2b_psys = (TH1F*)fpsys->Get("hratioCor");
+  hs2b_psys->SetDirectory(0);
+  fpsys->Close();
+
   TFile* file = new TFile("out.root");
   TH1F* HFv2stat = (TH1F*)file->Get("hHFv2stat");
   TH1F* HFv2sys = (TH1F*)file->Get("hHFv2sys");
+  TH1F* hs2b = (TH1F*)file->Get("hratioCor");
+  TH1F* hs2berr = (TH1F*)file->Get("hS2Berror");
    
   int  nbins = HFv2stat->GetNbinsX();
-  double x[50],xwidth[50] , y[50], syserr[50],staterr[50] ,tmpx,tmpy,tmperr,tmpstat;
+  double x[50],xwidth[50] , y[50], syserr[50],staterr[50] ,tmpx,tmpy,tmperr,tmpstat,tmppsys;
+  double  s2b[50], s2berr[50],s2bstaterr[50] ,tmpx,tmps2b,tmps2berr,tmps2bstat, tmps2bpsys;
   int npoints=0;
   for (int ib=0;ib<nbins;ib++)
   {
@@ -18,7 +34,17 @@ void plotNPEv2()
     tmpx = HFv2stat->GetBinCenter(ib+1);
     tmpstat = HFv2stat->GetBinError(ib+1);
     tmperr = HFv2sys->GetBinError(ib+1);
-    if (tmpy<-0.05 || tmpx<0.35|| (tmpx<1.15&&tmpx>0.85) || tmperr>0.1 ) 
+    tmps2b = hs2b->GetBinContent(ib+1);
+    tmps2bstat = hs2b->GetBinError(ib+1);
+    tmps2berr = hs2berr->GetBinContent(ib+1);
+    tmps2bpsys = hs2b_psys->GetBinContent(ib+1)-hs2b->GetBinContent(ib+1);
+    tmppsys = hHFv2_psys->GetBinContent(ib+1)-HFv2stat->GetBinContent(ib+1);
+
+    tmperr = sqrt(tmperr*tmperr+tmppsys*tmppsys);
+    tmps2berr = sqrt(tmps2bpsys*tmps2bpsys+tmps2berr*tmps2berr);
+
+    // if (tmpy<-0.05 || tmpx<0.35|| (tmpx<1.15&&tmpx>0.85) || tmperr>0.1 ) 
+    if (tmpy<-0.05 || (tmpx<0.65&&tmpx>0.4)|| (tmpx<1.2&&tmpx>0.7) || tmperr>0.1 ) 
     { continue; }
     else 
     { 
@@ -27,6 +53,11 @@ void plotNPEv2()
       syserr[npoints] = tmperr;
       staterr[npoints] = tmpstat;
       xwidth[npoints] = 0.5*HFv2sys->GetBinWidth(ib+1);
+     
+      s2b[npoints] = tmps2b; 
+      s2berr[npoints] = tmps2berr; 
+      s2bstaterr[npoints] = tmps2bstat; 
+
       npoints++; 
     }
   }
@@ -35,17 +66,23 @@ void plotNPEv2()
   gSTAR54sys->SetName("gHFe54sys");
   TGraphErrors* gSTAR54 = new TGraphErrors(npoints ,x ,y ,0,staterr );
   gSTAR54->SetName("gHFe54stat");
-  
-  TFile* fRapp = new TFile("gRappNPE62.root");
+  TGraphErrors* g54S2Bsys = new TGraphErrors(npoints ,x ,s2b ,0,s2berr );
+  g54S2Bsys->SetName("g54S2Bsys");
+  TGraphErrors* g54S2B = new TGraphErrors(npoints ,x ,s2b ,0,s2bstaterr );
+  g54S2B->SetName("g54S2Bstat");
+
+  TFile* fRapp = new TFile("model/gRappNPE62.root");
   TGraph* gRappNPE62 = (TGraph*)fRapp->Get("gRappNPE62");
-  gRappNPE62->SetFillColor(kBlue-4);
-  gRappNPE62->SetLineColor(kBlue-4);
+  // gRappNPE62->SetFillColor(kBlue-4);
+  // gRappNPE62->SetLineColor(kBlue-4);
+  gRappNPE62->SetFillColor(kRed-4);
+  gRappNPE62->SetLineColor(kRed-4);
+
   gRappNPE62->SetLineWidth(3);
   fRapp->Close();
-  TGraph* gRappNPE200 = new TGraph("ev2_200_Rapp.txt","%lg %lg");
+  TGraph* gRappNPE200 = new TGraph("model/ev2_200_Rapp.txt","%lg %lg");
   gRappNPE200->SetLineColor(kBlack);
   gRappNPE200->SetLineWidth(3);
-
   
   //62 GeV
   TFile* fPhoE = TFile::Open("phoEv2.root");
@@ -74,7 +111,7 @@ void plotNPEv2()
 
    double x1 = 0.0;
    double x2 = 2.9;
-   double y1 = -0.1;
+   double y1 = -0.07;
    double y2 = 0.23;
    TH1D *d0 = new TH1D("d0","",1,x1,x2);
    d0->SetMinimum(y1);
@@ -104,11 +141,9 @@ void plotNPEv2()
    drawline(x1,y1,x1,y2,1,1,3);
    drawline(x2,y1,x2,y2,1,1,3);
 
-   gRappNPE200->Draw("same");
-   gRappNPE62->Draw("sameF");
    drawGraphWithSys(gSTAR200, gSTAR200sys, 1, 20, 1.8);
    drawGraphWithSys(gSTAR62, gSTAR62sys, 1, 24, 1.6);
-   drawGraphWithSys(gSTAR54, gSTAR54sys, 4, 20, 1.8);
+   drawGraphWithSys(gSTAR54, gSTAR54sys, kRed, 20, 1.8);
 
    TLatex *tex = new TLatex(2.0, 0.15, "Au+Au, 0-60%");
    tex->SetTextFont(42);
@@ -128,6 +163,16 @@ void plotNPEv2()
    leg->AddEntry(gSTAR54,"54.4 GeV","p");
    leg->Draw();
 
+   drawSTAR(0.65,0.88);
+
+   c1->Update();
+   c1->SaveAs("fig/NPEv2_200_62_54.pdf");
+   c1->SaveAs("fig/NPEv2_200_62_54.png");
+
+   //draw theory curve
+   gRappNPE200->Draw("same");
+   gRappNPE62->Draw("sameF");
+
    TLegend *leg = new TLegend(0.65, 0.18, 0.9, 0.32);
    leg->SetFillColor(10);
    leg->SetFillStyle(10);
@@ -141,9 +186,15 @@ void plotNPEv2()
    leg->Draw();
 
    c1->Update();
-   c1->SaveAs("fig/NPEv2_200_62_54.pdf");
-   c1->SaveAs("fig/NPEv2_200_62_54.png");
+   c1->SaveAs("fig/NPEv2_200_62_54_model.pdf");
+   c1->SaveAs("fig/NPEv2_200_62_54_model.png");
+
    
+   TFile* gplots = new TFile("finalDatapoints.root","recreate");
+   g54S2B->Write();
+   g54S2Bsys->Write();
+   gSTAR54->Write();
+   gSTAR54sys->Write();
 }
 
 
@@ -215,4 +266,12 @@ void drawGraphWithSys(TGraphErrors* g,TGraphErrors* gsys , int color,int style,f
     yerr = gsys->GetErrorY(ip);
     drawerrbar(x,y,yerr,0.03,0.005,color); 
   }
+}
+void drawSTAR(double x,double y)
+{
+  TLatex lat;
+  lat.SetTextSize(0.05);
+  lat.SetTextFont(72);
+  lat.SetTextColor(kRed);
+  lat.DrawLatexNDC ( x, y, "STAR Preliminary");
 }

@@ -1,7 +1,7 @@
 void purityplots()
 {
     TFile* fMB = new TFile("Nsigma_6_8.root");
-    TFile* fmid = new TFile("Nsigma_2_5.root");
+    TFile* fmid = new TFile("Nsigma_2_8.root");
     TH1F* hmb = (TH1F*)fMB->Get("hpurity");
     hmb->SetDirectory(0);
     TH1F* hmid = (TH1F*)fmid->Get("hpurity");

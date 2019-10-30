@@ -190,7 +190,7 @@ void StMcAnalysisMaker::bookSpectra(int centrality)
       // fPi0v2 = (TF1*)file->Get(Form("fGMv2_comb_%d",idx));
       fPi0v2 = (TF1*)file->Get(Form("%s_%d", McAnaCuts::GammaParentV2Name.Data(), idx));
       file->Close();
-    }
+   }
 }
 //__________________________________
 int StMcAnalysisMaker::Make()

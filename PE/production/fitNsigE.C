@@ -135,7 +135,7 @@ void funpisamp(double* x,double *p )
   if (x[0]<10&&x[0]>-10)  pi_part = p[0]*hpisamp[idx]->GetBinContent(hpisamp[idx]->FindBin(x[0]));
   return pi_part;
 }
-void fitNsigE(int centL=2, int centH=5){
+void fitNsigE(int centL=2, int centH=8){
 // void fitNsigE(int centL=6, int centH=8){
 // void fitNsigE(int centL=0, int centH=8){
   // centH++;  //hist bin number
@@ -473,6 +473,80 @@ void fitNsigE(int centL=2, int centH=5){
         constH[4]=exp(6.42+pt[j]*9.54);
       }
     }
+    if (centH==8 && centL==2)
+    {
+      //e
+      //
+      if (pt[j]<0.58&&pt[j]>0.48) {
+        constL[0]=exp(-5.12*pt[j]+17.6);
+        constH[0]=exp(-5.12*pt[j]+17.9);
+
+      }
+      if (pt[j]<=0.99&&pt[j]>0.7){
+        constL[0]=exp(-3.5*pt[j]+16);
+        constH[0]=exp(-3.5*pt[j]+16.6);
+      }
+      if (pt[j]<1.4&&pt[j]>0.99){
+        constL[0]=exp(-3.45*pt[j]+16.6);
+        constH[0]=exp(-3.45*pt[j]+16.65);
+      }
+      if (pt[j]>2.6){
+        constL[0]=exp(-2.71*pt[j]+16.7);
+        constH[0]=exp(-2.71*pt[j]+16.8);
+      }
+      // //p
+      // if (pt[j]>1.7){
+      //   constL[1]=0.3*exp(-1.72*pt[j]+16.1);
+      //   constH[1]=1.8*exp(-1.72*pt[j]+16.1);
+      // }
+
+      //pi
+      // if (pt[j]>0.8){
+      //   constL[2]=0.8*exp(-2.75*pt[j]+20);
+      //   constH[2]=1.2*exp(-2.75*pt[j]+20);
+      // }
+      //pi
+      if (pt[j]>1.6&&pt[j]<1.9){
+        constL[2]=exp(-2.67*pt[j]+21.3);
+        constH[2]=exp(-2.67*pt[j]+21.44);
+      }
+      if (pt[j]>1&&pt[j]<1.15){
+        constL[2]=exp(-2.755*pt[j]+21.44);
+        // constH[2]=exp(-2.67*pt[j]+21.44);
+        constH[2]=exp(-2.755*pt[j]+21.48);
+      }
+      // if (pt[j]>2.2 && pt[j]<2.4){
+      //   constL[2]=exp(-2.45*pt[j]+20.9);
+      //   constH[2]=exp(-2.45*pt[j]+21.1);
+      // }
+      if (pt[j]<3.2&&pt[j]>2.5)  {
+        constL[2]=exp(-2.58*pt[j]+22.16);
+        constH[2]=exp(-2.58*pt[j]+22.18);
+      }
+
+      // if (pt[j]>0.5&&pt[j]<0.6){
+      //   constL[2]=3.5e7;
+      //   constH[2]=5e7;
+      // }
+      // // //K
+      if (pt[j]<0.6 && pt[j]>0.44){
+        constL[3]=0.8*exp(10.4*pt[j]+7.48);
+        constH[3]=1.1*exp(10.4*pt[j]+7.48);
+      }
+      // if (pt[j]>0.4&&pt[j]<0.6){
+      //   constL[3]=0.95*exp(10.4*pt[j]+6);
+      //   constH[3]=1.1*exp(10.4*pt[j]+6);
+      // }
+      // if (pt[j]>0.8){
+      //   constL[3]=0.005*exp(-1.74*pt[j]+16.1);
+      //   constH[3]=exp(-1.74*pt[j]+16.1);
+      // }
+      // //merged pi
+      if (pt[j]<0.45&&pt[j]>0.35)  {
+        constL[4]=exp(6.35+pt[j]*9.54);
+        constH[4]=exp(6.42+pt[j]*9.54);
+      }
+          }
     for (int i=0;i<5;i++){
       // if (i!=2) ftot->FixParameter(i*3+1, mean[i]);
       ftot->FixParameter(i*3+1, mean[i]);

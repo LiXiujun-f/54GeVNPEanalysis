@@ -1,5 +1,6 @@
 #include "sPhenixStyle.h"
 // #include "AnaCuts.h"
+
 Double_t func1(Double_t *x, Double_t *par){
   Double_t arg = 0;
   Double_t val = 0;
@@ -17,9 +18,11 @@ void calgamma()
   TPDF* pdf = new TPDF("gammav2plots.pdf");
   pdf->Off();
 
-  TString filenamePi="pi02gamma_0918.root";
+  // TString filenamePi="pi02gamma_0918.root";
+  TString filenamePi="pi02gamma_1016.root";
   // TString filenamePi="gammav2.root";
-  TString filenameEta="eta2gamma_0918.root";
+  // TString filenameEta="eta2gamma_0918.root";
+  TString filenameEta="eta2gamma_1016.root";
   // TString filenameEta="gammav2.root";
   TFile* fout = new TFile("fread_pi0_eta_2gamma.root","recreate");
 
@@ -144,16 +147,16 @@ void drawAndWriteGamma(TString filename, TFile* fout,TPDF* pdf, TCanvas* c,TStri
                                  {992.598, 0.406828, 0.0831998, 1.04464, 11.0797}
     };
     double events=1;
-    if (i>=2) events = hCent->GetBinContent(i+1); //some problem happens the hCent does not represent real events, I donot know why
+    if (i>=2) events = hCent->Integral()/6.0; //some problem happens the hCent does not represent real events, I donot know why
     else if (i==1) events = hCent->GetEntries();
-    if (i>=2) events = 1.67e10; // directly use the scale factor taken from pi0 spectra
-    if (i>=7) events = 8.33e9;
+    // if (i>=2) events = ; // directly use the scale factor taken from pi0 spectra
+    if (i>=7) events = events*0.5;
     hGmSp[i]->Scale(1./(hGmSp[i]->GetBinWidth(1)*etarange));
     if (i>=2){
        f->SetParameters(SpectraParPi0[SpectraParPi0_centbin[i]] );
        double funInt = f->Integral(0,15);
        double gammaInt = hGmSp[i]->Integral()*hGmSp[i]->GetBinWidth(1);
-       cout << "scale by mother pt: " <<gammaInt/funInt*0.5 << " "<<events<< endl;
+       cout << "scale by mother pt: " <<gammaInt/funInt*0.5*0.5*0.5*0.5*0.5*0.5*0.5*0.5*0.5 << " "<<events<< endl;
     }
 
     hGmSp[i]->SetDirectory(0);
@@ -162,12 +165,13 @@ void drawAndWriteGamma(TString filename, TFile* fout,TPDF* pdf, TCanvas* c,TStri
     hGmSp[i]->GetXaxis()->SetTitle("p_{T} [GeV]");
     hGmSp[i]->SetLineColor(colors[i-1]);
     hGmSp[i]->DrawCopy(); 
+    f->DrawCopy("same");
     gPad->SetLogy(1);
     drawLatex(0.2,0.3,Form("#%s->#gamma %s",particlename.Data(),centname[i].Data()),0.05);
     addpdf(pdf);
 
-    Nbins=hGmSp[i]->GetNbinsX();
-    for (int ib=0;ib<Nbins;ib++)
+    Nbins=hGmSp[i]->GetNbinsX()+1;
+    for (int ib=0;ib<Nbins+1;ib++)
     {
       x[ib]=hGmSp[i]->GetBinCenter(ib);
       y[ib]=hGmSp[i]->GetBinContent(ib);
@@ -205,8 +209,8 @@ void drawAndWriteGamma(TString filename, TFile* fout,TPDF* pdf, TCanvas* c,TStri
   cout <<"start writing..." <<endl;
   fout->cd();
   for (int ic=1;ic<9;ic++){  
-    hGmSp[ic]->Write();
-    gGmSp[ic]->Write();
+    // hGmSp[ic]->Write();
+    // gGmSp[ic]->Write();
     pGmv2[ic]->Write();
     gGmv2[ic]->Write();
   }

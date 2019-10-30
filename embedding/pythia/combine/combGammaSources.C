@@ -116,21 +116,27 @@ void combGammaSources()
     gpi0_gamma_v2[ic] = (TGraph*)file->Get(Form("gGmv2_pi0_%d",ic));
     
     fcombsp[ic] = new TF1(Form("fGMSp_comb_%d",ic),CombineSpectra,0,15,2);
+    fcombsp[ic]->SetNpx(6000);
     fcombv2[ic] = new TF1(Form("fGMv2_comb_%d",ic),Combinev2,0,15,2);
+    fcombv2[ic]->SetNpx(6000);
     fcombsp[ic]->SetParameter(0,ic);
     fcombsp[ic]->SetParameter(1,ic);
     fcombv2[ic]->SetParameter(0,ic);
     fcombv2[ic]->SetParameter(1,ic);
  
     feta_gamma_sp[ic] = new TF1(Form("fGMSp_eta_%d",ic),EtaSpectra,0,15,2);
+    feta_gamma_sp[ic]->SetNpx(6000);
     feta_gamma_v2[ic] = new TF1(Form("fGMv2_eta_%d",ic),Etav2,0,15,2);
+    feta_gamma_v2[ic]->SetNpx(6000);
     feta_gamma_sp[ic]->SetParameter(0,ic);
     feta_gamma_sp[ic]->SetParameter(1,ic);
     feta_gamma_v2[ic]->SetParameter(0,ic);
     feta_gamma_v2[ic]->SetParameter(1,ic);
 
     fpi0_gamma_sp[ic] = new TF1(Form("fGMSp_pi0_%d",ic),Pi0Spectra,0,15,2);
+    fpi0_gamma_sp[ic]->SetNpx(6000);
     fpi0_gamma_v2[ic] = new TF1(Form("fGMv2_pi0_%d",ic),Pi0v2,0,15,2);
+    fpi0_gamma_v2[ic]->SetNpx(6000);
     fpi0_gamma_sp[ic]->SetParameter(0,ic);
     fpi0_gamma_sp[ic]->SetParameter(1,ic);
     fpi0_gamma_v2[ic]->SetParameter(0,ic);

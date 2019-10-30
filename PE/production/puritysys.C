@@ -11,8 +11,8 @@ void puritysys()
 {
   SetsPhenixStyle();
   // char name[100]="Nsigma_2_5";  
-  // char name[100]="Nsigma_2_8";  
-  char name[100]="Nsigma_0_8";  
+  char name[100]="Nsigma_2_8";  
+  // char name[100]="Nsigma_0_8";  
   // char name[100]="Nsigma_6_8";  
   
   TCanvas* c = new TCanvas("c","c",1200,600);

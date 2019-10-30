@@ -4,7 +4,7 @@
 TH1F* ProjectionAndFit(TString name,int centL,int centH,TString name,TPDF* pdf);
 TH1F* getPhev2(TH3F* phe, TH3F* phels, int centL,int centH, double* ptedge,int const nBins,char* hname);
 double getHFev2Err(double v1,double v1err,double n1,double n1err,double v2,double v2err,double n2,double n2err,double eff,double eff2err);
-double getHFev2ErrWithP(double v1,double v1err,double n1,double n1err,double v2,double v2err,double n2,double n2err,double eff,double eff2err,double purity, double vk,double kr,double vp,double pr,double vpi,double pir,double vmgpi,double mgpir,double& sys,double& stat,double pt);
+double getHFev2ErrWithP(double v1,double v1err,double n1,double n1err,double v2,double v2err,double n2,double n2err,double eff,double eff2err,double purity,double vk,double kr,double vp,double pr,double vpi,double pir,double vmgpi,double mgpir,double& sys,double& stat,double pt);
 
 double funv2(double*x, double *par);
 
@@ -12,6 +12,7 @@ void SetTH1(TH1* h, int color)
 {
    h->SetLineColor(color);
    h->SetMarkerColor(color);
+   h->Sumw2();
 }
 TH1F* hNpheError;
 TH1F* hNpheError1;
@@ -19,6 +20,7 @@ TH1F* hNpheError2;
 TH1F* hNincError;
 TH1F* hphV2error;
 TH1F* hincV2error;
+TH1F* hS2Berror;
 int errorbin = 0;
 
 void HFev2()
@@ -29,23 +31,33 @@ void HFev2()
   // TFile* file = TFile::Open("incEv2_addqa_loose0825.root");
   // TFile* file = TFile::Open("incEv2_0924.root");
   // TFile* file = TFile::Open("incEv2_0929.root");
-  TFile* file = TFile::Open("incEv2_1001.root");
+  // TFile* file = TFile::Open("incEv2_1001.root");
+  // TFile* file = TFile::Open("incEv2_1010.root");
+  TFile* file = TFile::Open("incEv2_1012.root"); //fix nHits>20 issue..previous is >=
   TCanvas* c = new TCanvas("c","c");
   TPDF* pdf = new TPDF("plots.pdf"); 
   pdf->Off();
   //book hists
-  TH1F* hpurity;
-  TFile* fpurity = TFile::Open("fpurity.root");
-  TH1F* hpurity = (TH1F*)fpurity->Get("hpurity_ptdef"); 
-  TH1F* hp = (TH1F*)fpurity->Get("hpratio_ptdef"); 
-  TH1F* hpi = (TH1F*)fpurity->Get("hkratio_ptdef"); 
-  TH1F* hk = (TH1F*)fpurity->Get("hpiratio_ptdef"); 
-  TH1F* hmgpi = (TH1F*)fpurity->Get("hmgpiratio_ptdef"); 
-  hpurity->SetDirectory(0);
-  hpi->SetDirectory(0);
-  hk->SetDirectory(0);
-  hp->SetDirectory(0);
-  hmgpi->SetDirectory(0);
+  // TH1F* hpurity;
+  // TFile* fpurity = TFile::Open("fpurity.root");
+  TFile* fpurity = TFile::Open("Nsigma_2_8_purity.root");
+  // TFile* fpurity = TFile::Open("purity_2_8_sys2.root");
+  // TH1F* hpurity = (TH1F*)fpurity->Get("hpurity_ptdef"); 
+  // TH1F* hp = (TH1F*)fpurity->Get("hpratio_ptdef"); 
+  // TH1F* hpi = (TH1F*)fpurity->Get("hkratio_ptdef"); 
+  // TH1F* hk = (TH1F*)fpurity->Get("hpiratio_ptdef"); 
+  // TH1F* hmgpi = (TH1F*)fpurity->Get("hmgpiratio_ptdef"); 
+  // hpurity->SetDirectory(0);
+  // hpi->SetDirectory(0);
+  // hk->SetDirectory(0);
+  // hp->SetDirectory(0);
+  // hmgpi->SetDirectory(0);
+   TGraph* hpurity = (TGraph*)fpurity->Get("gpurity_ptdef"); 
+   TGraph* hp = (TGraph*)fpurity->Get("gpratio_ptdef"); 
+   TGraph* hpi = (TGraph*)fpurity->Get("gkratio_ptdef"); 
+   TGraph* hk = (TGraph*)fpurity->Get("gpiratio_ptdef"); 
+   TGraph* hmgpi = (TGraph*)fpurity->Get("gmgpiratio_ptdef"); 
+
   fpurity->Close();
  
   //for sys err of reco eff
@@ -55,13 +67,12 @@ void HFev2()
   // TFile* freco = TFile::Open("RecoEff.root");
   // TH1F* hreco = (TH1F*)freco->Get("hRecoEff_2_8");
   // hreco->SetDirectory(0);
+  
+  TFile* freco = TFile::Open("embed/fitRecoEff.root");
+  TF1* fitreco = (TF1*)freco->Get("fitfun2");
 
-  // TH1F* hreco = ProjectionAndFit("embeddingQa.phoE.root", centL-1,centH-1 ,"RecoEff",pdf );
-  // TH1F* hreco = ProjectionAndFit("embeddQa0825.root", centL-1,centH-1 ,"RecoEff",pdf );
-  // TH1F* hreco = ProjectionAndFit("embeddQa_0910.root", centL-1,centH-1 ,"RecoEff",pdf );
-  // TH1F* hreco = ProjectionAndFit("embedd_comb0924.root", centL-1,centH-1 ,"RecoEff",pdf );
-  // TH1F* hreco = ProjectionAndFit("embedd_comb0929.root", centL-1,centH-1 ,"RecoEff",pdf );
-  TH1F* hreco = ProjectionAndFit("embed/embedd_comb1002.root", centL-1,centH-1 ,"RecoEff",pdf );
+  // TH1F* hreco = ProjectionAndFit("embed/rescale_combine1016.root", centL-1,centH-1 ,"RecoEff",pdf ); //large sample and good stat
+  // TH1F* hreco = ProjectionAndFit("embed/rescale_combine_0.9.root", centL-1,centH-1 ,"RecoEff",pdf );
   // TH1F* hreco = ProjectionAndFit("pi0/embeddQa_tightcut.root", centL-1,centH-1 ,"RecoEff",pdf );
   TFile* fPIDv2 = TFile::Open("chargeparticle/prev2.root");
   TGraphErrors* gKs = (TGraphErrors*)fPIDv2->Get("ks_0_80_62");
@@ -76,6 +87,7 @@ void HFev2()
   hNincError = new TH1F("hNincError","hNincError",nbin,ptedge);
   hphV2error = new TH1F("hphV2error","hphV2error",nbin,ptedge);
   hincV2error = new TH1F("hincV2error","hincV2error",nbin,ptedge);
+  hS2Berror= new TH1F("hS2Berror","hS2Berror",nbin,ptedge);
   
   //hists
   TH3F* hphotols = (TH3F*)file->Get("hphoto_LS_hitcut"); 
@@ -91,11 +103,11 @@ void HFev2()
   TH1F* centcorr = (TH1F*)file->Get("hcentwg");
   double nEvents = centcorr->Integral(centL,centH);
   cout<<nEvents<<endl;
-  TH1F* hPhe = new TH1F("hPheectra", "hPheectra;electron p_{T}(GeV);Counts",nbin,ptedge);
+  TH1F* hPhe = new TH1F("hPhectra", "hPheectra;electron p_{T}(GeV);Counts",nbin,ptedge);
    
   for(int j=0;j<nbin;j++){
-    int lbin = hphoto->GetYaxis()->FindBin(ptedge[j]);
-    int hbin = hphoto->GetYaxis()->FindBin(ptedge[j+1]);
+    int lbin = hphoto->GetYaxis()->FindBin(ptedge[j]+1e-6);
+    int hbin = hphoto->GetYaxis()->FindBin(ptedge[j+1]-1e-6);
     TH1F* hpx = (TH1F*)hphoto->ProjectionX("hpx",lbin,hbin,centL,centH);
     TH1F* hpx_ul = (TH1F*)hphotoul->ProjectionX("hpx_ul",lbin,hbin,centL,centH);
     TH1F* hpxls = (TH1F*)hphotols->ProjectionX("hpx_ls",lbin,hbin,centL,centH);
@@ -106,20 +118,24 @@ void HFev2()
     SetTH1(hpx,kRed);
 
     hpx_ul->Draw();
+    hpx_ul->GetXaxis()->SetTitle("Mee [GeV/c^{2}]");
+    hpx_ul->GetYaxis()->SetTitle(Form("Counts/(%0.f MeV/c^{2})",hpx_ul->GetBinWidth(1)*1000));
     hpx_ls->Draw("same");
     hpx->Draw("same");
-    TLegend* lpx = new TLegend(0.25,0.65,0.45,0.85);
-    lpx->SetHeader("0-60%");
+    TLegend* lpx = new TLegend(0.2,0.7,0.55,0.88);
     lpx->AddEntry(hpx_ul,"UnLike","l");
     lpx->AddEntry(hpx_ls,"LikeSign","l");
     lpx->AddEntry(hpx,"UL-LS","l");
     lpx->Draw();
     TLatex lat;
-    lat.SetTextSize(0.035);
-    lat.DrawLatex(0.025,hpx_ul->GetMaximum()*0.6,Form("%.2f<p_{T}<%.2f GeV",ptedge[j],ptedge[j+1]));
-
+    lat.SetTextSize(0.05);
+    lat.DrawLatexNDC(0.5,0.7,"0-60%");
+    lat.DrawLatexNDC(0.2,0.6,Form("%.2f<p_{T}<%.2f GeV/c",ptedge[j],ptedge[j+1]));
+    // lat.DrawLatexNDC(0.5,0.78,"electron pair");
+    lat.DrawLatexNDC(0.5,0.85,"Au+Au 54.4 GeV");
+    drawLine(0.1,0,0.1,hpx->GetMaximum()*0.5,2,9,kBlack);
     //hPhe->SetBinContent(j+1,hpx->Integral()/nEvents);
-    int highbin=hpx->GetXaxis()->FindBin(0.15);
+    int highbin=hpx->GetXaxis()->FindBin(0.1-1e-6);
     // int lowbin=hpx->GetXaxis()->FindBin(0);
     double integralerr;
     hPhe->SetBinContent(j+1,hpx->IntegralAndError(1,highbin,integralerr));
@@ -132,7 +148,7 @@ void HFev2()
     TH2F* hincEptCent= (TH2F*)file->Get("hIncEPtvsCent_hitcut");
     // hincEptCent->Draw("colz");
     // addpdf(pdf);
-    TH1F* hincE = (TH1F*)hincEptCent->ProjectionX("hincEpt",  centL,centH);
+    TH1F* hincE = (TH1F*)hincEptCent->ProjectionX("hincEpt", centL,centH);
     TH1F* hEsp4eff = (TH1F*)hincE->Clone("hEsp4eff");
     hincE = (TH1F*)hincE->Rebin(nbin,"hincE",ptedge);
     // hincE->Scale(1./hincE->GetBinWidth(1));
@@ -144,7 +160,7 @@ void HFev2()
     // hincE->SetLineColor(kRed);
     SetTH1(hincE,kRed);
     hincE->GetYaxis()->SetTitle("N/N_{events}");
-    hincE->GetXaxis()->SetRangeUser(1e3,3e9);
+    hincE->GetYaxis()->SetRangeUser(1e3,3e9);
     TLegend* lince = new TLegend(0.65,0.65,0.85,0.85);
     lince->AddEntry(hincE,"pass cut inclusive e","l");
     lince->AddEntry(hPhe,"reconstructed pho.c e","l");
@@ -216,60 +232,77 @@ void HFev2()
   // gPhoE62->Draw("psame");
   fprevious->Close();
   //
-  TFile* fPhev2 = new TFile("RecoEff_comb.root");
+  TFile* fPhev2 = new TFile("PhoEff_comb.root");
   TF1* fitPhev2 = (TF1*)fPhev2->Get("fPhoE_2_8");
+  TH1F* hphev2Mc = (TH1F*)fPhev2->Get("hPhoEv2_2_8");
+  hphev2Mc->SetDirectory(0);
+
   fPhev2->Close(); 
   double par62[6];
   fitPhev2->GetParameters(par62);
-  TF1* phe62v2 = new TF1("phe62v2","0.94*pol5(0)",0,5);
+  TF1* phe62v2 = new TF1("phe62v2","0.95*pol5(0)",0,5);
 
   // double par62[6] = {0.008145,0.1855,-0.07343,-0.02234,0.02459,-0.00508};
   // double par62[6] = {0.04015,0.02978,0.1155,-0.1099,0.03608,-0.004092 };
   phe62v2->SetParameters(par62); 
   phe62v2->Draw();
+  hphev2Mc->Draw("same");
   addpdf(pdf);
   // TF1* pheeff = new TF1("pheeff","pol2(0)",0,5);
-  TF1* pheeff = new TF1("pheeff","pol3",0,5);
+  // TF1* pheeff = new TF1("pheeff","pol3",0,5);
   // double pareff[3]={0.119,0.097,-0.0046}; 
   // double pareff[3]={0.1225,0.0937,-0.00384}; 
   // double pareff[3]={0.107604,0.114847, -0.00713215}; 
   // double pareff[4]={0.1632,0.3255,-0.1086,0.01432}; 
-  double pareff[4]={0.1332,0.4087,-0.1611,0.023}; 
-  pheeff->SetParameters(pareff);
-  pheeff->Draw();
-  TH1F* hPheEff = (TH1F*)hEsp4eff->Clone("hPheEff");
+  // double pareff[4]={0.1332,0.4087,-0.1611,0.023}; 
+  // pheeff->SetParameters(pareff);
+  // pheeff->Draw();
   TH1F* heratio = (TH1F*)hEsp4eff->Clone("heratio");
   TH1F* hpratio = (TH1F*)hEsp4eff->Clone("hpratio");
   TH1F* hkratio = (TH1F*)hEsp4eff->Clone("hkratio");
   TH1F* hmgpiratio = (TH1F*)hEsp4eff->Clone("hmgpiratio");
   TH1F* hpiratio = (TH1F*)hEsp4eff->Clone("hpiratio");
+  TH1F* hreco= (TH1F*)hEsp4eff->Clone("hreco");
   for (int i=1;i<=hEsp4eff->GetNbinsX();i++)
   {
-    double tmp = hPheEff->GetBinContent(i);
-    double eff = tmp*pheeff->Eval(hPheEff->GetBinCenter(i));
-    hPheEff->SetBinContent(i,eff);
-    int bin = hpurity->GetXaxis()->FindBin(hPheEff->GetBinCenter(i));
-    heratio->SetBinContent(i,hpurity->GetBinContent(bin)*heratio->GetBinContent(i));
-    hpratio->SetBinContent(i,hp->GetBinContent(bin)*hpratio->GetBinContent(i));
-    hpiratio->SetBinContent(i,hpi->GetBinContent(bin)*hpiratio->GetBinContent(i));
-    hkratio->SetBinContent(i,hk->GetBinContent(bin)*hkratio->GetBinContent(i));
-    hmgpiratio->SetBinContent(i,hmgpi->GetBinContent(bin)*hmgpiratio->GetBinContent(i));
+    // double tmp = hPheEff->GetBinContent(i);
+    // double eff = tmp*pheeff->Eval(hPheEff->GetBinCenter(i));
+    // hPheEff->SetBinContent(i,eff);
+    // int bin = hpurity->GetXaxis()->FindBin(hEsp4eff->GetBinCenter(i));
+    double pt = hEsp4eff->GetBinCenter(i);
+    heratio->SetBinContent(i,hpurity->Eval(pt)*heratio->GetBinContent(i));
+    hpratio->SetBinContent(i, hp->Eval(pt)*hpratio->GetBinContent(i));
+    hpiratio->SetBinContent(i, hpi->Eval(pt)*hpiratio->GetBinContent(i));
+    hkratio->SetBinContent(i, hk->Eval(pt)*hkratio->GetBinContent(i));
+    hmgpiratio->SetBinContent(i,hmgpi->Eval(pt)*hmgpiratio->GetBinContent(i));
+    hreco->SetBinContent(i,hreco->GetBinContent(i)*fitreco->Eval(hEsp4eff->GetBinCenter(i)));
+
+    // heratio->SetBinContent(i,hpurity->GetBinContent(bin)*heratio->GetBinContent(i));
+    // hpratio->SetBinContent(i,hp->GetBinContent(bin)*hpratio->GetBinContent(i));
+    // hpiratio->SetBinContent(i,hpi->GetBinContent(bin)*hpiratio->GetBinContent(i));
+    // hkratio->SetBinContent(i,hk->GetBinContent(bin)*hkratio->GetBinContent(i));
+    // hmgpiratio->SetBinContent(i,hmgpi->GetBinContent(bin)*hmgpiratio->GetBinContent(i));
+    // hreco->SetBinContent(i,hreco->GetBinContent(i)*fitreco->Eval(hEsp4eff->GetBinCenter(i)));
   }
-  TH1F* hPheEff = (TH1F*)hPheEff->Rebin(nbin,"hPheEff",ptedge);
   TH1F* hmgpiratio = (TH1F*)hmgpiratio->Rebin(nbin,"hmgpiratio",ptedge);
   TH1F* hkratio = (TH1F*)hkratio->Rebin(nbin,"hkratio",ptedge);
   TH1F* hpiratio = (TH1F*)hpiratio->Rebin(nbin,"hpiratio",ptedge);
   TH1F* hpratio = (TH1F*)hpratio->Rebin(nbin,"hpratio",ptedge);
   TH1F* heratio = (TH1F*)heratio->Rebin(nbin,"heratio",ptedge);
+  TH1F* hreco = (TH1F*)hreco->Rebin(nbin,"hreco",ptedge);
   TH1F* hEsp4eff = (TH1F*)hEsp4eff->Rebin(nbin,"hEsp4eff",ptedge);
-  hPheEff->Divide(hEsp4eff);
   hmgpiratio->Divide(hEsp4eff);
   hkratio->Divide(hEsp4eff);
   hpiratio->Divide(hEsp4eff);
   hpratio->Divide(hEsp4eff);
   heratio->Divide(hEsp4eff);
-  hPheEff->Draw("same");
+  hreco->Divide(hEsp4eff);
   addpdf(pdf);
+
+  hreco->Draw();
+  fitreco->Draw("same");
+  addpdf(pdf);
+
   heratio->Draw();
   heratio->GetYaxis()->SetRangeUser(0,1.1);
   hmgpiratio->Draw("same");
@@ -289,22 +322,29 @@ void HFev2()
   for (int ib=0;ib<nbin;ib++) 
   {
     double nphe =  hPhe->GetBinContent(ib+1);
+    double pt = hPhe->GetBinCenter(ib+1);
     // nphe/=pheeff->Eval(0.5*(ptedge[ib]+ptedge[ib+1]));
     // double eff =pheeff->Eval(hPhe->GetBinCenter(ib+1));
     // double eff =pheeff->Eval(ptedge[ib]);
     // double eff = hPheEff->GetBinContent(ib+1);
-    double eff = hreco->GetBinContent(ib+1);
+    // double eff = hreco->GetBinContent(ib+1);
+    double eff = fitreco->Eval(pt);
     nphe/=eff;
     hPheCor->SetBinContent(ib+1,nphe);
     double nince =  hincE->GetBinContent(ib+1);
-    double phev2 = phe62v2->Eval(hPhe->GetBinCenter(ib+1));
-    double pt = hPhe->GetBinCenter(ib+1);
+    // double phev2 = phe62v2->Eval(hPhe->GetBinCenter(ib+1));
+    double autoscale=0.963;
+    double phev2 = hphev2Mc->GetBinContent(ib+1)*autoscale;
     // if (pt>1)  phev2 = hphoE->GetBinContent(ib+1);
-    double phev2err = 0.04;
+    // double phev2err = 0.028;
+    // if (pt>1) phev2err = 0.04;
+    double phev2err = 0.032;
     // double phev2err = gTotSysErr->Eval(pt);
     // if (pt>1) phev2err = hphoE->GetBinError(ib+1)/hphoE->GetBinContent(ib+1); 
     
     double incev2 = pEv2->GetBinContent(ib+1);
+    // if (incev2>phev2) phev2=hphoE->GetBinContent(ib+1);
+  // TFile* fpurity = TFile::Open("fpurity.root");
   //  double hfev2 = (nince*incev2-phev2*nphe)/(nince-nphe);
     double piv2 = gPi->Eval(hPhe->GetBinCenter(ib+1)); 
     double pv2 = gP->Eval(hPhe->GetBinCenter(ib+1)); 
@@ -319,6 +359,8 @@ void HFev2()
     hfev2=hfev2-nince*piratio*piv2-nince*kratio*kv2-nince*pratio*pv2-nince*mgpiratio*piv2;
     hfev2/=1.*(eratio*nince-nphe);
    // HF electron yield before single electron efficiency correction
+   //
+
     hHFe_cor->SetBinContent(ib+1,nince*eratio-nphe);
     
     hratio->SetBinContent(ib+1,nince*eratio);
@@ -333,7 +375,7 @@ void HFev2()
     double hfev2syserr,hfev2staterr;
     // double hfev2err = getHFev2ErrWithP(incev2, pEv2->GetBinError(ib+1), nince,hincE->GetBinError(ib+1), phev2,phev2err,hPhe->GetBinContent(ib+1), hPhe->GetBinError(ib+1),eff,hreco->GetBinError(i+1)/hreco->GetBinContent(i+1),eratio, kv2,kratio,pv2,pratio,piv2,piratio,piv2,mgpiratio,hfev2syserr,hfev2staterr ,pt ); 
     // double hfev2err = getHFev2ErrWithP(incev2, pEv2->GetBinError(ib+1), nince,hincE->GetBinError(ib+1), phev2,phev2err,hPhe->GetBinContent(ib+1), hPhe->GetBinError(ib+1),eff,hreco->GetBinError(i+1)/hreco->GetBinContent(i+1),eratio, kv2,kratio,pv2,pratio,piv2,piratio,piv2,mgpiratio,hfev2syserr,hfev2staterr ,pt ); 
-    double hfev2err = getHFev2ErrWithP(incev2, pEv2->GetBinError(ib+1), nince,hincE->GetBinError(ib+1), phev2,phev2err,hPhe->GetBinContent(ib+1), hPhe->GetBinError(ib+1),eff,gTotSysErr->Eval(pt),eratio, kv2,kratio,pv2,pratio,piv2,piratio,piv2,mgpiratio,hfev2syserr,hfev2staterr ,pt ); 
+    double hfev2err = getHFev2ErrWithP(incev2, pEv2->GetBinError(ib+1), nince,hincE->GetBinError(ib+1), phev2,phev2err,hPhe->GetBinContent(ib+1), hPhe->GetBinError(ib+1),eff,gTotSysErr->Eval(pt),eratio,kv2,kratio,pv2,pratio,piv2,piratio,piv2,mgpiratio,hfev2syserr,hfev2staterr,pt); 
     // double hfev2err = getHFev2ErrWithP(incev2, pEv2->GetBinError(ib+1), nince,0,phev2,0.06,hPhe->GetBinContent(ib+1), hPhe->GetBinError(ib+1),eff,0.05,1, kv2,0,pv2,0,piv2,0,piv2,0); 
     cout << " for check: "<< eratio<<" " <<(hfev2err-hfev2err_wo_purity)/hfev2err<<" "<<nince << " "<<nphe <<endl;
 
@@ -353,6 +395,7 @@ void HFev2()
   SetTH1(hPhe,kRed);
   // hPheCor->SetLineColor(kBlue);
   SetTH1(hPheCor,kBlue);
+
   hincE->Scale(1./nEvents);
   hPheCor->Scale(1./nEvents);
   hPhe->Scale(1./nEvents);
@@ -372,8 +415,8 @@ void HFev2()
 
   addpdf(pdf);
   
-  hratio->Scale(nEvents); 
-  hPheCor->Scale(nEvents);
+  // hratio->Scale(nEvents); 
+  // hPheCor->Scale(nEvents);
   hratio->Add(hPheCor,-1); 
   hratio->Divide(hPheCor); 
   hratio->GetYaxis()->SetTitle("HF e/pho e");
@@ -441,6 +484,8 @@ void HFev2()
   hPheCor->Write();
   hPhe->Write();
   hHFe_cor->Write();  
+  hratio->Write();
+  hS2Berror->Write();
   pdf->On();
   pdf->Close();
   fout->Close();
@@ -456,7 +501,7 @@ TH1F* getIncev2(TH3F* phe,  int centL,int centH, double* ptedge,int const nBins,
   TF1* fitfun = new TF1("fitfun","[0]*(1+[1]*cos(2*x))", 0,5); 
   for (int ib=0;ib<nBins;ib++)
   {
-    TH1F* h = (TH1F*)phe->ProjectionX(Form("ince%d_%d",ptedge[ib],ptedge[ib+1]),phe->GetYaxis()->FindBin(ptedge[ib]),phe->GetYaxis()->FindBin(ptedge[ib+1]),centL,centH);
+    TH1F* h = (TH1F*)phe->ProjectionX(Form("ince%d_%d",ptedge[ib],ptedge[ib+1]),phe->GetYaxis()->FindBin(ptedge[ib]+1e-6),phe->GetYaxis()->FindBin(ptedge[ib+1]-1e-6),centL,centH);
     // TH1F* hls = (TH1F*)phels->ProjectionX(Form("%d_%d_ls",ptedge[ib],ptedge[ib+1]),phe->GetYaxis()->FindBin(ptedge[ib]),phe->GetYaxis()->FindBin(ptedge[ib+1]),centL,centH);
     // h->Add(hls,-1); 
     h->Rebin(20);
@@ -478,8 +523,8 @@ TH1F* getPhev2(TH3F* phe, TH3F* phels, int centL,int centH, double* ptedge,int c
   TF1* fitfun = new TF1("fitfun","[0]*(1+[1]*cos(2*x))", 0,5); 
   for (int ib=0;ib<nBins;ib++)
   {
-    TH1F* h = (TH1F*)phe->ProjectionX(Form("phe%d_%d",ptedge[ib],ptedge[ib+1]),phe->GetYaxis()->FindBin(ptedge[ib]),phe->GetYaxis()->FindBin(ptedge[ib+1]),centL,centH);
-    TH1F* hls = (TH1F*)phels->ProjectionX(Form("%d_%d_ls",ptedge[ib],ptedge[ib+1]),phe->GetYaxis()->FindBin(ptedge[ib]),phe->GetYaxis()->FindBin(ptedge[ib+1]),centL,centH);
+    TH1F* h = (TH1F*)phe->ProjectionX(Form("phe%d_%d",ptedge[ib],ptedge[ib+1]),phe->GetYaxis()->FindBin(ptedge[ib]+1e-6),phe->GetYaxis()->FindBin(ptedge[ib+1]-1e-6),centL,centH);
+    TH1F* hls = (TH1F*)phels->ProjectionX(Form("%d_%d_ls",ptedge[ib],ptedge[ib+1]),phe->GetYaxis()->FindBin(ptedge[ib]+1e-6),phe->GetYaxis()->FindBin(ptedge[ib+1]-1e-6),centL,centH);
     h->Add(hls,-1); 
     h->Rebin(30);
     if (ptedge[ib]>2.5) h->Rebin();
@@ -523,7 +568,8 @@ double getHFev2ErrWithP(double v1,double v1err,double n1,double n1err,double v2,
   double nperr2_1 = pow(n2/eff,2)*(n2err*n2err/(1.*n2*n2)); //stat
   // double nperr2_2 = pow(n2/eff,2)*(eff2err*eff2err);  //stat
   double nperr2_2 = pow(n2/eff,2)*(0*0);  //stat
-  double nperr2_3 = pow(n2/eff,2)*(0.06*0.06);  //sys
+  double nperr2_3 = pow(n2/eff,2)*(eff2err*eff2err);  //sys
+  // double nperr2_3 = pow(n2/eff,2)*(0.1*0.1);  //sys
   double nperr2 = nperr2_1+nperr2_2;
   // double nperr2 = pow(n2/eff,2)*(n2err*n2err/(1.*n2*n2)+eff2err*eff2err);
   nperr2_1 = nperr2_1*pow(( n1*(v1-hadronv2)-purity*n1*v2 )/(purity*n1-n2/eff)/(purity*n1-n2/eff),2); //num of pho e  //stat
@@ -538,8 +584,8 @@ double getHFev2ErrWithP(double v1,double v1err,double n1,double n1err,double v2,
   //v1err stat n2err stat 
   // if (pt<1)
   // {
-    sys = sqrt(nperr2_3 + vpherr);
-    stat = sqrt(nperr2_1+nperr2_2 + vincerr + nincerr);
+  sys = sqrt(nperr2_3 + vpherr);
+  stat = sqrt(nperr2_1+nperr2_2 + vincerr + nincerr);
   // }
   // else if (pt>1)
   // {
@@ -562,6 +608,7 @@ double getHFev2ErrWithP(double v1,double v1err,double n1,double n1err,double v2,
   hNincError->SetBinContent(errorbin,nincerr/sumerr);
   hphV2error->SetBinContent(errorbin,vpherr/sumerr);
   hincV2error->SetBinContent(errorbin,vincerr/sumerr);
+  hS2Berror->SetBinContent(errorbin, fabs( purity*n1/n2*(eff2err*eff)));
   return sqrt(sumerr);
 }
 

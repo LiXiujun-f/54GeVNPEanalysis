@@ -1,0 +1,91 @@
+void writepurity()
+{
+  // TString purityname = "0630/Nsigma_0_8";
+  // TString purityname = "Nsigma_2_5";
+  // TString purityname = "Nsigma_6_8";
+  TString purityname = "Nsigma_2_8";
+  TFile* fdef = new TFile(Form("%s.root",purityname.Data()));
+  // TFile* fdef = new TFile("Nsigma_0_8.root");
+  TH1F* hpdef = (TH1F*)fdef->Get("hpurity")->Clone("hpurity_def");
+  hpdef->SetDirectory(0);
+  TH1F* hpideff_def = (TH1F*)fdef->Get("hpideff")->Clone("hpideff_def");
+  hpideff_def->SetDirectory(0);
+  TH1F* hpar[4];
+  TH1F* hpar_sys[4];
+  char name[4][50]={"hpiratio","hkratio","hpratio","hmgpiratio"};
+  for (int i=0;i<4;i++){
+    hpar[i]= (TH1F*)fdef->Get(Form("%s",name[i]))->Clone(Form("%s_def",name[i]));
+    hpar[i]->SetDirectory(0);
+  }
+  // TFile* fsys = new TFile("Nsigma_0_8_sys.root");
+  TFile* fsys = new TFile(Form("%s_sys.root",purityname.Data()));
+  TH1F* hpsys = (TH1F*)fsys->Get("hpurity")->Clone("hpurity_sys");
+  hpsys->SetDirectory(0);
+  TH1F* hpideff_sys = (TH1F*)fsys->Get("hpideff")->Clone("hpideff_sys");
+  for (int i=0;i<4;i++){
+    hpar_sys[i]= (TH1F*)fsys->Get(Form("%s",name[i]))->Clone(Form("%s_sys",name[i]));
+    hpar_sys[i]->SetDirectory(0);
+  }
+  TFile* prj = new TFile("p_pt_MB_54.root");
+  TH1F* hprj = (TH1F*)prj->Get("hePtvsP_pfy");
+  // TFile* file = new TFile("fpurity.root","recreate");
+  TFile* file = new TFile(Form("%s_purity.root",purityname.Data()),"recreate");
+  int nbins=0;
+  double ptedge[500],ptBin[500];
+  ptedge[0]=hpsys->GetXaxis()->GetBinLowEdge(1);
+  ptedge[0]=hprj->GetBinContent(hprj->FindBin(ptedge[0]));
+  nbins++;
+  for (int i=1;i<=hpsys->GetXaxis()->GetNbins();i++)
+  {
+    ptedge[nbins]=hpsys->GetXaxis()->GetBinUpEdge(i);
+    ptedge[nbins]=hprj->GetBinContent(hprj->FindBin(ptedge[nbins]));
+    ptBin[nbins]=i;
+    cout<< ptedge[nbins]<<endl;
+    if (ptedge[nbins]==ptedge[nbins-1]) continue; 
+    nbins++;
+  }
+
+  TH1F* hptsys = new TH1F("hpurity_ptsys","hpurity;p_{T};purity",nbins-1,ptedge);
+  TH1F* hptdef = new TH1F("hpurity_ptdef","hpurity;p_{T};purity",nbins-1,ptedge);
+  TH1F* hptpideff_sys = new TH1F("hptpideff_sys","hptpideff_sys;p_{T};PID Eff",nbins-1,ptedge);
+  TH1F* hptpideff_def = new TH1F("hptpideff_def","hptpideff_def;p_{T};PID Eff",nbins-1,ptedge);
+  TH1F* hptpardef[4];
+  TH1F* hptparsys[4];
+  for (int i=0;i<4;i++){
+    hptparsys[i] = new TH1F(Form("%s_ptsys",name[i]),Form("%s;p_{T};ratio",name[i]),nbins-1,ptedge);
+    hptpardef[i] = new TH1F(Form("%s_ptdef",name[i]),Form("%s;p_{T};ratio",name[i]),nbins-1,ptedge);
+  }
+  for (int i=1;i<=nbins;i++)
+  {
+    hptdef->SetBinContent(i,hpdef->GetBinContent(ptBin[i]));
+    hptsys->SetBinContent(i,hpsys->GetBinContent(ptBin[i]));
+    hptpideff_def->SetBinContent(i,hpideff_def->GetBinContent(ptBin[i]));
+    hptpideff_sys->SetBinContent(i,hpideff_sys->GetBinContent(ptBin[i]));
+    for (int j=0;j<4;j++)
+    {
+      hptpardef[j]->SetBinContent(i,hpar[j]->GetBinContent(ptBin[i]));
+      hptparsys[j]->SetBinContent(i,hpar_sys[j]->GetBinContent(ptBin[i]));
+    }
+  }
+  hpsys->Write();
+  hptsys->Write();
+  hpdef->Write();
+  hptdef->Write();
+  hptpideff_sys->Write();
+  hptpideff_def->Write();
+  for (int j=0;j<4;j++) {
+     hptpardef[j]->Write();
+     hptparsys[j]->Write();
+  }
+  file->Close();
+}
+
+
+void rewriteHists(int nbin,double* ptedge,double* ptBin , TH1* hmom,TH1* hpt,TString name)
+{
+    hpt = new TH1F(Form("%s_ptsys",name.Data()),Form("%s;p_{T};ratio",name.Data()),nbins-1,ptedge);
+    for (int i=1;i<=nbins;i++)
+    {
+       hpt->SetBinContent(i,hmom->GetBinContent(ptBin[i]));
+    }
+}

@@ -62,7 +62,7 @@ void calHadronv2()
   // for ()
   // {
   // int centL=7,centH=7;  //start at 1
-  int centL=3,centH=3;  //start at 1
+  int centL=1,centH=9;  //start at 1
   TProfile* pHadv2 = (TProfile*)pHad2D->ProfileX("pHadv2",centL,centH);
   double resMB=0, totmult=0;
   double refmult[9]={11,22.8,41.7,70.2,112,170,249,329,402};

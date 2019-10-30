@@ -30,6 +30,7 @@ void refitv2()
   for (int i=0;i<6;i++)
   {
     fit[i] = new TF1(Form("fit_%s",name[i].Data()),myFit,0,18,7);
+    fit[i]->SetNpx(10000);
     c->Clear();
     // c->cd(i+1);
     g200Combine[i]=new TMultiGraph(Form("pionv2Com_%s",name[i].Data()),Form("pionv2Com_%s",name[i].Data()));

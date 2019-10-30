@@ -47,7 +47,7 @@ TStyle* sPhenixStyle()
   sphenixStyle->SetPaperSize(20,26);
 
   // set margin sizes
-  sphenixStyle->SetPadTopMargin(0.05);
+  sphenixStyle->SetPadTopMargin(0.06);
   sphenixStyle->SetPadRightMargin(0.05);
   sphenixStyle->SetPadBottomMargin(0.16);
   sphenixStyle->SetPadLeftMargin(0.16);
@@ -172,5 +172,13 @@ void drawLatex(double x,double y,const char* txt,double size)
   TLatex lat;
   lat.SetTextSize(size);
   lat.DrawLatexNDC ( x, y, txt);
+}
+void drawSTAR(double x,double y)
+{
+  TLatex lat;
+  lat.SetTextSize(0.05);
+  lat.SetTextFont(72);
+  lat.SetTextColor(kRed);
+  lat.DrawLatexNDC ( x, y, "STAR Preliminary");
 }
 #endif // __SPHENIXSTYLE_H

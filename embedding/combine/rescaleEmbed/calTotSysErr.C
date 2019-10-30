@@ -9,11 +9,16 @@ void calTotSysErr()
   //   totalsys=sys[i]*sys[i];
   // }
   //totalsys=sqrt(totalsys);
-  int const nbins = 8;
-  double ptedge[nbins+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
+  int const nbins = 10;
+  double ptedge[nbins+1]={0.2,0.4,0.6,0.7,0.85,1,1.2,1.6,2.0,2.4,2.8};
   double totalsys[nbins],x[nbins];
   // double partPtCutSys = 0.0084;
-  double partPtCutSys = 0.0072;
+  double partPtCutSys = 0.00276299;  //this value is after full gamma sample
+
+  TFile* fCombineSys = new TFile("output/fCombineSys_15.root");
+  TGraph* gCombineSys = (TGraph*)fCombineSys->Get("gCombineSys");
+  fCombineSys->Close();
+
   TFile* fsys = TFile::Open("sysFromEmbedd.root");
   TGraph* gInvMassSys = (TGraph*)fsys->Get("gInvMassSys");
   TGraph* gPairDca = (TGraph*)fsys->Get("gPairDca");
@@ -27,6 +32,7 @@ void calTotSysErr()
     totalsys[i] += gPairDca->Eval(x[i])*gPairDca->Eval(x[i]);
     totalsys[i] += gInvMassSys->Eval(x[i])*gInvMassSys->Eval(x[i]);
     totalsys[i] += partPtCutSys*partPtCutSys;
+    totalsys[i] += gCombineSys->Eval(x[i])*gCombineSys->Eval(x[i]);
     totalsys[i]=sqrt(totalsys[i]);
   }
 

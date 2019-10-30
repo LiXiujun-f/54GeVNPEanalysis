@@ -54,7 +54,7 @@ void calPhoeff_combine(TString inputfilename="rescale_combine.root", TString pdf
 
   fitPhoEv2(hPhEv2,hPhEv2raw, 2, 8,"PhoE",  pdf, fout);
   fitPhoEv2(hPhEv2,hPhEv2raw, 2, 5,"PhoE",  pdf, fout);
-  fitPhoEv2(hPhEv2,hPhEv2raw, 7, 8,"PhoE",  pdf, fout);
+  fitPhoEv2(hPhEv2,hPhEv2raw, 6, 8,"PhoE",  pdf, fout);
  
   fitPhoEv2(hPhEv2raw, 2, 8,"Raw",  pdf, fout);
   // fitPhoEv2(hPhEv2raw, 2, 5,"Raw",  pdf, fout);
@@ -65,6 +65,8 @@ void calPhoeff_combine(TString inputfilename="rescale_combine.root", TString pdf
   // fitPhoEv2(hPhEv2, 7, 8,"NoWg",  pdf, fout);
 
   fitPhoEv2(hRecoEv2,hRecoEv2raw, 2, 8,"RecoE",  pdf, fout);
+  fitPhoEv2(hRecoEv2,hRecoEv2raw, 6, 8,"RecoE",  pdf, fout);
+  fitPhoEv2(hRecoEv2,hRecoEv2raw, 2, 5,"RecoE",  pdf, fout);
   // fitPhoEv2(hPi0v2,hPi0v2raw, 2, 8,"Pi0",  pdf, fout);
   // fitPhoEv2(hPi0v2, 4, 5,"Pi0",  pdf, fout);
 
@@ -83,16 +85,16 @@ void ProjectionAndFit(TH2F* hMc,TH2F* hRc,int centL,int centH,TString name,TPDF*
   // TFile* file = new TFile("test.McAna.root");
   int centHbin = hMc->GetYaxis()->FindBin(centH);
   int centLbin = hMc->GetYaxis()->FindBin(centL);
-  int const nbin =11;
-  double ptedge[nbin+1]={0.2,0.3,0.4,0.5,0.6,0.7,0.85,1,1.2,1.6,2.0,2.8};
+  int const nbin =22;
+  double ptedge[nbin+1]={0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,1,1.1,1.2,1.4,1.6,1.8,2.0,2.4,2.8};
   TH1F* hMcX =(TH1F*)hMc->ProjectionX("hMcX",centLbin,centHbin);
   TH1F* hRcX =(TH1F*)hRc->ProjectionX("hRcX",centLbin,centHbin);
   hMcX->SetDirectory(0);
   hRcX->SetDirectory(0);
-  hRcX->Rebin(4);
-  hMcX->Rebin(4);
-  // hRcX = (TH1F*)hRcX->Rebin(11,"hRcX",ptedge);
-  // hMcX = (TH1F*)hMcX->Rebin(11,"hMcX",ptedge);
+  // hRcX->Rebin(4);
+  // hMcX->Rebin(4);
+  hRcX = (TH1F*)hRcX->Rebin(nbin,"hRcX",ptedge);
+  hMcX = (TH1F*)hMcX->Rebin(nbin,"hMcX",ptedge);
   TH1F* hRecoEff = (TH1F*)hRcX->Clone(Form("h%s_%d_%d",name.Data(),centL,centH));
   hRecoEff->SetDirectory(0); 
   hRecoEff->Divide(hMcX);
@@ -116,17 +118,18 @@ void fitPhoEv2(TH3F* hPhev2,TH3F* hPhev2raw, int centL, int centH, TString name 
   cout <<centHbin<<" "<<centLbin << endl;
   // int const nbin = 8;
   // int const nbin = 21;
-  int const nbin = 11;
+  // double ptedge[nbin+1]={0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,1,1.1,1.2,1.4,1.6,2,2.8};
+  // int const nbin = 11;
   // double ptedge[22]={0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.6,2.0,2.4,2.8,3.2,3.6,4.0,5,6,7,8,9,10};
-  //
-  double ptedge[12]={0,0.2,0.3,0.4,0.5,0.6,0.8,1.2,1.6,2.4,3.2,4.0};
+  // double ptedge[nbin+1]={0.2,0.4,0.65,0.85,1,1.2,1.6,2.0,2.8};
+  // double ptedge[12]={0,0.2,0.3,0.4,0.5,0.6,0.8,1.2,1.6,2.4,3.2,4.0};
   // double ptedge[nbin+1]={0.2,0.42,0.67,0.85,1,1.2,1.6,2.0,2.8};
   // double ptedge[10]={0,0.2,0.3,0.4,0.5,0.6,0.8,1.2,2.4,4.0};
   TH1F* hPhEv2 = new TH1F(Form("h%sv2_%d_%d",name.Data(),centL,centH),"hPhEv2",nbin,ptedge);
   TF1* fitfun = new TF1("fitfun","[0]*(1+2*[1]*cos(2*x))",0,3.14);
   for (int i=0;i<nbin;i++){
-    TH1F* h= (TH1F*)hPhev2->ProjectionY("h", hPhev2->GetXaxis()->FindBin(ptedge[i]), hPhev2->GetXaxis()->FindBin(ptedge[i+1]),centLbin,centHbin);
-    TH1F* hraw= (TH1F*)hPhev2raw->ProjectionY("hraw", hPhev2->GetXaxis()->FindBin(ptedge[i]), hPhev2->GetXaxis()->FindBin(ptedge[i+1]),centLbin,centHbin);
+    TH1F* h= (TH1F*)hPhev2->ProjectionY("h", hPhev2->GetXaxis()->FindBin(ptedge[i]+1e-6), hPhev2->GetXaxis()->FindBin(ptedge[i+1]-1e-6),centLbin,centHbin);
+    TH1F* hraw= (TH1F*)hPhev2raw->ProjectionY("hraw", hPhev2->GetXaxis()->FindBin(ptedge[i]+1e-6), hPhev2->GetXaxis()->FindBin(ptedge[i+1]-1e-6),centLbin,centHbin);
     // h->Divide(hraw);
     h->Rebin(5);
     hraw->Rebin(5);
@@ -165,13 +168,16 @@ void fitPhoEv2(TH3F* hPhev2, int centL, int centH, TString name, TPDF* pdf, TFil
 {
   int centHbin = hPhev2->GetZaxis()->FindBin(centH);
   int centLbin = hPhev2->GetZaxis()->FindBin(centL);
+  int const nbin=21;
   // double ptedge[13]={0.2,0.3,0.4,0.5,0.6,0.7,0.8,1.0,1.2,1.6,2.0,2.8,4.0};
-  double ptedge[12]={0,0.2,0.3,0.4,0.5,0.6,0.8,1.2,1.6,2.4,3.2,4.0};
+  // double ptedge[12]={0,0.2,0.3,0.4,0.5,0.6,0.8,1.2,1.6,2.4,3.2,4.0};
+  double ptedge[nbin+1]={0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,1,1.1,1.2,1.4,1.6,2,2.8};
+  // double ptedge[12]={0,0.2,0.3,0.4,0.5,0.6,0.8,1.2,1.6,2.4,3.2,4.0};
   // double ptedge[10]={0,0.2,0.3,0.4,0.5,0.6,0.8,1.2,2.4,4.0};
   TH1F* hPhEv2 = new TH1F(Form("h%sv2_%d_%d",name.Data(),centL,centH),"hPhEv2",11,ptedge);
   TF1* fitfun = new TF1("fitfun","[0]*(1+2*[1]*cos(2*x))",0,3.14);
-  for (int i=0;i<11;i++){
-    TH1F* h= (TH1F*)hPhev2->ProjectionY("h", hPhev2->GetXaxis()->FindBin(ptedge[i]), hPhev2->GetXaxis()->FindBin(ptedge[i+1]),centLbin,centHbin);
+  for (int i=0;i<nbin;i++){
+    TH1F* h= (TH1F*)hPhev2->ProjectionY("h", hPhev2->GetXaxis()->FindBin(ptedge[i]+1e-6), hPhev2->GetXaxis()->FindBin(ptedge[i+1]+1e-6),centLbin,centHbin);
     h->Rebin(5);
     h->Draw();
 

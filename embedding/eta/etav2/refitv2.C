@@ -32,6 +32,7 @@ void refitv2()
   for (int i=0;i<nCentbins;i++)
   {
     fit[i] = new TF1(Form("fit_%s",name[i].Data()),myFit,0,18,7);
+    fit[i]->SetNpx(10000);
     c->Clear();
     // c->cd(i+1);
     g200Combine[i]=new TMultiGraph(Form("kaonv2Com_%s",name[i].Data()),Form("kaonv2Com_%s",name[i].Data()));
@@ -67,7 +68,8 @@ void refitv2()
     fit[i]->SetParameters(par);
     if (i==0)
     {
-      fit[i]->FixParameter(6,3);
+      fit[i]->FixParameter(6,2.6);
+      fit[i]->FixParameter(5,0);
     }
     else if (i==1 )
     {   

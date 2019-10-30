@@ -32,6 +32,7 @@ void fitdirphov2()
     h->GetYaxis()->SetRangeUser(-0.15,0.3);
     // fit[i] = new TF1(Form("fitdirphov2_%s",centname[i].Data()), "pol5",0,15);
     fit[i] = new TF1(Form("fitdirphov2_%s",centname[i].Data()), myFit,0,15,7);
+    fit[i]->SetNpx(15000);
     if (i==0) 
       fit[i]->FixParameter(6,5);
     else if (i==1)

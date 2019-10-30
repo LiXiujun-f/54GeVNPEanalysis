@@ -45,13 +45,13 @@ void readPre(){
   }
   in.close();
   double x9[12],y9[12];
-  in.open("xyscan.txt");
-  for (int i=0;i<12;i++){
-    in>>x9[i]>>y9[i];
-    cout<<x9[i]<<endl;
-    y9[i]/=100.;
-  }
-  in.close();
+  // in.open("xyscan.txt");
+  // for (int i=0;i<12;i++){
+  //   in>>x9[i]>>y9[i];
+  //   cout<<x9[i]<<endl;
+  //   y9[i]/=100.;
+  // }
+  // in.close();
   TGraphErrors* g1=new TGraphErrors(14,x1,y1,0,err1);
   g1->SetName("10_20");
   g1->Write();
@@ -86,9 +86,9 @@ void readPre(){
   TGraphErrors* g8sys=new TGraphErrors(6,x8,y8,0,err8);
   g8sys->SetName("40_50_sys_62");
   g8sys->Write();
-  TGraph* g9 = new TGraph(12,x9,y9);
-  g9->SetName("30_40_star62");
-  g9->Write();
+  // TGraph* g9 = new TGraph(12,x9,y9);
+  // g9->SetName("30_40_star62");
+  // g9->Write();
   TGraph* g10 = new TGraph(14,x10,y10);
   g10->SetName("10_20_star27");
   g10->Write();
@@ -152,12 +152,28 @@ Double_t v2_stat_error20[15] = {5.35708e-05,6.30403e-05,8.53286e-05,0.000119076,
 TGraphErrors* g20 = new TGraphErrors(15,pt_bin_center20,v2_values20,0,v2_stat_error20);
 g20->SetName("pionplus_0_80_62");
 g20->Write();
+
+Double_t v2_syst_low_error20[15] = {0.00039791,4.51206e-05,9.01058e-05,2.79424e-05,2.85183e-06,3.33069e-05,6.99687e-06,3.29346e-05,5.51888e-05,8.54986e-05,0.000179613,2.01287e-05,0.000301499,0.000309676,0.000498189};
+Double_t v2_syst_high_error20[15] = {0.000817229,7.81332e-05,0.000173655,5.49184e-05,4.84156e-06,1.92013e-05,1.08836e-05,5.76759e-05,5.12876e-05,3.72477e-05,9.49193e-05,2.03476e-05,0.000517817,0.000340694,0.000588832};
+
+TGraphAsymmErrors* g20_sys = new TGraphAsymmErrors(15,pt_bin_center20,v2_values20,0,0,v2_syst_low_error20,v2_syst_high_error20);
+g20_sys->SetName("pionplus_0_80_62_sys");
+g20_sys->Write();
+
+
 Double_t pt_bin_center21[14] = {0.285,0.495,0.675,0.885,1.065,1.275,1.485,1.665,1.875,2.085,2.295,2.475,2.805,3.465};
 Double_t v2_values21[14] = {0.0204075,0.0404926,0.0592754,0.0759822,0.0897911,0.100898,0.110136,0.117802,0.121748,0.127693,0.133237,0.13354,0.138953,0.139932};
 Double_t v2_stat_error21[14] = {6.33703e-05,7.70403e-05,0.000105998,0.000151183,0.000217215,0.000309484,0.000439386,0.000629185,0.000895574,0.00124855,0.00171713,0.00236994,0.00242954,0.00593679};
 TGraphErrors* g21 = new TGraphErrors(14,pt_bin_center21,v2_values21,0,v2_stat_error21);
 g21->SetName("pionplus_0_80_27");
 g21->Write();
+
+Double_t v2_syst_low_error21[14] = {3.08594e-12,3.44343e-05,1.37324e-05,7.08059e-06,6.0534e-05,4.31305e-06,6.38219e-06,1.99066e-05,1.56152e-05,2.81408e-05,5.91236e-05,4.74272e-05,0.00019583,0.000324938};
+Double_t v2_syst_high_error21[14] = {1.71054e-12,6.88316e-05,2.75311e-05,3.63245e-06,3.05653e-05,5.28989e-06,9.58459e-06,1.89399e-05,1.50909e-05,4.09053e-05,3.45855e-05,4.82424e-05,0.000201095,0.000694842};
+
+TGraphAsymmErrors* g21_sys = new TGraphAsymmErrors(14,pt_bin_center21,v2_values21,0,0,v2_syst_low_error21,v2_syst_high_error21);
+g21_sys->SetName("pionplus_0_80_27_sys");
+g21_sys->Write();
 
 Double_t pt_bin_center22[12] = {0.285,0.495,0.675,0.885,1.065,1.275,1.485,1.665,1.875,2.085,2.355,2.835};
 Double_t v2_values22[12] = {0.028888,0.0589122,0.0884838,0.114564,0.138449,0.156339,0.173457,0.181754,0.19405,0.19931,0.210363,0.227665};
@@ -190,6 +206,12 @@ TGraphErrors* g25 = new TGraphErrors(15,pt_bin_center25,v2_values25,0,v2_stat_er
 g25->SetName("proton_0_80_62");
 g25->Write();
 
+Double_t v2_syst_low_error25[15] = {0.00133084,0.00118799,0.00140087,0.00130887,0.000988755,0.000808095,0.00057083,0.000347546,0.000570263,9.57722e-05,0.000218609,0.000241648,0.000981359,0.000816124,0.00113399};
+Double_t v2_syst_high_error25[15] = {0.000454418,0.000473792,0.000611198,0.000592553,0.000454717,0.000376167,0.000267744,0.00020096,0.000277379,0.000200235,0.000401093,0.000404765,0.00121205,0.000702832,0.000650917};
+TGraphAsymmErrors* g25_sys = new TGraphAsymmErrors(14,pt_bin_center25,v2_values25,0,0,v2_syst_low_error25,v2_syst_high_error25);
+g25_sys->SetName("proton_0_80_62_sys");
+g25_sys->Write();
+
 //Ks
 Double_t pt_bin_center26[16] = {0.3055,0.5055,0.7055,0.9055,1.1055,1.2955,1.5055,1.7055,1.9045,2.1055,2.3055,2.5055,2.7055,3.0055,3.4055,3.9755};
 Double_t v2_values26[16] = {0.0126035,0.0283912,0.0477735,0.0655328,0.0810368,0.0942137,0.106462,0.115122,0.124632,0.130506,0.132923,0.137253,0.137584,0.13788,0.133286,0.119046};
@@ -201,5 +223,24 @@ TGraphErrors* g26 = new TGraphErrors(16,pt_bin_center26,v2_values26,0,v2_stat_er
 g26->SetName("ks_0_80_62");
 
 g26->Write();
+
+TGraphAsymmErrors* g26_sys = new TGraphAsymmErrors(16,pt_bin_center26,v2_values26,0,0,v2_syst_low_error26,v2_syst_high_error26);
+g26_sys->SetName("ks_0_80_62_sys");
+g26_sys->Write();
+
+Double_t pt_bin_center27[13] = {0.3055,0.5055,0.7055,0.9045,1.1055,1.2955,1.5055,1.7045,1.9055,2.1055,2.3055,2.5735,3.1325};
+Double_t v2_values27[13] = {0.0122836,0.0268559,0.0446001,0.0609426,0.0758444,0.0872897,0.0966202,0.104787,0.108056,0.117038,0.120009,0.129502,0.124308};
+Double_t v2_stat_error27[13] = {0.00100124,0.000597009,0.000508597,0.000542948,0.000659749,0.000856601,0.00115403,0.00158061,0.00217902,0.00300181,0.00414592,0.004635,0.0075604};
+Double_t v2_syst_low_error27[13] = {0.000223394,1.86152e-05,3.44334e-05,5.05528e-05,9.82659e-05,5.70328e-05,0.00011115,0.000523317,0.000153481,0.000152831,0.00127955,0.00137025,0.00313353};
+Double_t v2_syst_high_error27[13] = {0.000229077,1.84111e-05,3.49978e-05,4.94356e-05,9.54257e-05,5.49993e-05,0.000115308,0.000549184,0.000145338,0.000143842,0.00119697,0.00148236,0.00345487};
+TGraphErrors* g27 = new TGraphErrors(13,pt_bin_center27,v2_values27,0,v2_stat_error27);
+g27->SetName("ks_0_80_27");
+
+g27->Write();
+
+TGraphAsymmErrors* g27_sys = new TGraphAsymmErrors(13,pt_bin_center27,v2_values27,0,0,v2_syst_low_error27,v2_syst_high_error27);
+g27_sys->SetName("ks_0_80_27_sys");
+g27_sys->Write();
+
 
 }
