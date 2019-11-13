@@ -53,18 +53,22 @@ void compare2PE_my()
   TString pi0Mc="rescaleFile/rescale_pi0.root", etaMc="rescaleFile/rescale_eta.root";
   TString gammaMc1="rescaleFile/rescale_gamma_pi0.root", gammaMc2="rescaleFile/rescale_gamma_eta.root",gammaMc3="rescaleFile/rescale_gamma_dirpho.root";
   // TString gammaMc1="rescaleFile/rescale_gamma_pi0.root", gammaMc2="rescaleFile/rescale_gamma_eta.root",gammaMc3="rescaleFile/test_pi0_DzGm.root";
+ 
   drawElectronComponent(mcdata, pi0Mc,etaMc,gammaMc1,gammaMc2,gammaMc3,pdf,c);
   drawQaNhits("NFit",pdf,c,realdata,mcdata);
   drawNhitsTagePt("NFit",pdf,c,realdata,mcdata);
   drawQaDca("DCA",pdf,c,realdata,mcdata);
   drawPartPtEtaPhi("Partner e",pdf ,c ,realdata,mcdata); 
+ 
   drawInvMass("Inv mass of dielectron",pdf ,c ,realdata,mcdata); 
   drawPairDca("pair DCA",pdf,c,realdata,mcdata);
   // drawDecayLplot("pair DecayLength",pdf,c,realdata,"rescale_combine_0.7.root","0.7");
   // drawDecayLplot("pair DecayLength",pdf,c,realdata,"rescale_combine_0.8.root","0.8");
+
   drawDecayLplot("pair DecayLength",pdf,c,realdata,"rescale_combine_0.85.root","0.85");
   drawDecayLplot("pair DecayLength",pdf,c,realdata,"rescale_combine.root","1");
   drawDecayLplot("pair DecayLength",pdf,c,realdata,"rescale_combine_1.15.root","1.15");
+
   // drawDecayLplot("pair DecayLength",pdf,c,realdata,"rescale_combine_1.2.root","1.2");
   // drawDecayLplot("pair DecayLength",pdf,c,realdata,"rescale_combine_1.3.root","1.3");
   //
@@ -183,6 +187,7 @@ void drawElectronComponent(TString totalMc, TString pi0Mc, TString etaMc, TStrin
    }
    legfaction1->Draw();
    legfaction2->Draw();
+   drawLatex(0.55,0.68,"Au+Au 54 GeV",0.05);
    gPad->SaveAs("lll.root");
   addpdf(pdf,c); 
    gPad->SetLogy(1);
@@ -544,9 +549,10 @@ void drawPartPtEtaPhi(TString head, TPDF* pdf, TCanvas* c,TString real,TString m
   hrc_x->GetXaxis()->SetTitle("partner e p_{T} [GeV/c]");
   hrc_x->DrawCopy();
   hdata_x->DrawCopy("samep");
-  drawLatex(0.55,0.85,Form("Tagged e: 0.4<p_{T}<2.5 GeV", head.Data()),0.05);
+  drawLatex(0.6,0.87,"Au+Au 54.4 GeV",0.05);
+  drawLatex(0.55,0.8,Form("Tagged e: 0.4<p_{T}<2.5 GeV", head.Data()),0.05);
   gPad->SetLogy(1);
-  TLegend* leg_tot = new TLegend(0.6,0.65,0.8,0.8);
+  TLegend* leg_tot = new TLegend(0.6,0.62,0.8,0.77);
   leg_tot->AddEntry( hrc_x,"MC","l" );
   leg_tot->AddEntry( hdata_x,"Data","pe" );
   leg_tot->Draw();
@@ -616,12 +622,13 @@ void drawPairDca(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   hDCAdata->Add(hDCAdataLS,-1);
   
   c->Clear();
-  TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc");;
-  TH1* hdata = (TH1*)hDCAdata->ProjectionX("hdata");
+  TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc",hDCArc->GetYaxis()->FindBin(0.4),hDCArc->GetYaxis()->FindBin(2.5),3,9);
+  TH1* hdata = (TH1*)hDCAdata->ProjectionX("hdata",hDCAdata->GetYaxis()->FindBin(0.4),hDCAdata->GetYaxis()->FindBin(2.5),3,9);
  
-  hrc->Scale(1./hrc->Integral());
+  // hdata->Rebin();
+  hrc->Scale(1./hrc->Integral(hrc->FindBin(0),hrc->FindBin(1.5-1e-6)));
   hrc->Scale(1./hrc->GetBinWidth(1));
-  hdata->Scale(1./hdata->Integral());
+  hdata->Scale(1./hdata->Integral(hdata->FindBin(0),hdata->FindBin(1.5-1e-6)));
   hdata->Scale(1./hdata->GetBinWidth(1));
   hrc->SetMarkerColor(kBlue);
   hrc->SetLineColor(kBlue);
@@ -634,9 +641,25 @@ void drawPairDca(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   double sys = calSys(hdata,hrc,0,1,0,0.8);
   cout <<"pair DCA sys(full pt): (0.8) "<< sys << endl;  
 
+  hrc->SetFillColorAlpha(kBlue,0.5);
+  hrc->SetFillStyle(1001);
+  hrc->SetMarkerSize(0);
+  hrc->GetXaxis()->SetRangeUser(0,1.5);
+  hrc->GetXaxis()->SetTitle("Pair DCA [cm]");
+  hrc->GetYaxis()->SetTitle("Arb. unit");
   hrc->DrawCopy();
-  hdata->DrawCopy("same");
-  drawLatex(0.6,0.6,"pair DCA (full p_{T} range)",0.035);
+  hrc->DrawCopy("E3same");
+  hrc->DrawCopy("psame");
+  hdata->SetMarkerStyle(24);
+  hdata->SetMarkerSize(1);
+  hdata->DrawCopy("samep");
+  // drawLatex(0.6,0.6,"pair DCA (full p_{T} range)",0.035);
+  drawLatex(0.53,0.81,"Au+Au 54.4 GeV",0.05);
+  drawLatex(0.5,0.75,"Tagged e: 0.4<p_{T}<2.5 GeV/c",0.05);
+  TLegend* leg_tot = new TLegend(0.53,0.57,0.88,0.73);
+  leg_tot->AddEntry(hrc, "MC", "l");
+  leg_tot->AddEntry(hdata, "Data", "pe");
+  leg_tot->Draw();
   addpdf(pdf,c); 
 
   // int const nbins = 7;
@@ -655,8 +678,8 @@ void drawPairDca(TString head, TPDF* pdf, TCanvas* c,TString real,TString mc)
   for (int ip=0;ip<nbins;ip++)
   {
     c->cd(ipad);
-    TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc", hDCArc->GetYaxis()->FindBin(ptedge[ip]),hDCArc->GetYaxis()->FindBin(ptedge[ip+1]),3,6);
-    TH1* hdata = (TH1*)hDCAdata->ProjectionX("hdata", hDCAdata->GetYaxis()->FindBin(ptedge[ip]),hDCAdata->GetYaxis()->FindBin(ptedge[ip+1]),3,6);
+    TH1* hrc = (TH1*)hDCArc->ProjectionX("hrc", hDCArc->GetYaxis()->FindBin(ptedge[ip]),hDCArc->GetYaxis()->FindBin(ptedge[ip+1]),3,9);
+    TH1* hdata = (TH1*)hDCAdata->ProjectionX("hdata", hDCAdata->GetYaxis()->FindBin(ptedge[ip]),hDCAdata->GetYaxis()->FindBin(ptedge[ip+1]),3,9);
     hrc->Scale(1./hrc->Integral());
     hrc->Scale(1./hrc->GetBinWidth(1));
     hdata->Scale(1./hdata->Integral());
@@ -1017,20 +1040,34 @@ void drawInvMass(TString head,TPDF* pdf,TCanvas* c, TString real, TString mc)
     y[i]=calSys(hdata_x, hrc_x, 0,0.1,0,0.15 );
   }
   
+    c->Clear();
     TH1* hrc_x = (TH1*)hDCArc->ProjectionX("hrc_X", hDCArc->GetYaxis()->FindBin(0.4),  hDCArc->GetYaxis()->FindBin(2.5), 1, hDCArc->GetNbinsZ());
     TH1* hdata_x = (TH1*)hDCAdata->ProjectionX("hdata_X",hDCAdata->GetYaxis()->FindBin(0.4), hDCAdata->GetYaxis()->FindBin(2.5),1,hDCAdata->GetNbinsZ());
+    hdata_X->Rebin();
     NormHist(hrc_x,kBlue);
     NormHist(hdata_x,kRed);
     hrc_x->GetXaxis()->SetRangeUser(0,0.2);
+    hrc_x->GetYaxis()->SetTitle("Arb. unit");
+    // hrc_x->GetXaxis()->SetTitle("Inv. mass of di-electrons [GeV/c^{2}]");
+    hrc_x->GetXaxis()->SetTitle("M_{ee} [GeV/c^{2}]");
+    hrc_x->GetYaxis()->SetRangeUser(0,hrc_x->GetMaximum()*1.1);
     hrc_x->DrawCopy();
+    hdata_x->SetMarkerStyle(24);
+    hdata_x->SetMarkerSize(0.8);
     hdata_x->DrawCopy("samep");
     // drawLatex(0.2,0.6,Form("%s Eta", head.Data()));
-    // drawLatex(0.2,0.85,Form("%s, Tag e %0.1f<pt<%0.1f", head.Data(), ptedge[i], ptedge[i+1]),0.05);
-    addpdf(pdf);
+    drawLatex(0.53,0.88,"Au+Au 54.4 GeV",0.05);
+    drawLatex(0.5,0.82,Form("Tagged e: %0.1f<p_{T}<%0.1f GeV/c", 0.4, 2.5),0.05);
 
-  gInvMassSys = new TGraph( nbins, x, y);
-  gInvMassSys->SetName("gInvMassSys");
-  gInvMassSys->GetXaxis()->SetTitle("Tagged e p_{T} [GeV]");
+    TLegend* leg_tot = new TLegend(0.53,0.65,0.88,0.79);
+    leg_tot->AddEntry( hrc_x, "MC", "l");
+    leg_tot->AddEntry(hdata_x,"Data","pe");
+    leg_tot->Draw();
+    addpdf(pdf,c);
+
+    gInvMassSys = new TGraph( nbins, x, y);
+    gInvMassSys->SetName("gInvMassSys");
+    gInvMassSys->GetXaxis()->SetTitle("Tagged e p_{T} [GeV/c]");
 }
 //----------------------------------------------------------------------
 void drawTofMatchingEff(TString head,TPDF* pdf,TCanvas* c, TString real, TString mc,int centL,int centH)

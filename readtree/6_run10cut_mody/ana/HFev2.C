@@ -118,7 +118,7 @@ void HFev2()
     SetTH1(hpx,kRed);
 
     hpx_ul->Draw();
-    hpx_ul->GetXaxis()->SetTitle("Mee [GeV/c^{2}]");
+    hpx_ul->GetXaxis()->SetTitle("M_{ee} [GeV/c^{2}]");
     hpx_ul->GetYaxis()->SetTitle(Form("Counts/(%0.f MeV/c^{2})",hpx_ul->GetBinWidth(1)*1000));
     hpx_ls->Draw("same");
     hpx->Draw("same");
@@ -130,9 +130,9 @@ void HFev2()
     TLatex lat;
     lat.SetTextSize(0.05);
     lat.DrawLatexNDC(0.5,0.7,"0-60%");
-    lat.DrawLatexNDC(0.2,0.6,Form("%.2f<p_{T}<%.2f GeV/c",ptedge[j],ptedge[j+1]));
+    lat.DrawLatexNDC(0.47,0.3,Form("Tagged e: %.2f<p_{T}<%.2f GeV/c",ptedge[j],ptedge[j+1]));
     // lat.DrawLatexNDC(0.5,0.78,"electron pair");
-    lat.DrawLatexNDC(0.5,0.85,"Au+Au 54.4 GeV");
+    lat.DrawLatexNDC(0.5,0.8,"Au+Au 54.4 GeV");
     drawLine(0.1,0,0.1,hpx->GetMaximum()*0.5,2,9,kBlack);
     //hPhe->SetBinContent(j+1,hpx->Integral()/nEvents);
     int highbin=hpx->GetXaxis()->FindBin(0.1-1e-6);

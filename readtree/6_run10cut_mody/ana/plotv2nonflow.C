@@ -7,7 +7,7 @@ void drawLatex(double x,double y,const char* txt,double size)
   lat.SetTextSize(size);
   lat.DrawLatexNDC ( x, y, txt);
 }
-void plotNPEv2()
+void plotv2nonflow()
 {
   gROOT->Reset();
 
@@ -92,6 +92,14 @@ void plotNPEv2()
   TGraphErrors* gSTAR200sys = (TGraphErrors*)fPhoE->Get("HFe200sys");  
   fPhoE->Close();
 
+  //nonflow for 200GeV
+  double nonflow200_pt[6] = {1.11351,1.35135,1.60541,1.85946,2.47027,2.82162};
+  double nonflow200_val[6] = {0.0277577,0.0369801,0.0396926,0.0497288,0.0556962,0.0660036 };
+  double nonflow200_errL[6] = {0.00135624,0.00271248,0.00379747,0.00786618,0.00352622,0.00678119};
+  double nonflow200_errH[6] = {0.00135624,0.00271248,0.00379747,0.00786618,0.00352622,0.00678119};
+  TGraphAsymmErrors* g200nonflow = new TGraphAsymmErrors( 6, nonflow200_pt, nonflow200_val,0,0,nonflow200_errL,nonflow200_errH);
+  g200nonflow->SetName("g200nonflow");
+
   TCanvas *c1 = new TCanvas("c1","c1",0,0,800,600);
 
    gStyle->SetOptFit(0);
@@ -145,6 +153,12 @@ void plotNPEv2()
    drawGraphWithSys(gSTAR62, gSTAR62sys, 1, 24, 1.7);
    drawGraphWithSys(gSTAR54, gSTAR54sys, kBlue, 20, 1.8);
 
+
+   g200nonflow->SetFillColorAlpha(kBlack,0.3);
+   g200nonflow->SetLineColor(kBlack);
+   g200nonflow->SetFillStyle(1001);
+   g200nonflow->Draw("L3");
+
    TLatex *tex = new TLatex(2.0, 0.15, "Au+Au, 0-60%");
    tex->SetTextFont(42);
    tex->SetTextSize(0.05);
@@ -166,14 +180,15 @@ void plotNPEv2()
    drawSTAR(0.65,0.88);
 
    c1->Update();
-   c1->SaveAs("fig/NPEv2_200_62_54.pdf");
-   c1->SaveAs("fig/NPEv2_200_62_54.png");
+   // c1->SaveAs("fig/NPEv2_200_62_54.pdf");
+   // c1->SaveAs("fig/NPEv2_200_62_54.png");
 
    //draw theory curve
-   gRappNPE200->Draw("same");
-   gRappNPE62->Draw("sameF");
+   // gRappNPE200->Draw("same");
+   // gRappNPE62->Draw("sameF");
 
-   TLegend *leg = new TLegend(0.65, 0.18, 0.9, 0.32);
+   // TLegend *leg = new TLegend(0.65, 0.18, 0.9, 0.32);
+   TLegend *leg = new TLegend(0.6, 0.22, 0.85, 0.32);
    leg->SetFillColor(10);
    leg->SetFillStyle(10);
    leg->SetLineStyle(4000);
@@ -181,13 +196,14 @@ void plotNPEv2()
    leg->SetLineWidth(0.);
    leg->SetTextFont(42);
    leg->SetTextSize(0.045);
-   leg->AddEntry(gRappNPE200,"TAMU @200 GeV","l");
-   leg->AddEntry(gRappNPE62,"TAMU @62.4 GeV","l");
+   // leg->AddEntry(gRappNPE200,"TAMU @200 GeV","l");
+   // leg->AddEntry(gRappNPE200,"TAMU @200 GeV","l");
+   leg->AddEntry(g200nonflow,"non-flow @200GeV","lf");
    leg->Draw();
 
    c1->Update();
-   c1->SaveAs("fig/NPEv2_200_62_54_model.pdf");
-   c1->SaveAs("fig/NPEv2_200_62_54_model.png");
+   c1->SaveAs("fig/NPEv2_200_62_54_nonflow.pdf");
+   c1->SaveAs("fig/NPEv2_200_62_54_nonflow.png");
 
    
    TFile* gplots = new TFile("finalDatapoints.root","recreate");

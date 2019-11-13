@@ -47,9 +47,9 @@ void plotPurity()
    }
    
    TGraphAsymmErrors* gpurityerr = new TGraphAsymmErrors(nbins,x,y,0,0,errL,errH);
-   gpurityerr->SetFillStyle(3017);
+   gpurityerr->SetFillStyle(1001);
 
-   gpurityerr->SetFillColor(kBlue);
+   gpurityerr->SetFillColorAlpha(kBlue,0.2);
    gpurityerr->GetXaxis()->SetTitle("p_{T} [GeV/c]");;
    gpurityerr->GetYaxis()->SetTitle("purity");
    gpurityerr->GetYaxis()->SetRangeUser(0.2,1.15);
@@ -62,12 +62,12 @@ void plotPurity()
    lat.DrawLatexNDC( 0.6,0.5,"Au+Au 54.4 GeV");  
 
    TBox* box1 = new TBox(0.4,0.2,0.65,1.1);
-   box1->SetFillColor(kGreen);
-   box1->SetFillStyle(3004);
+   box1->SetFillColorAlpha(kGreen,0.2);
+   box1->SetFillStyle(1001);
    box1->Draw();
    TBox* box2 = new TBox(0.7,0.2,1.2,1.1);
-   box2->SetFillColor(kGreen);
-   box2->SetFillStyle(3004);
+   box2->SetFillColorAlpha(kGreen,0.2);
+   box2->SetFillStyle(1001);
    box2->Draw();
    // drawLine(0.4,0.2,0.4,1.1,2,3,kBlue);
    // drawLine(0.65,0.2,0.65,1.1,2,3,kBlue);

@@ -86,6 +86,7 @@ void plotS2B()
    leg->Draw();
 
    gPad->Update();
+   drawLatex(0.63,0.35,"Au+Au 0-60%",0.05);
    drawSTAR(0.6,0.25);
 
    gPad->SaveAs("fig/S2B.pdf");
@@ -131,7 +132,7 @@ void drawGraphWithSys(TGraphErrors* g,TGraphErrors* gsys , int color,int style,f
     gsys->GetPoint(ip,x,y);
     yerr = gsys->GetErrorY(ip);
     // drawerrbar(x,y,yerr,0.04,0.02,color); 
-    drawerrbox(x,y,yerr,0.04,color,3002); 
+    drawerrbox(x,y,yerr,0.04,color,1001); 
   }
 }
 void drawline(double x1, double y1, double x2, double y2, int color, int s=0, int width=1 ){
@@ -165,6 +166,12 @@ void drawerrbox(double x, double y, double ysys, double xwidth,  int color,int f
   double xw = xwidth; //x-width or x sys
   TBox* box = new TBox(x-xw ,y-ysys,x+xw ,y+ysys ); 
   box->SetFillStyle(fillstyle);
-  box->SetFillColor(color);
+  box->SetFillColorAlpha(color,0.3);
   box->Draw();
+}
+void drawLatex(double x,double y,const char* txt,double size)
+{
+  TLatex lat;
+  lat.SetTextSize(size);
+  lat.DrawLatexNDC ( x, y, txt);
 }

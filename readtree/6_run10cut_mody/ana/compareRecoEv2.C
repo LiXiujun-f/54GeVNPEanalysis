@@ -71,20 +71,21 @@ void compareRecoEv2()
      hRecoEv2_2_8->SetBinError(i+1,mean*0.032);
   }
 
-  hRecoEv2_2_8->SetFillColor(kBlue);
+  hRecoEv2_2_8->SetFillColorAlpha(kBlue,0.3);
   hRecoEv2_2_8->SetMarkerColor(kBlue);
-  hRecoEv2_2_8->SetFillStyle(3003);
-  hPhoEv2_2_8->SetFillColor(kRed);
+  hRecoEv2_2_8->SetFillStyle(1001);
+  hPhoEv2_2_8->SetFillColorAlpha(kRed,0.3);
   hPhoEv2_2_8->SetMarkerColor(kRed);
   hPhoEv2_2_8->SetLineColor(kRed);
-  hPhoEv2_2_8->SetFillStyle(3003);
+  hPhoEv2_2_8->SetFillStyle(1001);
   hPhoEv2_2_8->Draw("sameE3");
   hRecoEv2_2_8->Draw("sameE3");
   // fRecoE_2_8->Draw("same");
   hphoE->Draw("psame");
   
   drawSTAR(0.2,0.85); 
-  drawLatex(0.5,0.48,"Au+Au 54.4 GeV",0.055);
+  drawLatex(0.5,0.54,"Au+Au 54.4 GeV",0.055);
+  drawLatex(0.55,0.46,"0-60%",0.055);
 
 // return;
   TLegend* leg = new TLegend(0.45 ,0.2,0.88,0.45 );

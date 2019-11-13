@@ -94,6 +94,7 @@ void plotMode1(TString inputfileDir,TString Stotal,TString Spi0,TString Seta,TSt
       plotEffHist("hRecoEff_2_8",Form("%s%s.root",inputfileDir.Data(),component[i-1].Data()),c,leg,color[i],LegComp[i-1]); 
    }
    leg->Draw();
+   drawLatex(0.65,0.8,"Au+Au 54.4 GeV",0.05);
   
    hPhoEff->DrawCopy("same");
 
