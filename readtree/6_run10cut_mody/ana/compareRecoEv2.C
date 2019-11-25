@@ -98,6 +98,7 @@ void compareRecoEv2()
   leg->Draw();
   gPad->SaveAs("fig/phov2sys.pdf");
   gPad->SaveAs("fig/phov2sys.png");
+  gPad->SaveAs("fig/phov2sys.eps");
 
   addpdf(pdf,c);
   TH1F* hratio = (TH1F*)hphoE->Clone("hratio");

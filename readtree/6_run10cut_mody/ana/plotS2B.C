@@ -91,6 +91,7 @@ void plotS2B()
 
    gPad->SaveAs("fig/S2B.pdf");
    gPad->SaveAs("fig/S2B.png");
+   gPad->SaveAs("fig/S2B.eps");
 }
 void drawGraphWithSys(TString fname,TString gname , TString gnamesys, int color,int style,float size)
 {

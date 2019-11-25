@@ -167,6 +167,7 @@ void plotNPEv2()
 
    c1->Update();
    c1->SaveAs("fig/NPEv2_200_62_54.pdf");
+   c1->SaveAs("fig/NPEv2_200_62_54.eps");
    c1->SaveAs("fig/NPEv2_200_62_54.png");
 
    //draw theory curve
@@ -187,6 +188,7 @@ void plotNPEv2()
 
    c1->Update();
    c1->SaveAs("fig/NPEv2_200_62_54_model.pdf");
+   c1->SaveAs("fig/NPEv2_200_62_54_model.eps");
    c1->SaveAs("fig/NPEv2_200_62_54_model.png");
 
    
